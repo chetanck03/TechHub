@@ -2,11 +2,70 @@ const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
 const { protect } = require('../middleware/auth');
+const MedBotChat = require('../models/MedBotChat');
+const Doctor = require('../models/Doctor');
+const Category = require('../models/Category');
+const User = require('../models/User');
+const { v4: uuidv4 } = require('uuid');
 
 // Initialize Gemini AI with the new API
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
 });
+
+// Helper function to search doctors
+const searchDoctors = async (specialization = null, city = null, limit = 5) => {
+  try {
+    let query = {
+      status: 'approved',
+      isApproved: true,
+      suspended: false
+    };
+
+    // Add specialization filter if provided
+    if (specialization) {
+      const category = await Category.findOne({
+        name: { $regex: specialization, $options: 'i' }
+      });
+      if (category) {
+        query.specialization = category._id;
+      }
+    }
+
+    // Add city filter if provided
+    if (city) {
+      query.currentWorkingCity = { $regex: city, $options: 'i' };
+    }
+
+    const doctors = await Doctor.find(query)
+      .populate('userId', 'name email phone')
+      .populate('specialization', 'name')
+      .limit(limit)
+      .sort({ rating: -1, totalRatings: -1 });
+
+    return doctors.map(doctor => ({
+      id: doctor._id,
+      name: doctor.userId?.name || 'Dr. Unknown',
+      email: doctor.userId?.email,
+      phone: doctor.userId?.phone || doctor.phone,
+      specialization: doctor.specialization?.name || 'General',
+      qualification: doctor.qualification,
+      experience: doctor.experience,
+      hospital: doctor.currentHospitalClinic,
+      city: doctor.currentWorkingCity,
+      rating: doctor.rating,
+      totalRatings: doctor.totalRatings,
+      consultationFee: doctor.consultationFee,
+      consultationModes: doctor.consultationModes,
+      languages: doctor.languagesSpoken,
+      about: doctor.about,
+      isAvailable: doctor.isAvailable
+    }));
+  } catch (error) {
+    console.error('Error searching doctors:', error);
+    return [];
+  }
+};
 
 // Enhanced System prompt for MedBot
 const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a comprehensive telehealth platform. You are knowledgeable, empathetic, and dedicated to helping users with their health concerns and platform navigation.
@@ -53,6 +112,12 @@ const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a co
 - Managing profile and medical history
 - Filing complaints if needed
 - Viewing consultation history and prescriptions
+
+**Doctor Recommendations:**
+- When users ask for doctor recommendations, search our database for available doctors
+- Provide specific doctor names, contact details, specializations, and consultation fees
+- If no doctors are found for a specific specialty or location, inform the user
+- Always encourage booking consultations through the platform for the best experience
 
 **For Doctors:**
 - Managing consultation availability and slots
@@ -163,10 +228,11 @@ router.post('/chat', protect, async (req, res) => {
     console.log('User:', req.user?._id);
     console.log('Request body:', { 
       messageLength: req.body?.message?.length,
-      hasConversationHistory: !!req.body?.conversationHistory 
+      hasConversationHistory: !!req.body?.conversationHistory,
+      hasSessionId: !!req.body?.sessionId
     });
 
-    const { message, conversationHistory } = req.body;
+    const { message, conversationHistory, sessionId } = req.body;
 
     // Validate message
     if (!message || !message.trim()) {
@@ -192,14 +258,106 @@ router.post('/chat', protect, async (req, res) => {
 
     console.log('🔧 Using Gemini 2.5 Flash model...');
 
+    // Check if user is asking for doctor recommendations
+    const doctorKeywords = ['doctor', 'specialist', 'physician', 'consultation', 'appointment', 'recommend', 'find doctor', 'need doctor'];
+    const isAskingForDoctor = doctorKeywords.some(keyword => 
+      message.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    let doctorInfo = '';
+    if (isAskingForDoctor) {
+      console.log('🔍 User asking for doctor recommendations, searching database...');
+      
+      // Extract specialization from message
+      const specializations = ['cardiology', 'dermatology', 'neurology', 'orthopedic', 'pediatric', 'gynecology', 'psychiatry', 'general', 'internal medicine', 'surgery'];
+      const foundSpecialization = specializations.find(spec => 
+        message.toLowerCase().includes(spec.toLowerCase())
+      );
+
+      // Extract city from message (basic extraction)
+      const cityMatch = message.match(/in\s+([a-zA-Z\s]+)/i);
+      const city = cityMatch ? cityMatch[1].trim() : null;
+
+      const doctors = await searchDoctors(foundSpecialization, city, 3);
+      
+      if (doctors.length > 0) {
+        doctorInfo = '\n\n=== AVAILABLE DOCTORS ON PLATFORM ===\n';
+        doctors.forEach((doctor, index) => {
+          doctorInfo += `\n${index + 1}. **Dr. ${doctor.name}**\n`;
+          doctorInfo += `   • Specialization: ${doctor.specialization}\n`;
+          doctorInfo += `   • Qualification: ${doctor.qualification}\n`;
+          doctorInfo += `   • Experience: ${doctor.experience} years\n`;
+          doctorInfo += `   • Hospital: ${doctor.hospital}\n`;
+          doctorInfo += `   • Location: ${doctor.city}\n`;
+          if (doctor.phone) {
+            doctorInfo += `   • Contact: ${doctor.phone}\n`;
+          }
+          if (doctor.email) {
+            doctorInfo += `   • Email: ${doctor.email}\n`;
+          }
+          doctorInfo += `   • Video Consultation Fee: ${doctor.consultationFee.video} credits\n`;
+          if (doctor.consultationModes.physical) {
+            doctorInfo += `   • Physical Consultation Fee: ${doctor.consultationFee.physical} credits\n`;
+          }
+          if (doctor.rating > 0) {
+            doctorInfo += `   • Rating: ${doctor.rating}/5 (${doctor.totalRatings} reviews)\n`;
+          }
+          if (doctor.languages && doctor.languages.length > 0) {
+            doctorInfo += `   • Languages: ${doctor.languages.join(', ')}\n`;
+          }
+          doctorInfo += `   • Status: ${doctor.isAvailable ? 'Available' : 'Busy'}\n`;
+        });
+        doctorInfo += '\n💡 You can book consultations directly through our platform for the best experience!\n';
+      } else {
+        doctorInfo = '\n\n=== DOCTOR SEARCH RESULT ===\n';
+        doctorInfo += 'I apologize, but we currently don\'t have any doctors available ';
+        if (foundSpecialization) {
+          doctorInfo += `specializing in ${foundSpecialization} `;
+        }
+        if (city) {
+          doctorInfo += `in ${city} `;
+        }
+        doctorInfo += 'on our platform at the moment.\n\n';
+        doctorInfo += '📋 **What you can do:**\n';
+        doctorInfo += '• Check back later as new doctors join regularly\n';
+        doctorInfo += '• Browse our general practitioners for immediate consultation\n';
+        doctorInfo += '• Contact our support team for assistance finding specialists\n';
+        doctorInfo += '• Consider video consultations which have more availability\n';
+      }
+    }
+
+    // Get or create session ID
+    const currentSessionId = sessionId || uuidv4();
+    
+    // Get existing chat session or create new one
+    let chatSession = await MedBotChat.findOne({
+      userId: req.user._id,
+      sessionId: currentSessionId,
+      isActive: true
+    });
+
+    if (!chatSession) {
+      chatSession = new MedBotChat({
+        userId: req.user._id,
+        sessionId: currentSessionId,
+        messages: []
+      });
+    }
+
     // Build conversation context
     let contents = SYSTEM_PROMPT + '\n\n';
     
-    // Add conversation history if provided (limit to last 6 messages for better context)
-    if (conversationHistory && conversationHistory.length > 0) {
+    // Use database history if available, otherwise use provided conversationHistory
+    let historyToUse = [];
+    if (chatSession.messages && chatSession.messages.length > 0) {
+      historyToUse = chatSession.messages.slice(-6); // Last 6 messages from DB
+    } else if (conversationHistory && conversationHistory.length > 0) {
+      historyToUse = conversationHistory.slice(-6); // Fallback to provided history
+    }
+    
+    if (historyToUse.length > 0) {
       contents += '=== Recent Conversation ===\n';
-      const recentHistory = conversationHistory.slice(-6);
-      recentHistory.forEach(msg => {
+      historyToUse.forEach(msg => {
         const role = msg.role === 'user' ? 'User' : 'MedBot';
         contents += `${role}: ${msg.content}\n`;
       });
@@ -207,10 +365,20 @@ router.post('/chat', protect, async (req, res) => {
     }
 
     // Add current message with clear formatting
-    contents += `=== Current Question ===\nUser: ${message}\n\nMedBot (provide a helpful, accurate, and empathetic response):`;
+    contents += `=== Current Question ===\nUser: ${message}\n`;
+    
+    // Add doctor information if found
+    if (doctorInfo) {
+      contents += doctorInfo;
+    }
+    
+    contents += `\nMedBot (provide a helpful, accurate, and empathetic response):`;
 
     console.log('🤖 MedBot processing query from user:', req.user._id);
     console.log('📝 Contents length:', contents.length);
+    if (doctorInfo) {
+      console.log('👨‍⚕️ Doctor information included in response');
+    }
 
     // Generate response using the new API structure
     const response = await ai.models.generateContent({
@@ -239,9 +407,27 @@ router.post('/chat', protect, async (req, res) => {
 
     console.log('✅ MedBot response generated successfully');
 
+    // Save user message and bot response to database
+    chatSession.messages.push({
+      role: 'user',
+      content: message,
+      timestamp: new Date()
+    });
+
+    chatSession.messages.push({
+      role: 'bot',
+      content: botReply,
+      timestamp: new Date()
+    });
+
+    await chatSession.save();
+
+    console.log('💾 Chat session saved to database');
+
     res.json({
       reply: botReply,
-      timestamp: new Date()
+      timestamp: new Date(),
+      sessionId: currentSessionId
     });
 
   } catch (error) {
@@ -282,6 +468,25 @@ router.post('/chat', protect, async (req, res) => {
   }
 });
 
+// Search doctors endpoint
+router.get('/doctors', protect, async (req, res) => {
+  try {
+    const { specialization, city, limit = 10 } = req.query;
+    
+    const doctors = await searchDoctors(specialization, city, parseInt(limit));
+    
+    res.json({
+      doctors,
+      total: doctors.length,
+      specialization: specialization || 'All',
+      city: city || 'All locations'
+    });
+  } catch (error) {
+    console.error('Error in doctor search endpoint:', error);
+    res.status(500).json({ message: 'Error searching doctors' });
+  }
+});
+
 // Get quick suggestions
 router.get('/suggestions', protect, async (req, res) => {
   try {
@@ -292,14 +497,14 @@ router.get('/suggestions', protect, async (req, res) => {
 
     if (user.role === 'patient') {
       suggestions = [
-        "How do I book a video consultation?",
+        "Find me a cardiologist doctor",
+        "Show me available doctors in my area",
         "What are common cold symptoms?",
+        "How do I book a video consultation?",
         "Tell me about fever management",
-        "How does the credit system work?",
-        "What should I do for a headache?",
-        "How can I message my doctor?",
-        "When should I see a doctor?",
-        "Explain common pain relievers"
+        "I need a pediatric specialist",
+        "Find dermatology doctors",
+        "When should I see a doctor?"
       ];
     } else if (user.role === 'doctor') {
       suggestions = [
@@ -329,6 +534,103 @@ router.get('/suggestions', protect, async (req, res) => {
     res.json({ suggestions });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Get chat history for a user
+router.get('/history', protect, async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    
+    const chatSessions = await MedBotChat.find({
+      userId: req.user._id,
+      isActive: true
+    })
+    .sort({ lastActivity: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .select('sessionId messages createdAt lastActivity');
+
+    const totalSessions = await MedBotChat.countDocuments({
+      userId: req.user._id,
+      isActive: true
+    });
+
+    res.json({
+      sessions: chatSessions,
+      totalSessions,
+      currentPage: page,
+      totalPages: Math.ceil(totalSessions / limit)
+    });
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    res.status(500).json({ message: 'Error fetching chat history' });
+  }
+});
+
+// Get specific chat session
+router.get('/history/:sessionId', protect, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    const chatSession = await MedBotChat.findOne({
+      userId: req.user._id,
+      sessionId: sessionId,
+      isActive: true
+    });
+
+    if (!chatSession) {
+      return res.status(404).json({ message: 'Chat session not found' });
+    }
+
+    res.json({
+      sessionId: chatSession.sessionId,
+      messages: chatSession.messages,
+      createdAt: chatSession.createdAt,
+      lastActivity: chatSession.lastActivity
+    });
+  } catch (error) {
+    console.error('Error fetching chat session:', error);
+    res.status(500).json({ message: 'Error fetching chat session' });
+  }
+});
+
+// Delete chat session
+router.delete('/history/:sessionId', protect, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    const chatSession = await MedBotChat.findOne({
+      userId: req.user._id,
+      sessionId: sessionId
+    });
+
+    if (!chatSession) {
+      return res.status(404).json({ message: 'Chat session not found' });
+    }
+
+    chatSession.isActive = false;
+    await chatSession.save();
+
+    res.json({ message: 'Chat session deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting chat session:', error);
+    res.status(500).json({ message: 'Error deleting chat session' });
+  }
+});
+
+// Clear all chat history for user
+router.delete('/history', protect, async (req, res) => {
+  try {
+    await MedBotChat.updateMany(
+      { userId: req.user._id },
+      { isActive: false }
+    );
+
+    res.json({ message: 'All chat history cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing chat history:', error);
+    res.status(500).json({ message: 'Error clearing chat history' });
   }
 });
 

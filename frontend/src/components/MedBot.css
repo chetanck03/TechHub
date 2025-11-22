@@ -366,6 +366,31 @@
   background: rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Doctor information styling */
+.medbot-message-content ul {
+  margin: 0.5rem 0 !important;
+  padding-left: 1rem !important;
+}
+
+.medbot-message-content li {
+  margin: 0.25rem 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* Special styling for doctor cards in messages */
+.medbot-doctor-card {
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-left: 3px solid #667eea !important;
+  padding: 0.75rem !important;
+  margin: 0.5rem 0 !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.medbot-message.user .medbot-doctor-card {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-left-color: rgba(255, 255, 255, 0.5) !important;
+}
+
 .medbot-message.user .medbot-message-content {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -619,6 +644,129 @@
 .medbot-container .medbot-send-btn:focus {
   outline: 2px solid #667eea !important;
   outline-offset: 2px !important;
+}
+
+/* History View */
+.medbot-history {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.medbot-history-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+}
+
+.medbot-history-header h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.medbot-history-header p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.medbot-history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.medbot-history-loading p {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.medbot-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #999;
+  text-align: center;
+}
+
+.medbot-history-empty p {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.medbot-history-empty small {
+  font-size: 0.8rem;
+}
+
+.medbot-history-list {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.medbot-history-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.medbot-history-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.medbot-history-content {
+  flex: 1;
+  padding: 0.75rem;
+  cursor: pointer;
+}
+
+.medbot-history-preview {
+  font-size: 0.85rem;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.medbot-history-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.medbot-history-delete {
+  background: none !important;
+  border: none !important;
+  color: #dc3545 !important;
+  padding: 0.75rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border-radius: 0 10px 10px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 40px !important;
+}
+
+.medbot-history-delete:hover {
+  background: rgba(220, 53, 69, 0.1) !important;
+  color: #dc3545 !important;
 }
 
 /* Disclaimer */
