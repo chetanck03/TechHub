@@ -281,48 +281,34 @@ router.post('/chat', protect, async (req, res) => {
       const doctors = await searchDoctors(foundSpecialization, city, 3);
       
       if (doctors.length > 0) {
-        doctorInfo = '\n\n=== AVAILABLE DOCTORS ON PLATFORM ===\n';
+        doctorInfo = '\n\n=== AVAILABLE DOCTORS ===\n';
         doctors.forEach((doctor, index) => {
-          doctorInfo += `\n${index + 1}. **Dr. ${doctor.name}**\n`;
-          doctorInfo += `   • Specialization: ${doctor.specialization}\n`;
-          doctorInfo += `   • Qualification: ${doctor.qualification}\n`;
-          doctorInfo += `   • Experience: ${doctor.experience} years\n`;
-          doctorInfo += `   • Hospital: ${doctor.hospital}\n`;
-          doctorInfo += `   • Location: ${doctor.city}\n`;
+          doctorInfo += `\n${index + 1}. Dr. ${doctor.name}\n`;
+          doctorInfo += `   Specialization: ${doctor.specialization}\n`;
+          doctorInfo += `   Experience: ${doctor.experience} years\n`;
+          doctorInfo += `   Location: ${doctor.city}\n`;
           if (doctor.phone) {
-            doctorInfo += `   • Contact: ${doctor.phone}\n`;
+            doctorInfo += `   Phone: ${doctor.phone}\n`;
           }
-          if (doctor.email) {
-            doctorInfo += `   • Email: ${doctor.email}\n`;
-          }
-          doctorInfo += `   • Video Consultation Fee: ${doctor.consultationFee.video} credits\n`;
+          doctorInfo += `   Video Fee: ${doctor.consultationFee.video} credits\n`;
           if (doctor.consultationModes.physical) {
-            doctorInfo += `   • Physical Consultation Fee: ${doctor.consultationFee.physical} credits\n`;
+            doctorInfo += `   Physical Fee: ${doctor.consultationFee.physical} credits\n`;
           }
           if (doctor.rating > 0) {
-            doctorInfo += `   • Rating: ${doctor.rating}/5 (${doctor.totalRatings} reviews)\n`;
+            doctorInfo += `   Rating: ${doctor.rating}/5\n`;
           }
-          if (doctor.languages && doctor.languages.length > 0) {
-            doctorInfo += `   • Languages: ${doctor.languages.join(', ')}\n`;
-          }
-          doctorInfo += `   • Status: ${doctor.isAvailable ? 'Available' : 'Busy'}\n`;
+          doctorInfo += `   Status: ${doctor.isAvailable ? 'Available' : 'Busy'}\n`;
         });
-        doctorInfo += '\n💡 You can book consultations directly through our platform for the best experience!\n';
       } else {
         doctorInfo = '\n\n=== DOCTOR SEARCH RESULT ===\n';
-        doctorInfo += 'I apologize, but we currently don\'t have any doctors available ';
+        doctorInfo += 'No doctors available';
         if (foundSpecialization) {
-          doctorInfo += `specializing in ${foundSpecialization} `;
+          doctorInfo += ` for ${foundSpecialization}`;
         }
         if (city) {
-          doctorInfo += `in ${city} `;
+          doctorInfo += ` in ${city}`;
         }
-        doctorInfo += 'on our platform at the moment.\n\n';
-        doctorInfo += '📋 **What you can do:**\n';
-        doctorInfo += '• Check back later as new doctors join regularly\n';
-        doctorInfo += '• Browse our general practitioners for immediate consultation\n';
-        doctorInfo += '• Contact our support team for assistance finding specialists\n';
-        doctorInfo += '• Consider video consultations which have more availability\n';
+        doctorInfo += ' at the moment.\n';
       }
     }
 
