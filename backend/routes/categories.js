@@ -6,9 +6,12 @@ const { protect, authorize } = require('../middleware/auth');
 // Get all categories
 router.get('/', async (req, res) => {
   try {
+    console.log('Categories endpoint called');
     const categories = await Category.find({ isActive: true });
+    console.log(`Found ${categories.length} categories`);
     res.json(categories);
   } catch (error) {
+    console.error('Error in categories endpoint:', error);
     res.status(500).json({ message: error.message });
   }
 });

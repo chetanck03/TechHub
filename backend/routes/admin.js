@@ -138,7 +138,24 @@ router.get('/doctors/pending', protect, authorize('admin'), async (req, res) => 
       .populate('userId', 'name email phone')
       .populate('specialization', 'name');
 
-    res.json(doctors);
+    // Include file information for each doctor
+    const { getFileInfo } = require('../utils/fileStorage');
+    
+    const doctorsWithFiles = doctors.map(doctor => {
+      const fileInfo = {
+        profilePhoto: getFileInfo(doctor.profilePhoto),
+        degreeDocument: getFileInfo(doctor.degreeDocument),
+        licenseDocument: getFileInfo(doctor.licenseDocument),
+        idProof: getFileInfo(doctor.idProof)
+      };
+
+      return {
+        ...doctor.toObject(),
+        fileInfo
+      };
+    });
+
+    res.json(doctorsWithFiles);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -364,11 +381,21 @@ router.get('/doctors/:id/details', protect, authorize('admin'), async (req, res)
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
 
+    // Include file information for admin
+    const { getFileInfo } = require('../utils/fileStorage');
+    const fileInfo = {
+      profilePhoto: getFileInfo(doctor.profilePhoto),
+      degreeDocument: getFileInfo(doctor.degreeDocument),
+      licenseDocument: getFileInfo(doctor.licenseDocument),
+      idProof: getFileInfo(doctor.idProof)
+    };
+
     res.json({
       ...doctor.toObject(),
       consultations,
       complaints,
-      totalEarnings: totalEarnings[0]?.total || 0
+      totalEarnings: totalEarnings[0]?.total || 0,
+      fileInfo
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -570,6 +597,97 @@ router.put('/settings', protect, authorize('admin'), async (req, res) => {
   try {
     // In a real app, update Settings model
     res.json({ message: 'Settings updated successfully', settings: req.body });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// View doctor documents (Admin only)
+router.get('/doctors/:id/document/:type', protect, authorize('admin'), async (req, res) => {
+  try {
+    console.log(`📄 Admin requesting document: ${req.params.type} for doctor: ${req.params.id}`);
+    
+    const { id, type } = req.params;
+    const validTypes = ['profilePhoto', 'degreeDocument', 'licenseDocument', 'idProof'];
+    
+    if (!validTypes.includes(type)) {
+      console.log(`❌ Invalid document type: ${type}`);
+      return res.status(400).json({ message: 'Invalid document type' });
+    }
+
+    const doctor = await Doctor.findById(id).select(type);
+    
+    if (!doctor) {
+      console.log(`❌ Doctor not found: ${id}`);
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+    
+    if (!doctor[type]) {
+      console.log(`❌ Document field not found: ${type}`);
+      return res.status(404).json({ message: 'Document field not found' });
+    }
+    
+    if (!doctor[type].data) {
+      console.log(`❌ Document data not found for: ${type}`);
+      return res.status(404).json({ message: 'Document data not found' });
+    }
+
+    console.log(`✅ Serving document: ${type}, size: ${doctor[type].data.length} chars, contentType: ${doctor[type].contentType}`);
+
+    const documentBuffer = Buffer.from(doctor[type].data, 'base64');
+    
+    res.set({
+      'Content-Type': doctor[type].contentType,
+      'Content-Length': documentBuffer.length,
+      'Content-Disposition': `inline; filename="${doctor[type].originalName}"`,
+      'Cache-Control': 'private, no-cache'
+    });
+    
+    res.send(documentBuffer);
+  } catch (error) {
+    console.error('❌ Error serving document:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all doctor documents info (Admin only)
+router.get('/doctors/:id/documents', protect, authorize('admin'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id)
+      .select('profilePhoto degreeDocument licenseDocument idProof')
+      .populate('userId', 'name email');
+    
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const { getFileInfo } = require('../utils/fileStorage');
+
+    // Debug information
+    console.log('📋 Document debug info for doctor:', req.params.id);
+    console.log('- Profile Photo data length:', doctor.profilePhoto?.data?.length || 'No data');
+    console.log('- Degree Document data length:', doctor.degreeDocument?.data?.length || 'No data');
+    console.log('- License Document data length:', doctor.licenseDocument?.data?.length || 'No data');
+    console.log('- ID Proof data length:', doctor.idProof?.data?.length || 'No data');
+
+    res.json({
+      doctorInfo: {
+        name: doctor.userId?.name,
+        email: doctor.userId?.email
+      },
+      documents: {
+        profilePhoto: getFileInfo(doctor.profilePhoto),
+        degreeDocument: getFileInfo(doctor.degreeDocument),
+        licenseDocument: getFileInfo(doctor.licenseDocument),
+        idProof: getFileInfo(doctor.idProof)
+      },
+      debug: {
+        profilePhotoDataLength: doctor.profilePhoto?.data?.length || 0,
+        degreeDocumentDataLength: doctor.degreeDocument?.data?.length || 0,
+        licenseDocumentDataLength: doctor.licenseDocument?.data?.length || 0,
+        idProofDataLength: doctor.idProof?.data?.length || 0
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

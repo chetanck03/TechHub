@@ -32,10 +32,27 @@ const DoctorRegisterForm = ({ basicInfo, onComplete }) => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories...');
       const response = await api.get('/categories');
+      console.log('Categories response:', response.data);
       setCategories(response.data);
+      
+      if (response.data.length === 0) {
+        console.warn('No categories found in database');
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      console.error('Error details:', error.response?.data);
+      
+      // Set some default categories as fallback
+      const fallbackCategories = [
+        { _id: 'temp1', name: 'General Physician' },
+        { _id: 'temp2', name: 'Cardiologist' },
+        { _id: 'temp3', name: 'Dermatologist' },
+        { _id: 'temp4', name: 'Pediatrician' },
+        { _id: 'temp5', name: 'Gynecologist' }
+      ];
+      setCategories(fallbackCategories);
     }
   };
 

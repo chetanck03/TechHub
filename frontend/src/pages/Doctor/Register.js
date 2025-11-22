@@ -38,10 +38,27 @@ const DoctorRegister = () => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories...');
       const response = await api.get('/categories');
+      console.log('Categories response:', response.data);
       setCategories(response.data);
+      
+      if (response.data.length === 0) {
+        console.warn('No categories found in database');
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      console.error('Error details:', error.response?.data);
+      
+      // Set some default categories as fallback
+      const fallbackCategories = [
+        { _id: 'temp1', name: 'General Physician' },
+        { _id: 'temp2', name: 'Cardiologist' },
+        { _id: 'temp3', name: 'Dermatologist' },
+        { _id: 'temp4', name: 'Pediatrician' },
+        { _id: 'temp5', name: 'Gynecologist' }
+      ];
+      setCategories(fallbackCategories);
     }
   };
 
@@ -167,6 +184,12 @@ const DoctorRegister = () => {
                     accept="image/*"
                     className="file-input"
                   />
+                  <small>Optional - Upload your profile photo (Max 2MB)</small>
+                  {files.profilePhoto && (
+                    <div className="file-info">
+                      ✅ Selected: {files.profilePhoto.name} ({(files.profilePhoto.size / 1024 / 1024).toFixed(2)} MB)
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -253,7 +276,12 @@ const DoctorRegister = () => {
                   required
                   className="file-input"
                 />
-                <small>Upload your Aadhar card, PAN card, or any government-issued ID</small>
+                <small>Upload your Aadhar card, PAN card, or any government-issued ID (Max 5MB)</small>
+                {files.idProof && (
+                  <div className="file-info">
+                    ✅ Selected: {files.idProof.name} ({(files.idProof.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -265,7 +293,12 @@ const DoctorRegister = () => {
                   required
                   className="file-input"
                 />
-                <small>Upload your medical degree certificate (MBBS, MD, etc.)</small>
+                <small>Upload your medical degree certificate (MBBS, MD, etc.) (Max 5MB)</small>
+                {files.degreeDocument && (
+                  <div className="file-info">
+                    ✅ Selected: {files.degreeDocument.name} ({(files.degreeDocument.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -277,7 +310,12 @@ const DoctorRegister = () => {
                   required
                   className="file-input"
                 />
-                <small>Upload your medical council registration/license certificate</small>
+                <small>Upload your medical council registration/license certificate (Max 5MB)</small>
+                {files.licenseDocument && (
+                  <div className="file-info">
+                    ✅ Selected: {files.licenseDocument.name} ({(files.licenseDocument.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
               </div>
             </div>
 
@@ -345,6 +383,8 @@ const DoctorRegister = () => {
                   <li>✅ You will receive an email once your profile is approved</li>
                   <li>✅ You cannot login until admin approves your registration</li>
                   <li>✅ After approval, you can update consultation details, fees, and slots</li>
+                  <li>🔒 All documents are securely stored in our database</li>
+                  <li>📁 Supported formats: PDF, JPG, PNG (Max 5MB per file)</li>
                 </ul>
               </div>
             </div>

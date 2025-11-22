@@ -59,13 +59,33 @@ const doctorSchema = new mongoose.Schema({
     type: String
   }],
   
-  // REQUIRED DOCUMENTS (Private - Only for Admin)
-  degreeDocument: String,
-  licenseDocument: String,
-  idProof: String,
+  // REQUIRED DOCUMENTS (Private - Only for Admin) - Stored as Base64
+  degreeDocument: {
+    data: String, // Base64 encoded file
+    contentType: String,
+    originalName: String,
+    size: Number
+  },
+  licenseDocument: {
+    data: String, // Base64 encoded file
+    contentType: String,
+    originalName: String,
+    size: Number
+  },
+  idProof: {
+    data: String, // Base64 encoded file
+    contentType: String,
+    originalName: String,
+    size: Number
+  },
   
   // PUBLIC PROFILE (Visible to Patients)
-  profilePhoto: String,
+  profilePhoto: {
+    data: String, // Base64 encoded file
+    contentType: String,
+    originalName: String,
+    size: Number
+  },
   about: String,
   
   // CONSULTATION DETAILS (Editable by Doctor after Approval)
@@ -110,11 +130,39 @@ const doctorSchema = new mongoose.Schema({
     default: false
   },
   approvedAt: Date,
+  documentsUpdatedAt: Date,
   rejectionReason: String,
   suspended: {
     type: Boolean,
     default: false
   },
+  
+  // DRAFT DOCUMENT CHANGES
+  draftDocuments: {
+    degreeDocument: {
+      data: String,
+      contentType: String,
+      originalName: String,
+      size: Number
+    },
+    licenseDocument: {
+      data: String,
+      contentType: String,
+      originalName: String,
+      size: Number
+    },
+    idProof: {
+      data: String,
+      contentType: String,
+      originalName: String,
+      size: Number
+    }
+  },
+  hasDraftChanges: {
+    type: Boolean,
+    default: false
+  },
+  draftUpdatedAt: Date,
   
   // RATINGS & REVIEWS
   rating: {

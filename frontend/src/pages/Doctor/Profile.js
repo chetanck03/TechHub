@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
+import MyDocuments from '../../components/MyDocuments';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
+import { FiEdit3, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiAward, FiBook } from 'react-icons/fi';
 import './Doctor.css';
 
 const DoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [editingPersonal, setEditingPersonal] = useState(false);
   const [formData, setFormData] = useState({
     consultationModes: {
       video: true,
@@ -23,17 +26,30 @@ const DoctorProfile = () => {
     followUpPolicy: '',
     isAvailable: true
   });
+  const [personalData, setPersonalData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    currentHospitalClinic: '',
+    currentWorkingCity: '',
+    languagesSpoken: [],
+    about: ''
+  });
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     fetchDoctorProfile();
+    fetchCategories();
   }, []);
+
+  
 
   const fetchDoctorProfile = async () => {
     try {
       const response = await api.get('/doctors/me/profile');
-      setDoctor(response.data);
-      setFormData({
+      setDoctor(response.data);   
+   setFormData({
         consultationModes: response.data.consultationModes || { video: true, physical: false },
         consultationFee: response.data.consultationFee || { video: 10, physical: 15 },
         about: response.data.about || '',
@@ -42,10 +58,28 @@ const DoctorProfile = () => {
         followUpPolicy: response.data.followUpPolicy || '',
         isAvailable: response.data.isAvailable !== undefined ? response.data.isAvailable : true
       });
+      setPersonalData({
+        name: response.data.userId?.name || '',
+        email: response.data.userId?.email || '',
+        phone: response.data.phone || '',
+        currentHospitalClinic: response.data.currentHospitalClinic || '',
+        currentWorkingCity: response.data.currentWorkingCity || '',
+        languagesSpoken: response.data.languagesSpoken || [],
+        about: response.data.about || ''
+      });
     } catch (error) {
       toast.error('Failed to fetch profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
     }
   };
 
@@ -61,12 +95,41 @@ const DoctorProfile = () => {
     
     try {
       await api.put('/doctors/me/consultation-details', formData);
-      toast.success('Profile updated successfully');
+      toast.success('Consultation details updated successfully');
       setEditing(false);
       fetchDoctorProfile();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
     }
+  };
+
+  const handlePersonalSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await api.put('/doctors/me/personal-info', personalData);
+      toast.success('Personal information updated successfully');
+      setEditingPersonal(false);
+      fetchDoctorProfile();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update personal information');
+    }
+  }; 
+  
+  const handleLanguageAdd = (language) => {
+    if (language && !personalData.languagesSpoken.includes(language)) {
+      setPersonalData({
+        ...personalData,
+        languagesSpoken: [...personalData.languagesSpoken, language]
+      });
+    }
+  };
+
+  const handleLanguageRemove = (language) => {
+    setPersonalData({
+      ...personalData,
+      languagesSpoken: personalData.languagesSpoken.filter(lang => lang !== language)
+    });
   };
 
   const handlePhotoUpload = async (e) => {
@@ -117,9 +180,8 @@ const DoctorProfile = () => {
         </div>
       </Layout>
     );
-  }
-
-  return (
+  }  
+return (
     <Layout>
       <div className="dashboard">
         <div className="profile-header-section">
@@ -135,101 +197,296 @@ const DoctorProfile = () => {
         <div className="profile-section">
           <h2>Profile Photo</h2>
           <div className="photo-upload-section">
-            {doctor.profilePhoto ? (
+            {doctor.profilePhoto && doctor.profilePhoto.data ? (
               <img 
-                src={`${process.env.REACT_APP_API_URL}/${doctor.profilePhoto}`} 
+                src={`data:${doctor.profilePhoto.contentType};base64,${doctor.profilePhoto.data}`}
                 alt="Profile" 
                 className="profile-photo-preview"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
               />
-            ) : (
-              <div className="profile-photo-placeholder">
-                {doctor.userId?.name?.charAt(0)}
-              </div>
-            )}
-            <form onSubmit={handlePhotoUpload} className="photo-upload-form">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProfilePhoto(e.target.files[0])}
-                className="file-input"
-              />
-              {profilePhoto && (
-                <button type="submit" className="btn-primary btn-small">
-                  Upload Photo
-                </button>
+            ) : null}
+            <div 
+              className="profile-photo-placeholder" 
+              style={{ 
+                display: (doctor.profilePhoto && doctor.profilePhoto.data) ? 'none' : 'flex' 
+              }}
+            >
+              {doctor.userId?.name?.charAt(0) || 'D'}
+            </div>
+            <div className="photo-info">
+              <h4>Profile Photo Status</h4>
+              {doctor.profilePhoto && doctor.profilePhoto.data ? (
+                <div>
+                  <p style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Photo Uploaded</p>
+                  <small>File: {doctor.profilePhoto.originalName}</small><br />
+                  <small>Size: {(doctor.profilePhoto.size / 1024).toFixed(1)} KB</small>
+                </div>
+              ) : (
+                <p style={{ color: '#f59e0b', fontWeight: 'bold' }}>📷 No photo uploaded</p>
               )}
-            </form>
+              
+              <form onSubmit={handlePhotoUpload} className="photo-upload-form">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setProfilePhoto(e.target.files[0])}
+                  className="file-input"
+                />
+                {profilePhoto && (
+                  <button type="submit" className="btn-primary btn-small">
+                    {doctor.profilePhoto && doctor.profilePhoto.data ? 'Update Photo' : 'Upload Photo'}
+                  </button>
+                )}
+              </form>
+            </div>
           </div>
-        </div>
-
-        {/* Personal Information (Read-Only) */}
+        </div>       
+ {/* Personal Information */}
         <div className="profile-section">
-          <h2>Personal Information</h2>
-          <p className="section-note">These details cannot be edited. Contact admin if changes are needed.</p>
-          <div className="info-grid">
-            <div className="info-item">
-              <label>Full Name</label>
-              <p>{doctor.userId?.name}</p>
-            </div>
-            <div className="info-item">
-              <label>Email</label>
-              <p>{doctor.userId?.email}</p>
-            </div>
-            <div className="info-item">
-              <label>Phone Number</label>
-              <p>{doctor.phone}</p>
-            </div>
-            <div className="info-item">
-              <label>Gender</label>
-              <p style={{ textTransform: 'capitalize' }}>{doctor.gender}</p>
-            </div>
-            <div className="info-item">
-              <label>Date of Birth</label>
-              <p>{doctor.dateOfBirth ? new Date(doctor.dateOfBirth).toLocaleDateString() : 'Not provided'}</p>
-            </div>
-            <div className="info-item">
-              <label>Registration Type</label>
-              <p style={{ textTransform: 'capitalize' }}>{doctor.registrationType || 'Online'}</p>
-            </div>
+          <div className="section-header">
+            <h2>Personal Information</h2>
+            {doctor.isApproved && !editingPersonal && (
+              <button 
+                className="btn-edit"
+                onClick={() => setEditingPersonal(true)}
+              >
+                <FiEdit3 /> Edit Personal Info
+              </button>
+            )}
           </div>
-        </div>
 
-        {/* Professional Information (Read-Only) */}
+          {editingPersonal ? (
+            <form onSubmit={handlePersonalSubmit} className="edit-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label><FiUser /> Full Name</label>
+                  <input
+                    type="text"
+                    value={personalData.name}
+                    onChange={(e) => setPersonalData({ ...personalData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label><FiMail /> Email</label>
+                  <input
+                    type="email"
+                    value={personalData.email}
+                    disabled
+                    className="disabled-input"
+                    title="Email cannot be changed"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label><FiPhone /> Phone Number</label>
+                  <input
+                    type="tel"
+                    value={personalData.phone}
+                    onChange={(e) => setPersonalData({ ...personalData, phone: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label><FiMapPin /> Current Hospital/Clinic</label>
+                  <input
+                    type="text"
+                    value={personalData.currentHospitalClinic}
+                    onChange={(e) => setPersonalData({ ...personalData, currentHospitalClinic: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>  
+            <div className="form-row">
+                <div className="form-group">
+                  <label><FiMapPin /> Current Working City</label>
+                  <input
+                    type="text"
+                    value={personalData.currentWorkingCity}
+                    onChange={(e) => setPersonalData({ ...personalData, currentWorkingCity: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Languages Spoken</label>
+                <div className="languages-input">
+                  <div className="languages-list">
+                    {personalData.languagesSpoken.map((lang, index) => (
+                      <span key={index} className="language-tag">
+                        {lang}
+                        <button
+                          type="button"
+                          onClick={() => handleLanguageRemove(lang)}
+                          className="remove-language"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Add language and press Enter"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleLanguageAdd(e.target.value.trim());
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>About / Bio</label>
+                <textarea
+                  rows="4"
+                  value={personalData.about}
+                  onChange={(e) => setPersonalData({ ...personalData, about: e.target.value })}
+                  placeholder="Tell patients about yourself, your approach to treatment, etc."
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="btn-primary">
+                  <FiSave /> Save Changes
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={() => {
+                    setEditingPersonal(false);
+                    setPersonalData({
+                      name: doctor.userId?.name || '',
+                      email: doctor.userId?.email || '',
+                      phone: doctor.phone || '',
+                      currentHospitalClinic: doctor.currentHospitalClinic || '',
+                      currentWorkingCity: doctor.currentWorkingCity || '',
+                      languagesSpoken: doctor.languagesSpoken || [],
+                      about: doctor.about || ''
+                    });
+                  }}
+                >
+                  <FiX /> Cancel
+                </button>
+              </div>
+            </form>   
+       ) : (
+            <div className="info-grid">
+              <div className="info-item">
+                <FiUser className="info-icon" />
+                <div>
+                  <label>Full Name</label>
+                  <p>{doctor.userId?.name}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiMail className="info-icon" />
+                <div>
+                  <label>Email</label>
+                  <p>{doctor.userId?.email}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiPhone className="info-icon" />
+                <div>
+                  <label>Phone Number</label>
+                  <p>{doctor.phone}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiUser className="info-icon" />
+                <div>
+                  <label>Gender</label>
+                  <p style={{ textTransform: 'capitalize' }}>{doctor.gender}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiCalendar className="info-icon" />
+                <div>
+                  <label>Date of Birth</label>
+                  <p>{doctor.dateOfBirth ? new Date(doctor.dateOfBirth).toLocaleDateString() : 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiMapPin className="info-icon" />
+                <div>
+                  <label>Current Hospital/Clinic</label>
+                  <p>{doctor.currentHospitalClinic}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <FiMapPin className="info-icon" />
+                <div>
+                  <label>Current Working City</label>
+                  <p>{doctor.currentWorkingCity}</p>
+                </div>
+              </div>
+              <div className="info-item">
+                <div>
+                  <label>Languages Spoken</label>
+                  <div className="languages-display">
+                    {doctor.languagesSpoken && doctor.languagesSpoken.length > 0 ? (
+                      doctor.languagesSpoken.map((lang, index) => (
+                        <span key={index} className="language-badge">{lang}</span>
+                      ))
+                    ) : (
+                      <p>Not specified</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {doctor.about && (
+                <div className="info-item full-width">
+                  <label>About</label>
+                  <p>{doctor.about}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>        
+{/* Professional Information (Read-Only) */}
         <div className="profile-section">
           <h2>Professional Details</h2>
           <p className="section-note">Verified information from your registration. Contact admin for changes.</p>
-          <div className="info-grid">
-            <div className="info-item">
-              <label>Qualification</label>
+          <div className="professional-grid">
+            <div className="professional-item">
+              <FiAward className="info-icon" />
+              <h4>Qualification</h4>
               <p>{doctor.qualification}</p>
             </div>
-            <div className="info-item">
-              <label>Specialization</label>
+            <div className="professional-item">
+              <FiBook className="info-icon" />
+              <h4>Specialization</h4>
               <p>{doctor.specialization?.name}</p>
             </div>
-            <div className="info-item">
-              <label>Years of Experience</label>
+            <div className="professional-item">
+              <FiCalendar className="info-icon" />
+              <h4>Years of Experience</h4>
               <p>{doctor.experience} years</p>
             </div>
-            <div className="info-item">
-              <label>Medical Registration Number</label>
+            <div className="professional-item">
+              <FiUser className="info-icon" />
+              <h4>Medical Registration Number</h4>
               <p>{doctor.medicalRegistrationNumber}</p>
             </div>
-            <div className="info-item">
-              <label>Issuing Medical Council</label>
+            <div className="professional-item">
+              <FiAward className="info-icon" />
+              <h4>Issuing Medical Council</h4>
               <p>{doctor.issuingMedicalCouncil}</p>
             </div>
-            <div className="info-item">
-              <label>Current Hospital/Clinic</label>
-              <p>{doctor.currentHospitalClinic}</p>
-            </div>
-            <div className="info-item">
-              <label>Current Working City</label>
-              <p>{doctor.currentWorkingCity}</p>
-            </div>
-            <div className="info-item">
-              <label>Languages Spoken</label>
-              <p>{doctor.languagesSpoken?.join(', ') || 'Not specified'}</p>
+            <div className="professional-item">
+              <FiMapPin className="info-icon" />
+              <h4>Registration Date</h4>
+              <p>{new Date(doctor.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
         </div>
@@ -251,80 +508,94 @@ const DoctorProfile = () => {
         )}
 
         {/* Uploaded Documents */}
+        <MyDocuments 
+          doctorId={doctor._id} 
+          doctorData={doctor} 
+          onDocumentUpdate={fetchDoctorProfile}
+        />        {/* 
+Account Status & Statistics */}
         <div className="profile-section">
-          <h2>Uploaded Documents</h2>
-          <p className="section-note">Documents submitted during registration for verification</p>
-          <div className="documents-grid">
-            {doctor.idProof && (
-              <div className="document-item">
-                <label>Government ID (Aadhar/PAN)</label>
-                <a 
-                  href={`${process.env.REACT_APP_API_URL}/${doctor.idProof}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="document-link"
-                >
-                  📄 View Document
-                </a>
-              </div>
-            )}
-            {doctor.degreeDocument && (
-              <div className="document-item">
-                <label>Degree Certificate</label>
-                <a 
-                  href={`${process.env.REACT_APP_API_URL}/${doctor.degreeDocument}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="document-link"
-                >
-                  📄 View Document
-                </a>
-              </div>
-            )}
-            {doctor.licenseDocument && (
-              <div className="document-item">
-                <label>Medical License Certificate</label>
-                <a 
-                  href={`${process.env.REACT_APP_API_URL}/${doctor.licenseDocument}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="document-link"
-                >
-                  📄 View Document
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
+          <h2>Account Status & Statistics</h2>
+          <div className="professional-grid">
+            <div className="professional-item">
+              <h4>Approval Status</h4>
+              {doctor.isApproved ? (
+                <span className="status-badge status-approved">✅ Approved</span>
+              ) : doctor.status === 'rejected' ? (
+                <span className="status-badge status-rejected">❌ Rejected</span>
+              ) : (
+                <span className="status-badge status-pending">⏳ Pending Approval</span>
+              )}
+            </div>
+            
+            <div className="professional-item">
+              <h4>Account Status</h4>
+              {doctor.suspended ? (
+                <span className="status-badge status-rejected">🚫 Suspended</span>
+              ) : doctor.status === 'approved' ? (
+                <span className="status-badge status-approved">✅ Active</span>
+              ) : (
+                <span className="status-badge status-pending">⏳ Under Review</span>
+              )}
+            </div>
 
-        {/* Approval Status */}
-        <div className="profile-section">
-          <h2>Account Status</h2>
-          <div className="info-grid">
-            <div className="info-item">
-              <label>Approval Status</label>
-              <p>
-                {doctor.isApproved ? (
-                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Approved</span>
-                ) : (
-                  <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>⏳ Pending</span>
-                )}
-              </p>
+            <div className="professional-item">
+              <h4>Platform Fee</h4>
+              {doctor.platformFeePaid ? (
+                <span className="status-badge status-approved">✅ Paid (${doctor.registrationFee || 10})</span>
+              ) : (
+                <span className="status-badge status-pending">⏳ Pending (${doctor.registrationFee || 10})</span>
+              )}
             </div>
-            <div className="info-item">
-              <label>Registration Date</label>
-              <p>{new Date(doctor.createdAt).toLocaleDateString()}</p>
-            </div>
-            {doctor.rating && (
-              <div className="info-item">
-                <label>Rating</label>
+
+            {doctor.approvedAt && (
+              <div className="professional-item">
+                <h4>Approved Date</h4>
+                <p>{new Date(doctor.approvedAt).toLocaleDateString()}</p>
+              </div>
+            )}
+
+            {doctor.rating > 0 && (
+              <div className="professional-item">
+                <h4>Patient Rating</h4>
                 <p>⭐ {doctor.rating.toFixed(1)} ({doctor.totalRatings} reviews)</p>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Consultation Details (Editable) */}
+            <div className="professional-item">
+              <h4>Total Consultations</h4>
+              <p>{doctor.totalConsultations || 0} consultations</p>
+            </div>
+
+            <div className="professional-item">
+              <h4>Availability Status</h4>
+              {doctor.isAvailable ? (
+                <span className="status-badge status-approved">✅ Available</span>
+              ) : (
+                <span className="status-badge status-pending">❌ Unavailable</span>
+              )}
+            </div>
+
+            <div className="professional-item">
+              <h4>Member Since</h4>
+              <p>{new Date(doctor.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+          
+          {doctor.rejectionReason && (
+            <div style={{ 
+              marginTop: '2rem',
+              padding: '1.5rem', 
+              background: '#fee2e2', 
+              border: '1px solid #fecaca', 
+              borderRadius: '12px'
+            }}>
+              <h4 style={{ margin: '0 0 1rem 0', color: '#991b1b' }}>Rejection Reason</h4>
+              <p style={{ margin: 0 }}>{doctor.rejectionReason}</p>
+            </div>
+          )}
+        </div>      
+  {/* Consultation Details (Editable) */}
         {editing ? (
           <form onSubmit={handleSubmit} className="profile-section">
             <h2>Consultation Details (Editable)</h2>
@@ -382,9 +653,8 @@ const DoctorProfile = () => {
                   min="1"
                 />
               </div>
-            </div>
-
-            <div className="form-group">
+            </div>     
+       <div className="form-group">
               <label>About / Bio</label>
               <textarea
                 rows="4"
@@ -450,8 +720,8 @@ const DoctorProfile = () => {
                 Cancel
               </button>
             </div>
-          </form>
-        ) : (
+          </form>        )
+ : (
           <div className="profile-section">
             <h2>Consultation Details</h2>
             <div className="info-grid">

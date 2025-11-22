@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
+import DocumentViewer from '../../components/DocumentViewer';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import './Admin.css';
@@ -125,6 +126,15 @@ const DoctorApprovals = () => {
                     <strong>{doctor.registrationType}</strong>
                   </div>
                 </div>
+
+                {/* Document Viewer */}
+                {doctor.fileInfo && (
+                  <DocumentViewer 
+                    doctorId={doctor._id} 
+                    documents={doctor.fileInfo} 
+                    doctorName={doctor.userId?.name} 
+                  />
+                )}
 
                 <div className="approval-actions">
                   <button

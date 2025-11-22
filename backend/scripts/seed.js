@@ -14,7 +14,19 @@ const categories = [
   { name: 'Gynecologist', icon: '👶', description: 'Women\'s health' },
   { name: 'Psychiatrist', icon: '🧠', description: 'Mental health' },
   { name: 'Pediatrician', icon: '👶', description: 'Children\'s health' },
-  { name: 'Orthopedic', icon: '🦴', description: 'Bone and joint care' }
+  { name: 'Orthopedic', icon: '🦴', description: 'Bone and joint care' },
+  { name: 'Neurologist', icon: '🧠', description: 'Brain and nervous system' },
+  { name: 'Ophthalmologist', icon: '👁️', description: 'Eye care and vision' },
+  { name: 'ENT Specialist', icon: '👂', description: 'Ear, nose, and throat' },
+  { name: 'Urologist', icon: '🫘', description: 'Urinary system and male reproductive health' },
+  { name: 'Gastroenterologist', icon: '🫄', description: 'Digestive system' },
+  { name: 'Pulmonologist', icon: '🫁', description: 'Respiratory system and lungs' },
+  { name: 'Endocrinologist', icon: '⚖️', description: 'Hormones and metabolism' },
+  { name: 'Rheumatologist', icon: '🦴', description: 'Arthritis and autoimmune diseases' },
+  { name: 'Oncologist', icon: '🎗️', description: 'Cancer treatment and care' },
+  { name: 'Radiologist', icon: '📷', description: 'Medical imaging and diagnostics' },
+  { name: 'Anesthesiologist', icon: '💉', description: 'Anesthesia and pain management' },
+  { name: 'Pathologist', icon: '🔬', description: 'Laboratory medicine and diagnostics' }
 ];
 
 const medicalStores = [
