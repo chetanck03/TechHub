@@ -91,6 +91,42 @@ const LandingPage = () => {
         </div>
       </header>
 
+        {/* Search Results */}
+      {(searchResults.length > 0 || searchError) && (
+        <section className="search-results-section">
+          <div className="container">
+            {searchError && (
+              <div className="search-error">
+                <p>{searchError}</p>
+              </div>
+            )}
+            
+            {searchResults.length > 0 && (
+              <>
+                <h2 className="section-title">Medical Stores Near You</h2>
+                <div className="stores-grid">
+                  {searchResults.map((store, index) => (
+                    <div key={index} className="store-card">
+                      <MapPin className="store-icon" />
+                      <h3>{store.name}</h3>
+                      <div className="store-location">
+                        <p className="store-city">{store.city}, {store.state}</p>
+                        <p className="store-country">{store.country}</p>
+                      </div>
+                      <p className="store-address">{store.street}</p>
+                      {store.phone !== 'N/A' && (
+                        <p className="store-phone">📞 {store.phone}</p>
+                      )}
+                      <p className="store-distance">📍 {store.distance} km away</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Hero Section with Modern Design */}
       <section className="hero-section-modern">
         <div className="hero-background-circles">
@@ -138,41 +174,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Search Results */}
-      {(searchResults.length > 0 || searchError) && (
-        <section className="search-results-section">
-          <div className="container">
-            {searchError && (
-              <div className="search-error">
-                <p>{searchError}</p>
-              </div>
-            )}
-            
-            {searchResults.length > 0 && (
-              <>
-                <h2 className="section-title">Medical Stores Near You</h2>
-                <div className="stores-grid">
-                  {searchResults.map((store, index) => (
-                    <div key={index} className="store-card">
-                      <MapPin className="store-icon" />
-                      <h3>{store.name}</h3>
-                      <div className="store-location">
-                        <p className="store-city">{store.city}, {store.state}</p>
-                        <p className="store-country">{store.country}</p>
-                      </div>
-                      <p className="store-address">{store.street}</p>
-                      {store.phone !== 'N/A' && (
-                        <p className="store-phone">📞 {store.phone}</p>
-                      )}
-                      <p className="store-distance">📍 {store.distance} km away</p>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </section>
-      )}
+    
 
       {/* Features Section */}
       <section className="features-section">

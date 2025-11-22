@@ -120,7 +120,7 @@ const MedBot = () => {
     handleSendMessage(suggestion);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -135,6 +135,34 @@ const MedBot = () => {
         timestamp: new Date()
       }
     ]);
+  };
+
+  // Function to format markdown text
+  const formatMessage = (text) => {
+    if (!text) return '';
+    
+    // Convert markdown formatting to HTML
+    let formatted = text
+      // Bold text: **text** -> <strong>text</strong>
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Italic text: *text* -> <em>text</em>
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Code: `text` -> <code>text</code>
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      // Line breaks
+      .replace(/\n/g, '<br/>');
+    
+    return formatted;
+  };
+
+  // Component to render formatted message
+  const FormattedMessage = ({ content }) => {
+    const formattedContent = formatMessage(content);
+    return (
+      <div 
+        dangerouslySetInnerHTML={{ __html: formattedContent }}
+      />
+    );
   };
 
   return (
@@ -189,12 +217,7 @@ const MedBot = () => {
                 className={`medbot-message ${msg.role === 'user' ? 'user' : 'bot'}`}
               >
                 <div className="medbot-message-content">
-                  {msg.content.split('\n').map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line}
-                      {i < msg.content.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
+                  <FormattedMessage content={msg.content} />
                 </div>
                 <div className="medbot-message-time">
                   {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -243,10 +266,10 @@ const MedBot = () => {
             <div className="medbot-input-wrapper">
               <textarea
                 className="medbot-input"
-                placeholder="Ask me anything about health or the platform..."
+                placeholder="Ask me anything about health..."
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 rows="1"
                 disabled={isLoading}
                 maxLength={1000}

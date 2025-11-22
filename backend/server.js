@@ -17,9 +17,19 @@ const io = socketIO(server, {
 });
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Make io accessible to routes
 app.set('io', io);
@@ -45,6 +55,44 @@ app.use('/api/medbot', require('./routes/medbot'));
 // Health check
 app.get('/', (req, res) => {
   res.json({ message: 'Telehealth API is running' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      message: 'Validation Error',
+      errors: Object.values(err.errors).map(e => e.message)
+    });
+  }
+  
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      message: 'Invalid ID format'
+    });
+  }
+  
+  if (err.code === 11000) {
+    return res.status(400).json({
+      message: 'Duplicate field value'
+    });
+  }
+  
+  // Default error
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    message: `Route ${req.originalUrl} not found`
+  });
 });
 
 // Database connection

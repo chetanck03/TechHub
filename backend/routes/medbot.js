@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const { protect } = require('../middleware/auth');
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize Gemini AI with the new API
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 
 // Enhanced System prompt for MedBot
 const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a comprehensive telehealth platform. You are knowledgeable, empathetic, and dedicated to helping users with their health concerns and platform navigation.
@@ -157,73 +159,74 @@ Be helpful, be accurate, be safe, and always prioritize the user's wellbeing.`;
 // Chat with MedBot
 router.post('/chat', protect, async (req, res) => {
   try {
+    console.log('🤖 MedBot chat request received');
+    console.log('User:', req.user?._id);
+    console.log('Request body:', { 
+      messageLength: req.body?.message?.length,
+      hasConversationHistory: !!req.body?.conversationHistory 
+    });
+
     const { message, conversationHistory } = req.body;
 
     // Validate message
     if (!message || !message.trim()) {
+      console.log('❌ No message provided');
       return res.status(400).json({ message: 'Message is required' });
     }
 
     // Limit message length
     if (message.length > 1000) {
+      console.log('❌ Message too long:', message.length);
       return res.status(400).json({ 
         message: 'Message is too long. Please keep it under 1000 characters.' 
       });
     }
 
-    // Initialize the model with safety settings
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-pro',
+    // Check if GEMINI_API_KEY is available
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('❌ GEMINI_API_KEY not found in environment variables');
+      return res.status(500).json({ 
+        message: 'AI service configuration error. Please contact support.' 
+      });
+    }
+
+    console.log('🔧 Using Gemini 2.5 Flash model...');
+
+    // Build conversation context
+    let contents = SYSTEM_PROMPT + '\n\n';
+    
+    // Add conversation history if provided (limit to last 6 messages for better context)
+    if (conversationHistory && conversationHistory.length > 0) {
+      contents += '=== Recent Conversation ===\n';
+      const recentHistory = conversationHistory.slice(-6);
+      recentHistory.forEach(msg => {
+        const role = msg.role === 'user' ? 'User' : 'MedBot';
+        contents += `${role}: ${msg.content}\n`;
+      });
+      contents += '\n';
+    }
+
+    // Add current message with clear formatting
+    contents += `=== Current Question ===\nUser: ${message}\n\nMedBot (provide a helpful, accurate, and empathetic response):`;
+
+    console.log('🤖 MedBot processing query from user:', req.user._id);
+    console.log('📝 Contents length:', contents.length);
+
+    // Generate response using the new API structure
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: contents,
       generationConfig: {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 1024,
-      },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-      ],
+      }
     });
-
-    // Build conversation context
-    let prompt = SYSTEM_PROMPT + '\n\n';
     
-    // Add conversation history if provided (limit to last 6 messages for better context)
-    if (conversationHistory && conversationHistory.length > 0) {
-      prompt += '=== Recent Conversation ===\n';
-      const recentHistory = conversationHistory.slice(-6);
-      recentHistory.forEach(msg => {
-        const role = msg.role === 'user' ? 'User' : 'MedBot';
-        prompt += `${role}: ${msg.content}\n`;
-      });
-      prompt += '\n';
-    }
-
-    // Add current message with clear formatting
-    prompt += `=== Current Question ===\nUser: ${message}\n\nMedBot (provide a helpful, accurate, and empathetic response):`;
-
-    console.log('🤖 MedBot processing query from user:', req.user._id);
-
-    // Generate response
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    console.log('✅ Gemini API response received');
     
-    // Check if response was blocked
+    // Check if response was blocked or empty
     if (!response || !response.text) {
       console.warn('⚠️ MedBot response was blocked or empty');
       return res.json({
@@ -232,7 +235,7 @@ router.post('/chat', protect, async (req, res) => {
       });
     }
 
-    const botReply = response.text();
+    const botReply = response.text;
 
     console.log('✅ MedBot response generated successfully');
 
@@ -251,9 +254,16 @@ router.post('/chat', protect, async (req, res) => {
       });
     }
     
-    if (error.message?.includes('quota')) {
+    if (error.message?.includes('quota') || error.message?.includes('429')) {
       return res.status(429).json({ 
         message: 'AI service is currently busy. Please try again in a moment.' 
+      });
+    }
+
+    if (error.message?.includes('404') || error.message?.includes('not found')) {
+      console.error('❌ Model not found error - may need to update model name');
+      return res.status(500).json({ 
+        message: 'AI service is temporarily unavailable. Please try again later or contact support.' 
       });
     }
 
@@ -327,7 +337,7 @@ router.get('/health', (req, res) => {
   res.json({ 
     status: 'online',
     service: 'MedBot AI Assistant',
-    model: 'Gemini Pro'
+    model: 'Gemini 2.5 Flash'
   });
 });
 
