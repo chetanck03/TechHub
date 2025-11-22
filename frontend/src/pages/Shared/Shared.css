@@ -1,0 +1,87 @@
+.complaint-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.form-actions button {
+  flex: 1;
+}
+
+.complaints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.complaint-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.complaint-date {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-top: 0.25rem;
+}
+
+.admin-response {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #dbeafe;
+  border-left: 4px solid var(--secondary);
+  border-radius: 8px;
+}
+
+.admin-response strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+}
+
+.admin-response p {
+  color: var(--dark);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--gray);
+  margin-bottom: 2rem;
+}
+
+.empty-state {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.empty-state p {
+  color: var(--gray);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.file-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.file-input:hover {
+  border-color: var(--primary);
+}
