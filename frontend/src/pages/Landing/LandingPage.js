@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Users, Calendar, Shield, Search, MapPin, Zap, Heart, Stethoscope, UserCheck, Clock, Lock } from 'lucide-react';
+import { Activity, Search, MapPin, Zap, Stethoscope, UserCheck, Clock, Lock, X, Menu } from 'lucide-react';
 import { buildApiUrl, API_ENDPOINTS } from '../../config/api';
 
 const LandingPage = () => {
@@ -9,9 +9,28 @@ const LandingPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Don't auto-load stores on page load - let user search when they want
+
+  // Close mobile menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuOpen && !event.target.closest('header')) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    setMobileMenuOpen(false); // Close mobile menu on search
+    
     if (!searchQuery.trim()) {
       setSearchError('Please enter a search term');
       return;
@@ -37,7 +56,7 @@ const LandingPage = () => {
       } else if (Array.isArray(data)) {
         setSearchResults(data);
         if (data.length === 0) {
-          setSearchError('No medical stores found. Try a different search term.');
+          setSearchError(`No medical stores found for "${searchQuery}". Try searching for a different city, country, or store name.`);
         }
       } else {
         setSearchError('Unexpected response format');
@@ -51,43 +70,60 @@ const LandingPage = () => {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchError('');
+    setSearchResults([]); // Simply clear the results without making API call
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-secondary-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
+            {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => window.location.href = '/'}>
               <Stethoscope className="w-8 h-8 text-primary-500" />
               <h1 className="text-xl font-bold text-secondary-900">Telehealth</h1>
             </div>
 
-            {/* Medical Store Search */}
-            <div className="flex-1 max-w-2xl">
-              <form onSubmit={handleSearch} className="relative">
+            {/* Medical Store Search - Hidden on mobile, shown in mobile menu */}
+            <div className="hidden md:flex flex-1 max-w-2xl">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <div className="flex items-center bg-secondary-50 border-2 border-secondary-200 rounded-xl px-4 py-2 transition-all duration-300 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-soft">
                   <MapPin className="w-5 h-5 text-secondary-400 mr-3 flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Search by city or store name (e.g., Mumbai, India or pharmacy)..."
+                    placeholder="Search medical stores in Pakistan (e.g., Karachi, Lahore, Islamabad)..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none text-secondary-900 placeholder-secondary-400"
                   />
+                  {/* Clear button */}
+                  {searchQuery && (
+                    <button 
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="p-1 hover:bg-secondary-200 rounded-full transition-colors mr-2"
+                    >
+                      <X size={16} className="text-secondary-400" />
+                    </button>
+                  )}
                   <button 
                     type="submit" 
                     className="btn btn-primary btn-sm ml-2 flex-shrink-0" 
                     disabled={searching}
                   >
                     <Search size={16} />
-                    {searching ? 'Searching...' : 'Search'}
+                    <span className="hidden lg:inline ml-1">{searching ? 'Searching...' : 'Search'}</span>
                   </button>
                 </div>
               </form>
             </div>
 
-            {/* Auth Buttons */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Desktop Auth Buttons */}
+            <div className="hidden md:flex items-center gap-3 flex-shrink-0">
               <button onClick={() => navigate('/login')} className="btn btn-secondary btn-sm">
                 Login
               </button>
@@ -95,7 +131,73 @@ const LandingPage = () => {
                 Sign Up
               </button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 rounded-lg hover:bg-secondary-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <Menu size={24} className="text-secondary-600" />
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-secondary-200 py-4 space-y-4">
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch} className="relative">
+                <div className="flex items-center bg-secondary-50 border-2 border-secondary-200 rounded-xl px-4 py-3 transition-all duration-300 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-soft">
+                  <MapPin className="w-5 h-5 text-secondary-400 mr-3 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search stores in Pakistan..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-none outline-none text-secondary-900 placeholder-secondary-400"
+                  />
+                  {/* Clear button */}
+                  {searchQuery && (
+                    <button 
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="p-1 hover:bg-secondary-200 rounded-full transition-colors mr-2"
+                    >
+                      <X size={16} className="text-secondary-400" />
+                    </button>
+                  )}
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary btn-sm ml-2 flex-shrink-0" 
+                    disabled={searching}
+                  >
+                    <Search size={16} />
+                  </button>
+                </div>
+              </form>
+
+              {/* Mobile Auth Buttons */}
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => {
+                    navigate('/login');
+                    setMobileMenuOpen(false);
+                  }} 
+                  className="btn btn-secondary w-full"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => {
+                    navigate('/register');
+                    setMobileMenuOpen(false);
+                  }} 
+                  className="btn btn-primary w-full"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -104,14 +206,28 @@ const LandingPage = () => {
         <section className="py-16 bg-secondary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {searchError && (
-              <div className="bg-danger-50 border border-danger-200 text-danger-700 px-6 py-4 rounded-xl mb-8 text-center font-medium">
-                <p>{searchError}</p>
+              <div className="bg-danger-50 border border-danger-200 text-danger-700 px-6 py-4 rounded-xl mb-8 text-center">
+                <p className="font-medium mb-2">{searchError}</p>
+                <p className="text-sm text-danger-600">
+                  Try searching for: "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", or any Pakistan city
+                </p>
               </div>
             )}
             
             {searchResults.length > 0 && (
               <>
-                <h2 className="text-3xl font-bold text-secondary-900 text-center mb-12">Medical Stores Near You</h2>
+                <div className="flex items-center justify-between mb-12">
+                  <h2 className="text-3xl font-bold text-secondary-900 text-center flex-1">
+                    {searchQuery ? `Medical Stores for "${searchQuery}"` : 'Medical Stores in Pakistan'}
+                  </h2>
+                  <button 
+                    onClick={handleClearSearch}
+                    className="p-2 hover:bg-secondary-200 rounded-full transition-colors ml-4"
+                    title="Close search results"
+                  >
+                    <X size={24} className="text-secondary-500" />
+                  </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {searchResults.map((store, index) => (
                     <div key={index} className="card card-hover">
@@ -123,10 +239,21 @@ const LandingPage = () => {
                           <p className="text-secondary-500 text-sm">{store.country}</p>
                         </div>
                         <p className="text-secondary-600 text-sm mb-2 leading-relaxed">{store.street}</p>
-                        {store.phone !== 'N/A' && (
+                        
+                        {/* Phone Number */}
+                        {store.phone && store.phone !== 'N/A' && (
                           <p className="text-success-600 text-sm font-medium mb-2">📞 {store.phone}</p>
                         )}
-                        <p className="text-primary-600 font-semibold text-sm">📍 {store.distance} km away</p>
+                        
+                        {/* Opening Hours */}
+                        {store.opening_hours && store.opening_hours !== 'N/A' && (
+                          <p className="text-blue-600 text-sm mb-2">🕒 {store.opening_hours}</p>
+                        )}
+                        
+                        {/* Distance - only show if not N/A */}
+                        {store.distance && store.distance !== 'N/A' && (
+                          <p className="text-primary-600 font-semibold text-sm">📍 {store.distance} km away</p>
+                        )}
                       </div>
                     </div>
                   ))}
