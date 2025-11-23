@@ -14,7 +14,7 @@ import PatientDashboard from './pages/Patient/Dashboard';
 import DoctorList from './pages/Patient/DoctorList';
 import DoctorProfile from './pages/Patient/DoctorProfile';
 import BookConsultation from './pages/Patient/BookConsultation';
-import MyConsultations from './pages/Patient/MyConsultations';
+import MyConsultations from './pages/Shared/MyConsultations';
 import Credits from './pages/Patient/Credits';
 import Profile from './pages/Patient/Profile';
 

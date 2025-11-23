@@ -19,6 +19,8 @@ router.post('/', protect, authorize('doctor'), async (req, res) => {
       return res.status(404).json({ message: 'Doctor profile not found' });
     }
 
+    console.log('Creating slot for doctor:', doctor._id, 'User:', req.user._id);
+
     const slot = await Slot.create({
       doctorId: doctor._id,
       date,
@@ -26,8 +28,10 @@ router.post('/', protect, authorize('doctor'), async (req, res) => {
       endTime
     });
 
+    console.log('Slot created:', slot);
     res.status(201).json(slot);
   } catch (error) {
+    console.error('Error creating slot:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -35,14 +39,40 @@ router.post('/', protect, authorize('doctor'), async (req, res) => {
 // Get doctor's slots
 router.get('/doctor/:doctorId', async (req, res) => {
   try {
+    console.log('Fetching slots for doctorId:', req.params.doctorId);
+    
+    // First check if we're getting the doctor's profile ID or user ID
+    let doctorId = req.params.doctorId;
+    
+    // If the doctorId looks like a user ID, find the doctor profile
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      // Try to find by userId instead
+      const doctorByUserId = await Doctor.findOne({ userId: doctorId });
+      if (doctorByUserId) {
+        doctorId = doctorByUserId._id;
+        console.log('Found doctor by userId, using doctorId:', doctorId);
+      }
+    }
+    
+    // First, let's see all slots for this doctor (for debugging)
+    const allSlots = await Slot.find({ doctorId: doctorId });
+    console.log('All slots for doctor:', allSlots.length, allSlots);
+    
+    // Get today's date at midnight for proper comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const slots = await Slot.find({
-      doctorId: req.params.doctorId,
-      date: { $gte: new Date() },
+      doctorId: doctorId,
+      date: { $gte: today }, // Include today's slots and future
       isBooked: false
     }).sort({ date: 1, startTime: 1 });
 
+    console.log('Filtered available slots:', slots.length, slots);
     res.json(slots);
   } catch (error) {
+    console.error('Error fetching slots:', error);
     res.status(500).json({ message: error.message });
   }
 });

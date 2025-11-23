@@ -97,7 +97,13 @@ router.get('/my-consultations', protect, async (req, res) => {
 
     if (req.user.role === 'patient') {
       consultations = await Consultation.find({ patientId: req.user._id })
-        .populate('doctorId')
+        .populate({
+          path: 'doctorId',
+          populate: [
+            { path: 'userId', select: 'name email' },
+            { path: 'specialization', select: 'name' }
+          ]
+        })
         .populate('slotId')
         .sort({ createdAt: -1 });
     } else if (req.user.role === 'doctor') {
@@ -393,7 +399,13 @@ router.get('/:id', protect, async (req, res) => {
   try {
     const consultation = await Consultation.findById(req.params.id)
       .populate('patientId', 'name email')
-      .populate('doctorId')
+      .populate({
+        path: 'doctorId',
+        populate: [
+          { path: 'userId', select: 'name email' },
+          { path: 'specialization', select: 'name' }
+        ]
+      })
       .populate('slotId');
 
     if (!consultation) {

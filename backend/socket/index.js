@@ -11,7 +11,14 @@ module.exports = (io) => {
     try {
       const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
       
+      console.log('🔑 Socket auth attempt:', {
+        hasToken: !!token,
+        tokenStart: token ? token.substring(0, 20) + '...' : 'none',
+        hasJwtSecret: !!process.env.JWT_SECRET
+      });
+      
       if (!token) {
+        console.log('❌ No token provided');
         return next(new Error('Authentication error: No token provided'));
       }
 
@@ -19,14 +26,16 @@ module.exports = (io) => {
       const user = await User.findById(decoded.id).select('-password');
       
       if (!user) {
+        console.log('❌ User not found for ID:', decoded.id);
         return next(new Error('Authentication error: User not found'));
       }
 
+      console.log('✅ Socket authenticated for user:', user.name);
       socket.user = user;
       next();
     } catch (error) {
-      console.error('Socket authentication error:', error);
-      next(new Error('Authentication error'));
+      console.error('❌ Socket authentication error:', error.message);
+      next(new Error('Authentication error: ' + error.message));
     }
   });
 
@@ -240,10 +249,14 @@ module.exports = (io) => {
           .populate('from', 'name')
           .populate('to', 'name');
 
-        // Broadcast to all in the consultation room
-        io.to(socket.roomId).emit('chat-message', populatedMessage);
+        // Broadcast to all in the consultation room (use consultationId as room)
+        const roomId = socket.roomId || consultationId;
+        io.to(roomId).emit('chat-message', populatedMessage);
+        
+        // Also broadcast to the specific consultation room
+        io.to(consultationId).emit('chat-message', populatedMessage);
 
-        console.log(`💬 Chat message from ${socket.user.name} in consultation ${consultationId}`);
+        console.log(`💬 Chat message from ${socket.user.name} in consultation ${consultationId}, room: ${roomId}`);
 
       } catch (error) {
         console.error('Error sending chat message:', error);

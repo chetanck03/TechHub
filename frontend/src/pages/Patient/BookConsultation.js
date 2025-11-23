@@ -21,13 +21,17 @@ const BookConsultation = () => {
 
   const fetchData = async () => {
     try {
+      console.log('Fetching data for doctorId:', doctorId);
       const [doctorRes, slotsRes] = await Promise.all([
         api.get(`/doctors/${doctorId}`),
         api.get(`/slots/doctor/${doctorId}`)
       ]);
+      console.log('Doctor data:', doctorRes.data);
+      console.log('Slots data:', slotsRes.data);
       setDoctor(doctorRes.data);
       setSlots(slotsRes.data);
     } catch (error) {
+      console.error('Error loading data:', error);
       toast.error('Error loading data');
     } finally {
       setLoading(false);

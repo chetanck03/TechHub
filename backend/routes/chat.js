@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Chat = require('../models/Chat');
+const ChatMessage = require('../models/ChatMessage');
 const Consultation = require('../models/Consultation');
 const { protect } = require('../middleware/auth');
 const { upload } = require('../utils/upload');
@@ -11,24 +11,25 @@ router.post('/', protect, upload.array('attachments', 5), async (req, res) => {
     const { consultationId, receiverId, message } = req.body;
 
     const consultation = await Consultation.findById(consultationId);
-    if (!consultation || consultation.status !== 'completed') {
-      return res.status(400).json({ message: 'Chat only available after consultation' });
+    if (!consultation.allowedChat) {
+      return res.status(400).json({ message: 'Chat only available after completing the first video consultation' });
     }
 
-    const attachments = req.files?.map(file => file.path) || [];
-
-    const chat = await Chat.create({
-      consultationId,
-      senderId: req.user._id,
-      receiverId,
-      message,
-      attachments
+    const chatMessage = await ChatMessage.create({
+      consultation: consultationId,
+      from: req.user._id,
+      to: receiverId,
+      text: message
     });
 
-    const io = req.app.get('io');
-    io.to(consultationId).emit('receive-message', chat);
+    const populatedMessage = await ChatMessage.findById(chatMessage._id)
+      .populate('from', 'name')
+      .populate('to', 'name');
 
-    res.status(201).json(chat);
+    const io = req.app.get('io');
+    io.to(consultationId).emit('chat-message', populatedMessage);
+
+    res.status(201).json(populatedMessage);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -37,8 +38,9 @@ router.post('/', protect, upload.array('attachments', 5), async (req, res) => {
 // Get chat history
 router.get('/:consultationId', protect, async (req, res) => {
   try {
-    const messages = await Chat.find({ consultationId: req.params.consultationId })
-      .populate('senderId', 'name profileImage')
+    const messages = await ChatMessage.find({ consultation: req.params.consultationId })
+      .populate('from', 'name')
+      .populate('to', 'name')
       .sort({ createdAt: 1 });
 
     res.json(messages);
@@ -50,7 +52,7 @@ router.get('/:consultationId', protect, async (req, res) => {
 // Mark as read
 router.put('/:id/read', protect, async (req, res) => {
   try {
-    await Chat.findByIdAndUpdate(req.params.id, { isRead: true });
+    await ChatMessage.findByIdAndUpdate(req.params.id, { read: true });
     res.json({ message: 'Marked as read' });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -17,7 +17,7 @@ const ICE_SERVERS = {
   ]
 };
 
-const VideoCallNew = () => {
+const VideoCall = () => {
   const { consultationId } = useParams();
   const navigate = useNavigate();
   
@@ -373,128 +373,163 @@ const VideoCallNew = () => {
 
   if (loading) {
     return (
-      <div className="video-call-container">
-        <div className="loading">Loading consultation...</div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl font-medium">Loading consultation...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="video-call-container">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Video Grid */}
-      <div className="video-grid">
+      <div className="flex-1 relative">
         {/* Remote Video (Large) */}
-        <div className="remote-video-container">
+        <div className="absolute inset-0 bg-gray-800">
           <video
             ref={remoteVideoRef}
             autoPlay
             playsInline
-            className="remote-video"
+            className="w-full h-full object-cover"
           />
           {!remoteConnected && (
-            <div className="waiting-overlay">
-              <div className="waiting-message">
-                <div className="spinner"></div>
-                <p>Waiting for other participant...</p>
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+              <div className="text-center text-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-lg font-medium">Waiting for other participant...</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Local Video (Small, Picture-in-Picture) */}
-        <div className="local-video-container">
+        <div className="absolute top-4 right-4 w-48 h-36 bg-gray-700 rounded-lg overflow-hidden shadow-lg border-2 border-gray-600">
           <video
             ref={localVideoRef}
             autoPlay
             playsInline
             muted
-            className="local-video"
+            className="w-full h-full object-cover"
           />
           {!videoEnabled && (
-            <div className="video-off-overlay">
-              <FiVideoOff size={32} />
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-700">
+              <FiVideoOff size={32} className="text-gray-300" />
             </div>
           )}
+          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+            You
+          </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="video-controls">
-        <button
-          onClick={toggleVideo}
-          className={`control-btn ${!videoEnabled ? 'disabled' : ''}`}
-          title={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
-        >
-          {videoEnabled ? <FiVideo size={24} /> : <FiVideoOff size={24} />}
-        </button>
-
-        <button
-          onClick={toggleAudio}
-          className={`control-btn ${!audioEnabled ? 'disabled' : ''}`}
-          title={audioEnabled ? 'Mute' : 'Unmute'}
-        >
-          {audioEnabled ? <FiMic size={24} /> : <FiMicOff size={24} />}
-        </button>
-
-        <button
-          onClick={() => setShowNotes(!showNotes)}
-          className={`control-btn ${showNotes ? 'active' : ''}`}
-          title="Notes"
-        >
-          <FiFileText size={24} />
-        </button>
-
-        {chatAllowed && (
+      <div className="bg-gray-800 p-4">
+        <div className="flex items-center justify-center space-x-4">
           <button
-            onClick={() => setShowChat(!showChat)}
-            className={`control-btn ${showChat ? 'active' : ''}`}
-            title="Chat"
+            onClick={toggleVideo}
+            className={`p-4 rounded-full transition-all duration-200 ${
+              videoEnabled 
+                ? 'bg-gray-600 hover:bg-gray-500 text-white' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            }`}
+            title={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
           >
-            <FiMessageSquare size={24} />
+            {videoEnabled ? <FiVideo size={24} /> : <FiVideoOff size={24} />}
           </button>
-        )}
 
-        <button
-          onClick={endCall}
-          className="control-btn end-call"
-          title="End call"
-        >
-          <FiPhone size={24} />
-        </button>
+          <button
+            onClick={toggleAudio}
+            className={`p-4 rounded-full transition-all duration-200 ${
+              audioEnabled 
+                ? 'bg-gray-600 hover:bg-gray-500 text-white' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            }`}
+            title={audioEnabled ? 'Mute' : 'Unmute'}
+          >
+            {audioEnabled ? <FiMic size={24} /> : <FiMicOff size={24} />}
+          </button>
+
+          <button
+            onClick={() => setShowNotes(!showNotes)}
+            className={`p-4 rounded-full transition-all duration-200 ${
+              showNotes 
+                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                : 'bg-gray-600 hover:bg-gray-500 text-white'
+            }`}
+            title="Notes"
+          >
+            <FiFileText size={24} />
+          </button>
+
+          {chatAllowed && (
+            <button
+              onClick={() => setShowChat(!showChat)}
+              className={`p-4 rounded-full transition-all duration-200 ${
+                showChat 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                  : 'bg-gray-600 hover:bg-gray-500 text-white'
+              }`}
+              title="Chat"
+            >
+              <FiMessageSquare size={24} />
+            </button>
+          )}
+
+          <button
+            onClick={endCall}
+            className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200"
+            title="End call"
+          >
+            <FiPhone size={24} />
+          </button>
+        </div>
       </div>
 
       {/* Notes Panel */}
       {showNotes && (
-        <div className="side-panel notes-panel">
-          <div className="panel-header">
-            <h3><FiFileText /> Notes</h3>
-            <button onClick={() => setShowNotes(false)} className="close-btn">
-              <FiX />
+        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <FiFileText /> Notes
+            </h3>
+            <button 
+              onClick={() => setShowNotes(false)} 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiX size={20} />
             </button>
           </div>
-          <div className="panel-content">
-            <div className="notes-list">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {notes.map((note, index) => (
-                <div key={index} className="note-item">
-                  <div className="note-header">
-                    <span className="note-author">{note.authorId?.name}</span>
-                    <span className="note-time">
+                <div key={index} className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-900">
+                      {note.authorId?.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
                       {new Date(note.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <div className="note-text">{note.text}</div>
+                  <div className="text-sm text-gray-700">{note.text}</div>
                 </div>
               ))}
             </div>
-            <div className="note-input">
+            <div className="p-4 border-t border-gray-200">
               <textarea
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="Add a note..."
                 rows="3"
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <button onClick={addNote} className="btn-primary">
-                <FiSend /> Add Note
+              <button 
+                onClick={addNote} 
+                className="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <FiSend size={16} /> Add Note
               </button>
             </div>
           </div>
@@ -503,43 +538,64 @@ const VideoCallNew = () => {
 
       {/* Chat Panel */}
       {showChat && chatAllowed && (
-        <div className="side-panel chat-panel">
-          <div className="panel-header">
-            <h3><FiMessageSquare /> Chat</h3>
-            <button onClick={() => setShowChat(false)} className="close-btn">
-              <FiX />
+        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <FiMessageSquare /> Chat
+            </h3>
+            <button 
+              onClick={() => setShowChat(false)} 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiX size={20} />
             </button>
           </div>
-          <div className="panel-content">
-            <div className="messages-list">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`message-item ${
-                    msg.from._id === currentUserId ? 'sent' : 'received'
+                  className={`flex ${
+                    msg.from._id === currentUserId ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <div className="message-header">
-                    <span className="message-author">{msg.from.name}</span>
-                    <span className="message-time">
-                      {new Date(msg.createdAt).toLocaleTimeString()}
-                    </span>
+                  <div
+                    className={`max-w-xs rounded-lg p-3 ${
+                      msg.from._id === currentUserId
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium opacity-75">
+                        {msg.from.name}
+                      </span>
+                      <span className="text-xs opacity-75">
+                        {new Date(msg.createdAt).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div className="text-sm">{msg.text}</div>
                   </div>
-                  <div className="message-text">{msg.text}</div>
                 </div>
               ))}
             </div>
-            <div className="message-input">
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type a message..."
-              />
-              <button onClick={sendMessage} className="btn-primary">
-                <FiSend />
-              </button>
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="Type a message..."
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button 
+                  onClick={sendMessage} 
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <FiSend size={16} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -548,4 +604,4 @@ const VideoCallNew = () => {
   );
 };
 
-export default VideoCallNew;
+export default VideoCall;

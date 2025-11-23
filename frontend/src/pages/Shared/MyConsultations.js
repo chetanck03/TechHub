@@ -120,9 +120,27 @@ const MyConsultations = () => {
                         <p className="text-secondary-900 capitalize">{consultation.type}</p>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-sm font-medium text-secondary-500">Date & Time</span>
+                        <span className="text-sm font-medium text-secondary-500">
+                          {(() => {
+                            if (consultation.status === 'completed') return 'Completed At';
+                            if (consultation.status === 'ongoing') return 'Started At';
+                            if (consultation.status === 'scheduled') return 'Scheduled For';
+                            return 'Created At';
+                          })()}
+                        </span>
                         <p className="text-secondary-900 text-sm">
-                          {new Date(consultation.scheduledAt).toLocaleString()}
+                          {(() => {
+                            // Show different dates based on consultation status
+                            if (consultation.status === 'completed' && consultation.completedAt) {
+                              return new Date(consultation.completedAt).toLocaleString();
+                            } else if (consultation.status === 'ongoing' && consultation.startedAt) {
+                              return new Date(consultation.startedAt).toLocaleString();
+                            } else if (consultation.scheduledAt) {
+                              return new Date(consultation.scheduledAt).toLocaleString();
+                            } else {
+                              return new Date(consultation.createdAt).toLocaleString();
+                            }
+                          })()}
                         </p>
                       </div>
                       <div className="space-y-1">
