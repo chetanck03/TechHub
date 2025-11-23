@@ -5,7 +5,7 @@ import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import { FiMic, FiMicOff, FiVideo, FiVideoOff, FiPhoneOff } from 'react-icons/fi';
-import './VideoCall.css';
+
 
 const VideoCall = () => {
   const { consultationId } = useParams();

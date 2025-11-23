@@ -4,7 +4,7 @@ import MyDocuments from '../../components/MyDocuments';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { FiEdit3, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiAward, FiBook } from 'react-icons/fi';
-import './Doctor.css';
+
 
 const DoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);

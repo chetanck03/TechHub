@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { FiSearch, FiEye, FiLock, FiUnlock } from 'react-icons/fi';
-import './Admin.css';
+
 
 const DoctorManagement = () => {
   const [doctors, setDoctors] = useState([]);

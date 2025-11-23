@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiEye, FiDownload, FiFileText, FiImage, FiUser, FiX } from 'react-icons/fi';
 import api from '../utils/api';
-import './DocumentViewer.css';
+
 
 const DocumentViewer = ({ doctorId, documents, doctorName }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);

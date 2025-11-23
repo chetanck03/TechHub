@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiEye, FiUpload, FiCheck, FiX, FiFileText, FiUser, FiSend, FiTrash2 } from 'react-icons/fi';
 import api from '../utils/api';
-import './MyDocuments.css';
+
 
 const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
   const [documents, setDocuments] = useState({});

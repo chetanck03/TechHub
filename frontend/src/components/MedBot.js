@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiMessageCircle, FiX, FiSend, FiRefreshCw, FiClock, FiTrash2 } from 'react-icons/fi';
+import { MessageCircle, X, Send, RefreshCw, Clock, Trash2, Bot } from 'lucide-react';
 import api from '../utils/api';
-import './MedBot.css';
 
 const MedBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -232,92 +231,96 @@ const MedBot = () => {
     <>
       {/* Floating Button */}
       <button
-        className={`medbot-float-button ${isOpen ? 'hidden' : ''}`}
+        className={`fixed bottom-6 right-6 w-14 h-14 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-large hover:shadow-xl transition-all duration-300 hover:-translate-y-1 z-40 ${isOpen ? 'hidden' : 'flex'} items-center justify-center`}
         onClick={() => setIsOpen(true)}
         title="Chat with MedBot"
       >
-        <FiMessageCircle />
-        <span className="medbot-badge">AI</span>
+        <Bot className="w-6 h-6" />
+        <span className="absolute -top-1 -right-1 bg-success-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+          AI
+        </span>
       </button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="medbot-container">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-large border border-secondary-200 flex flex-col z-40 animate-slide-up">
           {/* Header */}
-          <div className="medbot-header">
-            <div className="medbot-header-info">
-              <div className="medbot-avatar">
-                <FiMessageCircle />
+          <div className="flex items-center justify-between p-4 border-b border-secondary-200 bg-primary-50 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3>MedBot</h3>
-                <p>AI Health Assistant</p>
+                <h3 className="font-semibold text-secondary-900">MedBot</h3>
+                <p className="text-xs text-secondary-600">AI Health Assistant</p>
               </div>
             </div>
-            <div className="medbot-header-actions">
+            <div className="flex items-center gap-1">
               {currentView === 'chat' ? (
                 <>
                   <button
-                    className="medbot-icon-btn"
+                    className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
                     onClick={handleViewHistory}
                     title="View chat history"
                   >
-                    <FiClock />
+                    <Clock className="w-4 h-4 text-secondary-600" />
                   </button>
                   <button
-                    className="medbot-icon-btn"
+                    className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
                     onClick={handleNewChat}
                     title="New chat"
                   >
-                    <FiRefreshCw />
+                    <RefreshCw className="w-4 h-4 text-secondary-600" />
                   </button>
                 </>
               ) : (
                 <button
-                  className="medbot-icon-btn"
+                  className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
                   onClick={() => setCurrentView('chat')}
                   title="Back to chat"
                 >
-                  <FiMessageCircle />
+                  <MessageCircle className="w-4 h-4 text-secondary-600" />
                 </button>
               )}
               <button
-                className="medbot-icon-btn"
+                className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
                 onClick={() => setIsOpen(false)}
                 title="Close"
               >
-                <FiX />
+                <X className="w-4 h-4 text-secondary-600" />
               </button>
             </div>
           </div>
 
           {/* Messages or History */}
           {currentView === 'chat' ? (
-            <div className="medbot-messages">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`medbot-message ${msg.role === 'user' ? 'user' : 'bot'}`}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className="medbot-message-content">
-                    <FormattedMessage content={msg.content} />
-                  </div>
-                  <div className="medbot-message-time">
-                    {new Date(msg.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                  <div className={`max-w-[80%] ${msg.role === 'user' ? 'bg-primary-500 text-white' : 'bg-secondary-100 text-secondary-900'} rounded-2xl px-4 py-3`}>
+                    <div className="text-sm">
+                      <FormattedMessage content={msg.content} />
+                    </div>
+                    <div className={`text-xs mt-2 ${msg.role === 'user' ? 'text-primary-100' : 'text-secondary-500'}`}>
+                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
                   </div>
                 </div>
               ))}
 
               {isLoading && (
-                <div className="medbot-message bot">
-                  <div className="medbot-message-content">
-                    <div className="medbot-typing">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                <div className="flex justify-start">
+                  <div className="bg-secondary-100 rounded-2xl px-4 py-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                     </div>
                   </div>
                 </div>
@@ -326,59 +329,55 @@ const MedBot = () => {
               <div ref={messagesEndRef} />
             </div>
           ) : (
-            <div className="medbot-history">
-              <div className="medbot-history-header">
-                <h4>Chat History</h4>
-                <p>Your previous conversations with MedBot</p>
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="mb-6">
+                <h4 className="font-semibold text-secondary-900 mb-1">Chat History</h4>
+                <p className="text-sm text-secondary-600">Your previous conversations with MedBot</p>
               </div>
               
               {isLoadingHistory ? (
-                <div className="medbot-history-loading">
-                  <div className="medbot-typing">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="flex space-x-1 mb-4">
+                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                   </div>
-                  <p>Loading chat history...</p>
+                  <p className="text-secondary-600">Loading chat history...</p>
                 </div>
               ) : chatHistory.length === 0 ? (
-                <div className="medbot-history-empty">
-                  <FiMessageCircle size={48} />
-                  <p>No chat history yet</p>
-                  <small>Start a conversation to see your history here</small>
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <MessageCircle className="w-12 h-12 text-secondary-300 mb-4" />
+                  <p className="text-secondary-600 mb-2">No chat history yet</p>
+                  <small className="text-secondary-500">Start a conversation to see your history here</small>
                 </div>
               ) : (
-                <div className="medbot-history-list">
+                <div className="space-y-3">
                   {chatHistory.map((session) => (
-                    <div key={session.sessionId} className="medbot-history-item">
+                    <div key={session.sessionId} className="flex items-center gap-3 p-3 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors">
                       <div 
-                        className="medbot-history-content"
+                        className="flex-1 cursor-pointer"
                         onClick={() => loadChatSession(session.sessionId)}
                       >
-                        <div className="medbot-history-preview">
+                        <div className="text-sm text-secondary-900 mb-1">
                           {session.messages.length > 0 && session.messages[1] ? 
                             session.messages[1].content.substring(0, 60) + '...' : 
                             'New conversation'
                           }
                         </div>
-                        <div className="medbot-history-meta">
-                          <span className="medbot-history-date">
-                            {new Date(session.lastActivity).toLocaleDateString()}
-                          </span>
-                          <span className="medbot-history-count">
-                            {Math.floor(session.messages.length / 2)} messages
-                          </span>
+                        <div className="flex items-center gap-3 text-xs text-secondary-500">
+                          <span>{new Date(session.lastActivity).toLocaleDateString()}</span>
+                          <span>{Math.floor(session.messages.length / 2)} messages</span>
                         </div>
                       </div>
                       <button
-                        className="medbot-history-delete"
+                        className="p-2 hover:bg-danger-100 rounded-lg transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteChatSession(session.sessionId);
                         }}
                         title="Delete conversation"
                       >
-                        <FiTrash2 />
+                        <Trash2 className="w-4 h-4 text-danger-500" />
                       </button>
                     </div>
                   ))}
@@ -389,13 +388,13 @@ const MedBot = () => {
 
           {/* Suggestions - only show in chat view */}
           {currentView === 'chat' && messages.length <= 2 && suggestions.length > 0 && (
-            <div className="medbot-suggestions">
-              <p>Quick questions:</p>
-              <div className="medbot-suggestions-grid">
+            <div className="px-4 pb-4">
+              <p className="text-sm text-secondary-600 mb-3">Quick questions:</p>
+              <div className="grid grid-cols-2 gap-2">
                 {suggestions.slice(0, 4).map((suggestion, index) => (
                   <button
                     key={index}
-                    className="medbot-suggestion-btn"
+                    className="text-xs p-2 bg-secondary-50 hover:bg-primary-50 text-secondary-700 hover:text-primary-700 rounded-lg transition-colors text-left"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     {suggestion}
@@ -407,41 +406,43 @@ const MedBot = () => {
 
           {/* Input - only show in chat view */}
           {currentView === 'chat' && (
-            <div className="medbot-input-container">
-              <div className="medbot-input-wrapper">
-                <textarea
-                  className="medbot-input"
-                  placeholder="Ask me anything about health..."
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows="1"
-                  disabled={isLoading}
-                  maxLength={1000}
-                />
-                {inputMessage.length > 0 && (
-                  <span className={`medbot-char-count ${inputMessage.length > 900 ? 'warning' : ''}`}>
-                    {inputMessage.length}/1000
-                  </span>
-                )}
+            <div className="p-4 border-t border-secondary-200">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 relative">
+                  <textarea
+                    className="w-full p-3 pr-12 border border-secondary-200 rounded-xl resize-none focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 text-sm"
+                    placeholder="Ask me anything about health..."
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows="1"
+                    disabled={isLoading}
+                    maxLength={1000}
+                  />
+                  {inputMessage.length > 0 && (
+                    <span className={`absolute bottom-1 right-1 text-xs ${inputMessage.length > 900 ? 'text-warning-500' : 'text-secondary-400'}`}>
+                      {inputMessage.length}/1000
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="p-3 bg-primary-500 hover:bg-primary-600 disabled:bg-secondary-300 text-white rounded-xl transition-colors"
+                  onClick={() => handleSendMessage()}
+                  disabled={!inputMessage.trim() || isLoading}
+                  title="Send message"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                className="medbot-send-btn"
-                onClick={() => handleSendMessage()}
-                disabled={!inputMessage.trim() || isLoading}
-                title="Send message"
-              >
-                <FiSend />
-              </button>
             </div>
           )}
 
           {/* Disclaimer */}
-          <div className="medbot-disclaimer">
-            <small>
+          <div className="px-4 pb-4">
+            <div className="text-xs text-secondary-500 bg-warning-50 border border-warning-200 rounded-lg p-3">
               ⚠️ MedBot is an AI assistant. For medical emergencies, call emergency services.
               Always consult a doctor for personalized advice.
-            </small>
+            </div>
           </div>
         </div>
       )}

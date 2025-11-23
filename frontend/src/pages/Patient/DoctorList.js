@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { FiStar } from 'react-icons/fi';
-import './Patient.css';
+
 
 const DoctorList = () => {
   const [doctors, setDoctors] = useState([]);

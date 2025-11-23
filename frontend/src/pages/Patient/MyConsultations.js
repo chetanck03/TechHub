@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { FiVideo, FiMessageCircle } from 'react-icons/fi';
-import './Patient.css';
+
 
 const MyConsultations = () => {
   const [consultations, setConsultations] = useState([]);

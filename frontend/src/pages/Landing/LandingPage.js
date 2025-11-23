@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Users, Calendar, Shield, Search, MapPin, Zap, Heart } from 'lucide-react';
-import './LandingPage.css';
+import { Activity, Users, Calendar, Shield, Search, MapPin, Zap, Heart, Stethoscope, UserCheck, Clock, Lock } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -52,72 +51,82 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="landing-page">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="landing-header">
-        <div className="header-container">
-          <div className="header-logo" onClick={() => window.location.href = '/'}>
-            <Heart className="logo-icon" />
-            <h1>Telehealth</h1>
-          </div>
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-secondary-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => window.location.href = '/'}>
+              <Stethoscope className="w-8 h-8 text-primary-500" />
+              <h1 className="text-xl font-bold text-secondary-900">Telehealth</h1>
+            </div>
 
-          {/* Medical Store Search */}
-          <div className="header-search">
-            <form onSubmit={handleSearch} className="search-form">
-              <MapPin className="search-icon-left" />
-              <input
-                type="text"
-                placeholder="Search by city or store name (e.g., Mumbai, India or pharmacy)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" className="search-button" disabled={searching}>
-                <Search size={18} />
-                {searching ? 'Searching...' : 'Search'}
+            {/* Medical Store Search */}
+            <div className="flex-1 max-w-2xl">
+              <form onSubmit={handleSearch} className="relative">
+                <div className="flex items-center bg-secondary-50 border-2 border-secondary-200 rounded-xl px-4 py-2 transition-all duration-300 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-soft">
+                  <MapPin className="w-5 h-5 text-secondary-400 mr-3 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search by city or store name (e.g., Mumbai, India or pharmacy)..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-none outline-none text-secondary-900 placeholder-secondary-400"
+                  />
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary btn-sm ml-2 flex-shrink-0" 
+                    disabled={searching}
+                  >
+                    <Search size={16} />
+                    {searching ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <button onClick={() => navigate('/login')} className="btn btn-secondary btn-sm">
+                Login
               </button>
-            </form>
-          </div>
-
-          {/* Auth Buttons */}
-          <div className="header-auth">
-            <button onClick={() => navigate('/login')} className="btn-login">
-              Login
-            </button>
-            <button onClick={() => navigate('/register')} className="btn-signup">
-              Sign Up
-            </button>
+              <button onClick={() => navigate('/register')} className="btn btn-primary btn-sm">
+                Sign Up
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
         {/* Search Results */}
       {(searchResults.length > 0 || searchError) && (
-        <section className="search-results-section">
-          <div className="container">
+        <section className="py-16 bg-secondary-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {searchError && (
-              <div className="search-error">
+              <div className="bg-danger-50 border border-danger-200 text-danger-700 px-6 py-4 rounded-xl mb-8 text-center font-medium">
                 <p>{searchError}</p>
               </div>
             )}
             
             {searchResults.length > 0 && (
               <>
-                <h2 className="section-title">Medical Stores Near You</h2>
-                <div className="stores-grid">
+                <h2 className="text-3xl font-bold text-secondary-900 text-center mb-12">Medical Stores Near You</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {searchResults.map((store, index) => (
-                    <div key={index} className="store-card">
-                      <MapPin className="store-icon" />
-                      <h3>{store.name}</h3>
-                      <div className="store-location">
-                        <p className="store-city">{store.city}, {store.state}</p>
-                        <p className="store-country">{store.country}</p>
+                    <div key={index} className="card card-hover">
+                      <div className="card-body">
+                        <MapPin className="w-6 h-6 text-primary-500 mb-4" />
+                        <h3 className="text-lg font-semibold text-secondary-900 mb-3">{store.name}</h3>
+                        <div className="mb-3 pb-3 border-b border-secondary-200">
+                          <p className="text-primary-600 font-semibold">{store.city}, {store.state}</p>
+                          <p className="text-secondary-500 text-sm">{store.country}</p>
+                        </div>
+                        <p className="text-secondary-600 text-sm mb-2 leading-relaxed">{store.street}</p>
+                        {store.phone !== 'N/A' && (
+                          <p className="text-success-600 text-sm font-medium mb-2">📞 {store.phone}</p>
+                        )}
+                        <p className="text-primary-600 font-semibold text-sm">📍 {store.distance} km away</p>
                       </div>
-                      <p className="store-address">{store.street}</p>
-                      {store.phone !== 'N/A' && (
-                        <p className="store-phone">📞 {store.phone}</p>
-                      )}
-                      <p className="store-distance">📍 {store.distance} km away</p>
                     </div>
                   ))}
                 </div>
@@ -128,48 +137,51 @@ const LandingPage = () => {
       )}
 
       {/* Hero Section with Modern Design */}
-      <section className="hero-section-modern">
-        <div className="hero-background-circles">
-          <div className="circle-outer">
-            <div className="circle-middle">
-              <div className="circle-inner"></div>
-            </div>
+      <section className="relative overflow-hidden py-20 bg-gradient-to-b from-secondary-50 to-white">
+        {/* Background Decoration */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="w-[800px] h-[800px] border border-secondary-200 rounded-full opacity-30"></div>
+            <div className="absolute inset-16 border border-secondary-200 rounded-full opacity-20"></div>
+            <div className="absolute inset-32 border border-secondary-200 rounded-full opacity-10"></div>
           </div>
         </div>
 
-        <div className="hero-container-modern">
-          <div className="hero-content-modern">
-            <span className="hero-icon-badge">
-              <Activity className="badge-icon" />
-            </span>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white border-2 border-secondary-200 rounded-full mb-8">
+              <Activity className="w-8 h-8 text-primary-500" />
+            </div>
             
-            <h1 className="hero-title-modern">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-900 mb-6 leading-tight">
               Your Health, Our Priority
             </h1>
             
-            <p className="hero-description-modern">
+            <p className="text-lg md:text-xl text-secondary-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Connect with certified doctors online. Book consultations, get prescriptions, 
               and access quality healthcare from the comfort of your home.
             </p>
             
-            <div className="hero-buttons-modern">
-              <button onClick={() => navigate('/register')} className="btn-hero-primary">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+              <button onClick={() => navigate('/register')} className="btn btn-primary btn-lg">
                 Get Started
-                <Zap className="btn-icon" />
+                <Zap className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="hero-trust-text">
+            <p className="text-sm text-secondary-400">
               Trusted by 25,000+ Patients Nationwide
-            </div>
+            </p>
           </div>
 
-          <div className="hero-image-modern">
-            <img 
-              src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1200&h=800&fit=crop&q=80" 
-              alt="Professional doctors team in white coats providing healthcare services" 
-              className="hero-img"
-            />
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-2xl overflow-hidden shadow-large">
+              <img 
+                src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1200&h=800&fit=crop&q=80" 
+                alt="Professional doctors team in white coats providing healthcare services" 
+                className="w-full h-auto max-h-96 object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -177,102 +189,118 @@ const LandingPage = () => {
     
 
       {/* Features Section */}
-      <section className="features-section">
-        <div className="container">
-          <h2 className="section-title">Why Choose Telehealth?</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon-wrapper">
-                <Users className="feature-icon" />
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 text-center mb-16">Why Choose Telehealth?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-50">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-xl mb-6">
+                <UserCheck className="w-8 h-8 text-primary-600" />
               </div>
-              <h3>Expert Doctors</h3>
-              <p>Connect with certified and experienced healthcare professionals</p>
+              <h3 className="text-xl font-semibold text-secondary-900 mb-3">Expert Doctors</h3>
+              <p className="text-secondary-600 leading-relaxed">Connect with certified and experienced healthcare professionals</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon-wrapper">
-                <Calendar className="feature-icon" />
+            <div className="text-center p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-50">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-xl mb-6">
+                <Clock className="w-8 h-8 text-primary-600" />
               </div>
-              <h3>Easy Booking</h3>
-              <p>Book appointments instantly with our simple slot system</p>
+              <h3 className="text-xl font-semibold text-secondary-900 mb-3">Easy Booking</h3>
+              <p className="text-secondary-600 leading-relaxed">Book appointments instantly with our simple slot system</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon-wrapper">
-                <Activity className="feature-icon" />
+            <div className="text-center p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-50">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-xl mb-6">
+                <Activity className="w-8 h-8 text-primary-600" />
               </div>
-              <h3>Video Consultations</h3>
-              <p>Face-to-face consultations from anywhere, anytime</p>
+              <h3 className="text-xl font-semibold text-secondary-900 mb-3">Video Consultations</h3>
+              <p className="text-secondary-600 leading-relaxed">Face-to-face consultations from anywhere, anytime</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon-wrapper">
-                <Shield className="feature-icon" />
+            <div className="text-center p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-50">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-xl mb-6">
+                <Lock className="w-8 h-8 text-primary-600" />
               </div>
-              <h3>Secure & Private</h3>
-              <p>Your health data is encrypted and completely confidential</p>
+              <h3 className="text-xl font-semibold text-secondary-900 mb-3">Secure & Private</h3>
+              <p className="text-secondary-600 leading-relaxed">Your health data is encrypted and completely confidential</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="how-it-works-section">
-        <div className="container">
-          <h2 className="section-title">How It Works</h2>
-          <div className="steps-grid">
-            <div className="step-card">
-              <div className="step-number">1</div>
-              <h3>Sign Up</h3>
-              <p>Create your account in minutes</p>
+      <section className="py-20 bg-secondary-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 text-center mb-16">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="card card-hover text-center">
+              <div className="card-body">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500 text-white rounded-full text-xl font-bold mb-6">
+                  1
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 mb-3">Sign Up</h3>
+                <p className="text-secondary-600 leading-relaxed">Create your account in minutes</p>
+              </div>
             </div>
-            <div className="step-card">
-              <div className="step-number">2</div>
-              <h3>Find a Doctor</h3>
-              <p>Browse and select from our network of specialists</p>
+            <div className="card card-hover text-center">
+              <div className="card-body">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500 text-white rounded-full text-xl font-bold mb-6">
+                  2
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 mb-3">Find a Doctor</h3>
+                <p className="text-secondary-600 leading-relaxed">Browse and select from our network of specialists</p>
+              </div>
             </div>
-            <div className="step-card">
-              <div className="step-number">3</div>
-              <h3>Book Appointment</h3>
-              <p>Choose a convenient time slot</p>
+            <div className="card card-hover text-center">
+              <div className="card-body">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500 text-white rounded-full text-xl font-bold mb-6">
+                  3
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 mb-3">Book Appointment</h3>
+                <p className="text-secondary-600 leading-relaxed">Choose a convenient time slot</p>
+              </div>
             </div>
-            <div className="step-card">
-              <div className="step-number">4</div>
-              <h3>Get Consultation</h3>
-              <p>Connect via video call and receive care</p>
+            <div className="card card-hover text-center">
+              <div className="card-body">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500 text-white rounded-full text-xl font-bold mb-6">
+                  4
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 mb-3">Get Consultation</h3>
+                <p className="text-secondary-600 leading-relaxed">Connect via video call and receive care</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Trust & Technology Section */}
-      <section className="trust-section">
-        <div className="container">
-          <div className="trust-content">
-            <div className="trust-text">
-              <h2 className="section-title">Trusted Healthcare Technology</h2>
-              <p className="trust-description">
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-6">Trusted Healthcare Technology</h2>
+              <p className="text-lg text-secondary-600 mb-10 leading-relaxed">
                 Our platform uses cutting-edge technology to ensure secure, reliable, and 
                 high-quality healthcare delivery. With end-to-end encryption and HIPAA-compliant 
                 infrastructure, your health information is always protected.
               </p>
-              <div className="trust-stats">
-                <div className="stat-item">
-                  <h3>25,000+</h3>
-                  <p>Happy Patients</p>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-secondary-50 rounded-xl border border-secondary-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-medium">
+                  <h3 className="text-2xl font-bold text-primary-600 mb-2">25,000+</h3>
+                  <p className="text-secondary-600 text-sm font-medium">Happy Patients</p>
                 </div>
-                <div className="stat-item">
-                  <h3>500+</h3>
-                  <p>Certified Doctors</p>
+                <div className="text-center p-6 bg-secondary-50 rounded-xl border border-secondary-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-medium">
+                  <h3 className="text-2xl font-bold text-primary-600 mb-2">500+</h3>
+                  <p className="text-secondary-600 text-sm font-medium">Certified Doctors</p>
                 </div>
-                <div className="stat-item">
-                  <h3>99.9%</h3>
-                  <p>Uptime Guarantee</p>
+                <div className="text-center p-6 bg-secondary-50 rounded-xl border border-secondary-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-medium">
+                  <h3 className="text-2xl font-bold text-primary-600 mb-2">99.9%</h3>
+                  <p className="text-secondary-600 text-sm font-medium">Uptime Guarantee</p>
                 </div>
               </div>
             </div>
-            <div className="trust-image">
+            <div className="rounded-2xl overflow-hidden shadow-large">
               <img 
                 src="https://tse3.mm.bing.net/th/id/OIP.y6MfZGviJZLZlKOYkA_FjAHaE7?rs=1&pid=ImgDetMain&o=7&rm=3" 
                 alt="Confident doctor with stethoscope ready to provide medical consultation" 
-                className="trust-img"
+                className="w-full h-auto max-h-96 object-cover transition-transform duration-300 hover:scale-105"
               />
             </div>
           </div>
@@ -280,52 +308,54 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <h2>Ready to Get Started?</h2>
-          <p>Join thousands of patients who trust Telehealth for their healthcare needs</p>
-          <button onClick={() => navigate('/register')} className="btn-cta">
+      <section className="py-20 bg-gradient-to-r from-primary-500 to-primary-600 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
+          <p className="text-xl text-primary-100 mb-8">Join thousands of patients who trust Telehealth for their healthcare needs</p>
+          <button onClick={() => navigate('/register')} className="btn btn-lg bg-white text-primary-600 border-white hover:bg-primary-50 hover:border-primary-50">
             Create Free Account
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="landing-footer">
-        <div className="footer-container">
-          <div className="footer-section">
-            <div className="footer-logo">
-              <Heart className="footer-logo-icon" />
-              <h3>Telehealth</h3>
+      <footer className="bg-secondary-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Stethoscope className="w-7 h-7 text-primary-400" />
+                <h3 className="text-xl font-bold">Telehealth</h3>
+              </div>
+              <p className="text-secondary-300 leading-relaxed">Quality healthcare, accessible to everyone</p>
             </div>
-            <p>Quality healthcare, accessible to everyone</p>
+            <div>
+              <h4 className="text-lg font-semibold mb-4 text-white">For Patients</h4>
+              <ul className="space-y-3">
+                <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="text-secondary-300 hover:text-primary-400 transition-colors">Find Doctors</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="text-secondary-300 hover:text-primary-400 transition-colors">Sign Up</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="text-secondary-300 hover:text-primary-400 transition-colors">Login</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4 text-white">For Doctors</h4>
+              <ul className="space-y-3">
+                <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/doctor/register'); }} className="text-secondary-300 hover:text-primary-400 transition-colors">Register as Doctor</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="text-secondary-300 hover:text-primary-400 transition-colors">Doctor Login</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4 text-white">Support</h4>
+              <ul className="space-y-3">
+                <li><a href="#" onClick={(e) => e.preventDefault()} className="text-secondary-300 hover:text-primary-400 transition-colors">Help Center</a></li>
+                <li><a href="#" onClick={(e) => e.preventDefault()} className="text-secondary-300 hover:text-primary-400 transition-colors">Contact Us</a></li>
+                <li><a href="#" onClick={(e) => e.preventDefault()} className="text-secondary-300 hover:text-primary-400 transition-colors">Privacy Policy</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="footer-section">
-            <h4>For Patients</h4>
-            <ul>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>Find Doctors</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>Sign Up</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Login</a></li>
-            </ul>
+          <div className="pt-8 border-t border-secondary-700 text-center">
+            <p className="text-secondary-300">© 2025 Telehealth Platform. All rights reserved.</p>
           </div>
-          <div className="footer-section">
-            <h4>For Doctors</h4>
-            <ul>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/doctor/register'); }}>Register as Doctor</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Doctor Login</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Support</h4>
-            <ul>
-              <li><a href="#" onClick={(e) => e.preventDefault()}>Help Center</a></li>
-              <li><a href="#" onClick={(e) => e.preventDefault()}>Contact Us</a></li>
-              <li><a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2025 Telehealth Platform. All rights reserved.</p>
         </div>
       </footer>
     </div>

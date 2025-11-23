@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { FiCreditCard } from 'react-icons/fi';
-import './Patient.css';
+
 
 const Credits = () => {
   const [credits, setCredits] = useState(0);

@@ -4,7 +4,7 @@ import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { FiSend, FiPaperclip, FiArrowLeft } from 'react-icons/fi';
-import './Chat.css';
+
 
 const Chat = () => {
   const { consultationId } = useParams();

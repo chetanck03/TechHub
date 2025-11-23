@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import './Admin.css';
+
 
 const Complaints = () => {
   const [complaints, setComplaints] = useState([]);

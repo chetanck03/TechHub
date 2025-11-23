@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import './Doctor.css';
+
 
 const DoctorRegister = () => {
   const [categories, setCategories] = useState([]);

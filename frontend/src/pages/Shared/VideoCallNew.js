@@ -7,7 +7,7 @@ import {
   FiVideo, FiVideoOff, FiMic, FiMicOff, FiPhone, 
   FiMessageSquare, FiFileText, FiX, FiSend 
 } from 'react-icons/fi';
-import './VideoCall.css';
+
 
 const ICE_SERVERS = {
   iceServers: [

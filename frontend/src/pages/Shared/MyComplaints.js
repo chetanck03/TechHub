@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
-import './Shared.css';
+
 
 const MyComplaints = () => {
   const [complaints, setComplaints] = useState([]);

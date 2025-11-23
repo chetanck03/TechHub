@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { FiDollarSign, FiDownload } from 'react-icons/fi';
-import './Admin.css';
+
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);

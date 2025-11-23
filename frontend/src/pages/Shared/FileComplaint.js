@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import './Shared.css';
+
 
 const FileComplaint = () => {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import './Patient.css';
+
 
 const BookConsultation = () => {
   const { doctorId } = useParams();

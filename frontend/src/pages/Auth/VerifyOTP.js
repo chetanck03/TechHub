@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import './Auth.css';
+import { Mail, Stethoscope } from 'lucide-react';
+
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState('');
@@ -39,34 +40,47 @@ const VerifyOTP = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>📧 Verify OTP</h1>
-          <p>Enter the OTP sent to {email}</p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>OTP Code</label>
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-              maxLength={6}
-              style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' }}
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary-50 to-secondary-100 p-4">
+      <div className="card w-full max-w-md animate-fade-in">
+        <div className="card-body">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <Stethoscope className="w-8 h-8 text-primary-500" />
+            <h2 className="text-xl font-bold text-secondary-900">Telehealth</h2>
           </div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Verifying...' : 'Verify OTP'}
-          </button>
-        </form>
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+              <Mail className="w-8 h-8 text-primary-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-secondary-900 mb-2">Verify OTP</h1>
+            <p className="text-secondary-600">Enter the OTP sent to {email}</p>
+          </div>
 
-        <div className="auth-footer">
-          Didn't receive OTP? <a href="#resend">Resend</a>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="form-group">
+              <label className="form-label">OTP Code</label>
+              <input
+                type="text"
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="form-input text-center text-2xl tracking-widest font-mono"
+                required
+                maxLength={6}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+              {loading ? 'Verifying...' : 'Verify OTP'}
+            </button>
+          </form>
+
+          <div className="text-center mt-6 text-secondary-600">
+            Didn't receive OTP?{' '}
+            <button className="text-primary-600 hover:text-primary-700 font-semibold">
+              Resend
+            </button>
+          </div>
         </div>
       </div>
     </div>

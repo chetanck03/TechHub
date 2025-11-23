@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Layout from './Layout';
-import './DoctorGuard.css';
+
 
 const DoctorGuard = ({ children }) => {
   const { user } = useAuth();

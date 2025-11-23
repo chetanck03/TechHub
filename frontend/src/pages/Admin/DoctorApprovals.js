@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import DocumentViewer from '../../components/DocumentViewer';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import './Admin.css';
+
 
 const DoctorApprovals = () => {
   const [doctors, setDoctors] = useState([]);

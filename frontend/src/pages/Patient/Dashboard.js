@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { FiUsers, FiCalendar, FiCreditCard, FiMapPin } from 'react-icons/fi';
-import './Patient.css';
+
 
 const PatientDashboard = () => {
   const [categories, setCategories] = useState([]);

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { FiCalendar, FiCreditCard, FiUsers, FiVideo, FiMessageCircle, FiAlertCircle } from 'react-icons/fi';
-import './Doctor.css';
+
 
 const DoctorDashboard = () => {
   const [stats, setStats] = useState({

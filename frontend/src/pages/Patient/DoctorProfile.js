@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { FiStar, FiCalendar, FiMessageCircle } from 'react-icons/fi';
-import './Patient.css';
+
 
 const DoctorProfile = () => {
   const { id } = useParams();

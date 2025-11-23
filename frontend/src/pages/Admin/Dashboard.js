@@ -4,7 +4,7 @@ import api from '../../utils/api';
 import { FiUsers, FiCalendar, FiDollarSign, FiClock, FiAlertCircle, FiActivity } from 'react-icons/fi';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import './Admin.css';
+
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
