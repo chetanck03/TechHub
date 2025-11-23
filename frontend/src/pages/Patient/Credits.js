@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
+import PaymentModal from '../../components/PaymentModal';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
 import { FiCreditCard } from 'react-icons/fi';
@@ -10,6 +11,7 @@ const Credits = () => {
   const [packages, setPackages] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paymentModal, setPaymentModal] = useState({ isOpen: false, package: null });
 
   useEffect(() => {
     fetchData();
@@ -32,6 +34,10 @@ const Credits = () => {
     }
   };
 
+  const handlePurchaseClick = (pkg) => {
+    setPaymentModal({ isOpen: true, package: pkg });
+  };
+
   const handlePurchase = async (pkg) => {
     try {
       await api.post('/credits/purchase', {
@@ -42,7 +48,12 @@ const Credits = () => {
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Purchase failed');
+      throw error;
     }
+  };
+
+  const closePaymentModal = () => {
+    setPaymentModal({ isOpen: false, package: null });
   };
 
   if (loading) return (
@@ -90,7 +101,7 @@ const Credits = () => {
                     <h3 className="text-2xl font-bold text-secondary-900 mb-2">{pkg.credits} Credits</h3>
                     <p className="text-3xl font-bold text-primary-600 mb-4">${pkg.amount}</p>
                     <button 
-                      onClick={() => handlePurchase(pkg)}
+                      onClick={() => handlePurchaseClick(pkg)}
                       className="btn btn-primary w-full"
                     >
                       Purchase
@@ -133,6 +144,14 @@ const Credits = () => {
             )}
           </div>
         </div>
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={paymentModal.isOpen}
+          onClose={closePaymentModal}
+          package={paymentModal.package}
+          onSuccess={handlePurchase}
+        />
       </div>
     </Layout>
   );

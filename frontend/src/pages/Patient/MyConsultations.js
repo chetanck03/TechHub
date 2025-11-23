@@ -34,75 +34,109 @@ const MyConsultations = () => {
     return colors[status] || '#64748b';
   };
 
-  if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span className="ml-3 text-secondary-600">Loading...</span>
+      </div>
+    </Layout>
+  );
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>My Consultations</h1>
+      <div className="h-full flex flex-col">
+        <div className="mb-6 flex-shrink-0">
+          <h1 className="text-3xl font-bold text-secondary-900 mb-2">My Consultations</h1>
+          <p className="text-secondary-600">View and manage your medical consultations</p>
+        </div>
 
-        {consultations.length === 0 ? (
-          <div className="loading">No consultations found</div>
-        ) : (
-          <div className="consultations-list">
-            {consultations.map((consultation) => (
-              <div key={consultation._id} className="consultation-card">
-                <div className="consultation-header">
-                  <div>
-                    <h3>Dr. {consultation.doctorId?.userId?.name}</h3>
-                    <p>{consultation.doctorId?.specialization?.name}</p>
-                  </div>
-                  <span 
-                    className="status-badge"
-                    style={{ background: getStatusColor(consultation.status) }}
-                  >
-                    {consultation.status}
-                  </span>
-                </div>
-
-                <div className="consultation-details">
-                  <div className="detail-item">
-                    <span>Type:</span>
-                    <strong>{consultation.type}</strong>
-                  </div>
-                  <div className="detail-item">
-                    <span>Date:</span>
-                    <strong>{new Date(consultation.scheduledAt).toLocaleString()}</strong>
-                  </div>
-                  <div className="detail-item">
-                    <span>Credits:</span>
-                    <strong>{consultation.creditsCharged}</strong>
-                  </div>
-                </div>
-
-                {consultation.notes && (
-                  <div className="consultation-notes">
-                    <strong>Notes:</strong>
-                    <p>{consultation.notes}</p>
-                  </div>
-                )}
-
-                <div className="consultation-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                  {(consultation.status === 'scheduled' || consultation.status === 'ongoing') && consultation.type === 'online' && (
-                    <Link to={`/video-call/${consultation._id}`}>
-                      <button className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                        <FiVideo /> {consultation.status === 'ongoing' ? 'Rejoin' : 'Join'} Video Call
-                      </button>
-                    </Link>
-                  )}
-                  
-                  {consultation.videoCallCompleted && (
-                    <Link to={`/chat/${consultation._id}`}>
-                      <button className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                        <FiMessageCircle /> Message Doctor
-                      </button>
-                    </Link>
-                  )}
-                </div>
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100">
+          {consultations.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-6xl mb-4">👨‍⚕️</div>
+                <p className="text-secondary-500 text-lg">No consultations found</p>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="space-y-4 pr-2">
+              {consultations.map((consultation) => (
+                <div key={consultation._id} className="card card-hover">
+                  <div className="card-body">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-secondary-900 mb-1">
+                          Dr. {consultation.doctorId?.userId?.name}
+                        </h3>
+                        <p className="text-primary-600 font-medium mb-2">
+                          {consultation.doctorId?.specialization?.name}
+                        </p>
+                      </div>
+                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium capitalize ${
+                        consultation.status === 'scheduled' 
+                          ? 'bg-primary-100 text-primary-700'
+                          : consultation.status === 'ongoing'
+                            ? 'bg-warning-100 text-warning-700'
+                            : consultation.status === 'completed'
+                              ? 'bg-success-100 text-success-700'
+                              : consultation.status === 'cancelled'
+                                ? 'bg-danger-100 text-danger-700'
+                                : 'bg-secondary-100 text-secondary-700'
+                      }`}>
+                        {consultation.status}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                      <div className="space-y-1">
+                        <span className="text-sm font-medium text-secondary-500">Type</span>
+                        <p className="text-secondary-900 capitalize">{consultation.type}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-sm font-medium text-secondary-500">Date & Time</span>
+                        <p className="text-secondary-900 text-sm">
+                          {new Date(consultation.scheduledAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-sm font-medium text-secondary-500">Credits Charged</span>
+                        <p className="text-secondary-900 font-semibold">{consultation.creditsCharged}</p>
+                      </div>
+                    </div>
+
+                    {consultation.notes && (
+                      <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4 mb-4">
+                        <h4 className="font-semibold text-secondary-800 mb-2">Consultation Notes:</h4>
+                        <p className="text-secondary-700">{consultation.notes}</p>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-secondary-200">
+                      {(consultation.status === 'scheduled' || consultation.status === 'ongoing') && consultation.type === 'online' && (
+                        <Link to={`/video-call/${consultation._id}`} className="flex-1 sm:flex-none">
+                          <button className="btn btn-primary w-full sm:w-auto">
+                            <FiVideo className="w-4 h-4" />
+                            {consultation.status === 'ongoing' ? 'Rejoin' : 'Join'} Video Call
+                          </button>
+                        </Link>
+                      )}
+                      
+                      {consultation.videoCallCompleted && (
+                        <Link to={`/chat/${consultation._id}`} className="flex-1 sm:flex-none">
+                          <button className="btn btn-secondary w-full sm:w-auto">
+                            <FiMessageCircle className="w-4 h-4" />
+                            Message Doctor
+                          </button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );

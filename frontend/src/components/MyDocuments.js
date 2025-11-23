@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FiEye, FiUpload, FiCheck, FiX, FiFileText, FiUser, FiSend, FiTrash2 } from 'react-icons/fi';
+import { FiEye, FiUpload, FiCheck, FiX, FiFileText, FiUser, FiSend, FiTrash2, FiDownload } from 'react-icons/fi';
 import api from '../utils/api';
-
 
 const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
   const [documents, setDocuments] = useState({});
@@ -16,22 +15,22 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
   const documentTypes = {
     profilePhoto: {
       label: 'Profile Photo',
-      icon: <FiUser />,
+      icon: <FiUser className="w-5 h-5" />,
       description: 'Your profile picture (visible to patients)'
     },
     degreeDocument: {
       label: 'Degree Certificate',
-      icon: <FiFileText />,
+      icon: <FiFileText className="w-5 h-5" />,
       description: 'Medical degree certificate'
     },
     licenseDocument: {
       label: 'Medical License',
-      icon: <FiFileText />,
+      icon: <FiFileText className="w-5 h-5" />,
       description: 'Medical council license'
     },
     idProof: {
       label: 'Government ID',
-      icon: <FiFileText />,
+      icon: <FiFileText className="w-5 h-5" />,
       description: 'Government issued ID proof'
     }
   };
@@ -50,17 +49,10 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
       const processedDocs = {};
       const drafts = {};
       
-      console.log('Processing documents from doctor data:', doctorData);
-      
-      // Process each document type from doctor profile
       Object.keys(documentTypes).forEach(type => {
         const docData = doctorData[type];
         const draftData = doctorData.draftDocuments?.[type];
         
-        console.log(`Processing ${type}:`, docData);
-        console.log(`Draft ${type}:`, draftData);
-        
-        // Check if document exists and has data (base64 string or buffer)
         if (docData && docData.data && docData.contentType) {
           processedDocs[type] = {
             hasFile: true,
@@ -74,7 +66,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
           };
         }
 
-        // Check for draft documents
         if (draftData && draftData.data && draftData.contentType) {
           drafts[type] = {
             hasFile: true,
@@ -85,8 +76,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
         }
       });
       
-      console.log('Processed documents:', processedDocs);
-      console.log('Draft documents:', drafts);
       setDocuments(processedDocs);
       setDraftDocuments(drafts);
     } catch (error) {
@@ -99,14 +88,12 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      // Fallback: try to fetch doctor profile if doctorData not provided
       const response = await api.get(`/doctors/me/profile`);
       const doctorProfile = response.data;
       
       const processedDocs = {};
       Object.keys(documentTypes).forEach(type => {
         const docData = doctorProfile[type];
-        // Check if document exists and has data (base64 string or buffer)
         if (docData && docData.data && docData.contentType) {
           processedDocs[type] = {
             hasFile: true,
@@ -142,7 +129,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
   const handleDocumentUpload = async (type, file, submitForReview = false) => {
     if (!file) return;
 
-    // Handle profile photo immediately (no draft mode needed)
     if (type === 'profilePhoto') {
       setUploading(prev => ({ ...prev, [type]: true }));
 
@@ -150,11 +136,10 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
         const formData = new FormData();
         formData.append('profilePhoto', file);
 
-        const response = await api.put('/doctors/me/profile-photo', formData, {
+        await api.put('/doctors/me/profile-photo', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
-        // Update local documents state
         setDocuments(prev => ({
           ...prev,
           [type]: {
@@ -165,13 +150,11 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
           }
         }));
 
-        // Notify parent component if callback provided
         if (onDocumentUpdate) {
           onDocumentUpdate();
         }
 
         alert(`${documentTypes[type].label} uploaded successfully!`);
-        console.log(`${type} uploaded successfully`);
       } catch (error) {
         console.error(`Error uploading ${type}:`, error);
         const errorMessage = error.response?.data?.message || `Failed to upload ${documentTypes[type].label}. Please try again.`;
@@ -182,7 +165,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
       return;
     }
 
-    // For verification documents, save as draft by default
     setUploading(prev => ({ ...prev, [type]: true }));
 
     try {
@@ -197,7 +179,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
       });
 
       if (submitForReview) {
-        // Update main documents
         setDocuments(prev => ({
           ...prev,
           [type]: {
@@ -207,14 +188,12 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
             contentType: file.type
           }
         }));
-        // Clear draft
         setDraftDocuments(prev => {
           const newDrafts = { ...prev };
           delete newDrafts[type];
           return newDrafts;
         });
       } else {
-        // Update draft documents
         setDraftDocuments(prev => ({
           ...prev,
           [type]: {
@@ -226,13 +205,11 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
         }));
       }
 
-      // Notify parent component if callback provided
       if (onDocumentUpdate) {
         onDocumentUpdate();
       }
 
       alert(response.data.message);
-      console.log(`${type} uploaded successfully`);
     } catch (error) {
       console.error(`Error uploading ${type}:`, error);
       const errorMessage = error.response?.data?.message || `Failed to upload ${documentTypes[type].label}. Please try again.`;
@@ -241,8 +218,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
       setUploading(prev => ({ ...prev, [type]: false }));
     }
   };
-
-
 
   const handleSubmitForReview = async () => {
     if (Object.keys(draftDocuments).length === 0) {
@@ -255,7 +230,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
     try {
       const response = await api.post('/doctors/me/submit-for-review');
 
-      // Clear draft documents and update main documents
       Object.keys(draftDocuments).forEach(type => {
         setDocuments(prev => ({
           ...prev,
@@ -264,7 +238,6 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
       });
       setDraftDocuments({});
 
-      // Notify parent component if callback provided
       if (onDocumentUpdate) {
         onDocumentUpdate();
       }
@@ -313,73 +286,86 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
 
   if (loading) {
     return (
-      <div className="my-documents loading">
-        <div className="loading-spinner"></div>
-        <p>Loading your documents...</p>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center justify-center space-x-3">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">Loading your documents...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="my-documents">
-      <div className="documents-header">
-        <h3>📄 My Uploaded Documents</h3>
-        <p>View and manage your uploaded documents</p>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center">
+          <FiFileText className="w-5 h-5 mr-2" />
+          My Uploaded Documents
+        </h3>
+        <p className="text-gray-600 mb-4">View and manage your uploaded documents</p>
         
         {/* Draft Mode Controls */}
         {Object.keys(draftDocuments).length > 0 && (
-          <div className="draft-mode-controls">
-            <div className="draft-info">
-              <h4>📝 Draft Changes Ready</h4>
-              <p>You have {Object.keys(draftDocuments).length} document(s) with unsaved changes.</p>
-              <div className="draft-list">
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+            <div className="mb-3">
+              <h4 className="font-semibold text-orange-800 flex items-center mb-2">
+                <FiFileText className="w-4 h-4 mr-1" />
+                Draft Changes Ready
+              </h4>
+              <p className="text-orange-700 text-sm mb-2">
+                You have {Object.keys(draftDocuments).length} document(s) with unsaved changes.
+              </p>
+              <div className="flex flex-wrap gap-2">
                 {Object.keys(draftDocuments).map(type => (
-                  <span key={type} className="draft-item">
+                  <span key={type} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-sm">
                     {documentTypes[type].label}
                   </span>
                 ))}
               </div>
             </div>
             
-            <div className="draft-actions">
+            <div className="flex space-x-3">
               <button 
-                className="btn-submit-review"
                 onClick={handleSubmitForReview}
                 disabled={submittingForReview}
+                className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
                 {submittingForReview ? (
                   <>
-                    <div className="upload-spinner"></div>
-                    Submitting...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Submitting...</span>
                   </>
                 ) : (
                   <>
-                    <FiSend /> Submit for Admin Review
+                    <FiSend className="w-4 h-4" />
+                    <span>Submit for Admin Review</span>
                   </>
                 )}
               </button>
               <button 
-                className="btn-discard-drafts"
                 onClick={handleDiscardDrafts}
                 disabled={discardingDrafts}
+                className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {discardingDrafts ? (
                   <>
-                    <div className="upload-spinner"></div>
-                    Discarding...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Discarding...</span>
                   </>
                 ) : (
                   <>
-                    <FiTrash2 /> Discard Changes
+                    <FiTrash2 className="w-4 h-4" />
+                    <span>Discard Changes</span>
                   </>
                 )}
               </button>
             </div>
           </div>
         )}
-      </div>
-      
-      <div className="documents-grid">
+      </div>    
+        {/* Documents Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {Object.entries(documentTypes).map(([type, config]) => {
           const doc = documents[type];
           const draftDoc = draftDocuments[type];
@@ -388,41 +374,54 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
           const isVerificationDoc = type !== 'profilePhoto';
           
           return (
-            <div key={type} className={`document-card ${hasDocument ? 'has-document' : 'no-document'} ${hasDraft ? 'has-draft' : ''}`}>
-              <div className="document-header">
-                <div className="document-icon">
-                  {config.icon}
+            <div 
+              key={type} 
+              className={`border rounded-lg p-4 transition-all ${
+                hasDocument 
+                  ? 'border-green-200 bg-green-50' 
+                  : 'border-gray-200 bg-gray-50'
+              } ${hasDraft ? 'ring-2 ring-orange-200' : ''}`}
+            >
+              {/* Document Header */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${hasDocument ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                    {config.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{config.label}</h4>
+                    <p className="text-sm text-gray-600">{config.description}</p>
+                  </div>
                 </div>
-                <div className="document-info">
-                  <h4>{config.label}</h4>
-                  <p>{config.description}</p>
-                </div>
-                <div className="document-status">
+                <div className="flex-shrink-0">
                   {hasDocument ? (
-                    <FiCheck className="status-icon success" />
+                    <FiCheck className="w-5 h-5 text-green-600" />
                   ) : (
-                    <FiX className="status-icon error" />
+                    <FiX className="w-5 h-5 text-red-500" />
                   )}
                 </div>
               </div>
               
               {hasDocument || hasDraft ? (
-                <div className="document-details">
-                  {/* Show draft indicator */}
+                <div className="space-y-3">
+                  {/* Draft Indicator */}
                   {hasDraft && (
-                    <div className="draft-indicator">
-                      <span className="draft-badge">📝 Draft Changes</span>
-                      <small>New version ready for review</small>
+                    <div className="bg-orange-100 border border-orange-200 rounded-lg p-2">
+                      <span className="inline-flex items-center text-sm font-medium text-orange-800">
+                        <FiFileText className="w-4 h-4 mr-1" />
+                        Draft Changes
+                      </span>
+                      <p className="text-xs text-orange-700 mt-1">New version ready for review</p>
                     </div>
                   )}
                   
-                  {/* Show thumbnail for images */}
+                  {/* Image Thumbnail */}
                   {(hasDocument && doc.contentType?.startsWith('image/')) && (
-                    <div className="document-thumbnail">
+                    <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
                       <img
                         src={`data:${doctorData[type]?.contentType};base64,${doctorData[type]?.data}`}
                         alt={config.label}
-                        className="thumbnail-image"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}
@@ -430,52 +429,57 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
                     </div>
                   )}
                   
-                  <div className="file-info">
-                    <span className="file-name">
-                      {hasDraft ? draftDoc.originalName : (hasDocument ? doc.originalName : 'No file')}
-                    </span>
-                    <span className="file-size">
-                      {formatFileSize(hasDraft ? draftDoc.size : (hasDocument ? doc.size : 0))}
-                    </span>
-                    <span className="file-type">
-                      {hasDraft ? draftDoc.contentType : (hasDocument ? doc.contentType : '')}
-                    </span>
+                  {/* File Info */}
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="text-sm">
+                      <p className="font-medium text-gray-900 truncate">
+                        {hasDraft ? draftDoc.originalName : (hasDocument ? doc.originalName : 'No file')}
+                      </p>
+                      <p className="text-gray-500">
+                        {formatFileSize(hasDraft ? draftDoc.size : (hasDocument ? doc.size : 0))}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {hasDraft ? draftDoc.contentType : (hasDocument ? doc.contentType : '')}
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="document-actions">
+                  {/* Document Actions */}
+                  <div className="flex flex-wrap gap-2">
                     {hasDocument && (
                       <button
-                        className="btn-view"
                         onClick={() => handleViewDocument(type)}
+                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                         title="View current document"
                       >
-                        <FiEye /> View Current
+                        <FiEye className="w-4 h-4" />
+                        <span>View Current</span>
                       </button>
                     )}
                     
-                    <label className="btn-upload-new">
+                    <label className="flex items-center space-x-1 text-green-600 hover:text-green-700 text-sm font-medium cursor-pointer">
                       {uploading[type] ? (
                         <>
-                          <div className="upload-spinner"></div>
-                          Updating...
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                          <span>Updating...</span>
                         </>
                       ) : (
                         <>
-                          <FiUpload /> {hasDraft ? 'Replace Draft' : 'Update'}
+                          <FiUpload className="w-4 h-4" />
+                          <span>{hasDraft ? 'Replace Draft' : 'Update'}</span>
                         </>
                       )}
                       <input
                         type="file"
                         accept={type === 'profilePhoto' ? 'image/*' : '*/*'}
                         onChange={(e) => handleDocumentUpload(type, e.target.files[0])}
-                        style={{ display: 'none' }}
+                        className="hidden"
                         disabled={uploading[type]}
                       />
                     </label>
                     
                     {isVerificationDoc && (
                       <button
-                        className="btn-submit-immediate"
                         onClick={() => {
                           const fileInput = document.createElement('input');
                           fileInput.type = 'file';
@@ -488,43 +492,45 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
                           fileInput.click();
                         }}
                         disabled={uploading[type]}
+                        className="flex items-center space-x-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
                         title="Upload and submit for review immediately"
                       >
-                        <FiSend /> Upload & Submit
+                        <FiSend className="w-4 h-4" />
+                        <span>Upload & Submit</span>
                       </button>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="no-document">
-                  <FiUpload className="upload-icon" />
-                  <span>Not uploaded</span>
-                  <small>This document was not uploaded during registration</small>
+                <div className="text-center py-6">
+                  <FiUpload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600 font-medium mb-1">Not uploaded</p>
+                  <p className="text-sm text-gray-500 mb-4">This document was not uploaded during registration</p>
                   
-                  <div className="upload-actions">
-                    <label className="btn-upload">
+                  <div className="space-y-2">
+                    <label className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
                       {uploading[type] ? (
                         <>
-                          <div className="upload-spinner"></div>
-                          Uploading...
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Uploading...</span>
                         </>
                       ) : (
                         <>
-                          <FiUpload /> Upload as Draft
+                          <FiUpload className="w-4 h-4" />
+                          <span>Upload as Draft</span>
                         </>
                       )}
                       <input
                         type="file"
                         accept={type === 'profilePhoto' ? 'image/*' : '*/*'}
                         onChange={(e) => handleDocumentUpload(type, e.target.files[0])}
-                        style={{ display: 'none' }}
+                        className="hidden"
                         disabled={uploading[type]}
                       />
                     </label>
                     
                     {isVerificationDoc && (
                       <button
-                        className="btn-upload-submit"
                         onClick={() => {
                           const fileInput = document.createElement('input');
                           fileInput.type = 'file';
@@ -537,9 +543,11 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
                           fileInput.click();
                         }}
                         disabled={uploading[type]}
+                        className="block w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                         title="Upload and submit for review immediately"
                       >
-                        <FiSend /> Upload & Submit
+                        <FiSend className="w-4 h-4 inline mr-2" />
+                        Upload & Submit
                       </button>
                     )}
                   </div>
@@ -550,24 +558,52 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
         })}
       </div>
 
-      <div className="documents-note">
-        <h4>📝 Document Update System:</h4>
-        <ul>
-          <li><strong>Profile Photo:</strong> Updates immediately and is visible to patients</li>
-          <li><strong>Verification Documents:</strong> Saved as drafts first, then submitted for admin review</li>
-          <li><strong>Draft Mode:</strong> Update multiple documents, then submit all at once for review</li>
-          <li><strong>Immediate Submit:</strong> Use "Upload & Submit" to bypass draft mode</li>
-          <li><strong>Review Process:</strong> Your profile goes to "Pending" status during admin review</li>
-          <li><strong>Continue Practicing:</strong> You can still see patients while documents are under review</li>
-          <li><strong>Accepted Formats:</strong> PDF, JPG, PNG (Max size: 5MB per file)</li>
-          <li><strong>Security:</strong> All documents are encrypted and stored securely</li>
-        </ul>
+      {/* Information Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+          <FiFileText className="w-4 h-4 mr-2" />
+          Document Update System:
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+          <div>
+            <p className="font-medium mb-1">Profile Photo:</p>
+            <p>Updates immediately and is visible to patients</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Verification Documents:</p>
+            <p>Saved as drafts first, then submitted for admin review</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Draft Mode:</p>
+            <p>Update multiple documents, then submit all at once for review</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Immediate Submit:</p>
+            <p>Use "Upload & Submit" to bypass draft mode</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Review Process:</p>
+            <p>Your profile goes to "Pending" status during admin review</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Continue Practicing:</p>
+            <p>You can still see patients while documents are under review</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Accepted Formats:</p>
+            <p>PDF, JPG, PNG (Max size: 5MB per file)</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Security:</p>
+            <p>All documents are encrypted and stored securely</p>
+          </div>
+        </div>
       </div>
 
       {/* Document Viewer Modal */}
       {isModalOpen && selectedDocument && documents[selectedDocument]?.hasFile && (
         <div 
-          className="document-modal-overlay" 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
           onClick={closeModal}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
@@ -576,25 +612,32 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
           }}
           tabIndex={0}
         >
-          <div className="document-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{documentTypes[selectedDocument].label}</h3>
+          <div 
+            className="bg-white rounded-lg max-w-4xl max-h-full w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {documentTypes[selectedDocument].label}
+              </h3>
               <button 
-                className="close-btn" 
                 onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
                 title="Close (Esc)"
                 autoFocus
               >
-                <FiX />
+                <FiX className="w-6 h-6" />
               </button>
             </div>
             
-            <div className="modal-content">
+            {/* Modal Content */}
+            <div className="p-4 max-h-96 overflow-auto">
               {documents[selectedDocument]?.contentType?.startsWith('image/') ? (
                 <img
                   src={`data:${doctorData[selectedDocument]?.contentType};base64,${doctorData[selectedDocument]?.data}`}
                   alt={documentTypes[selectedDocument].label}
-                  className="document-image"
+                  className="w-full h-auto max-h-80 object-contain mx-auto"
                   onError={(e) => {
                     console.error('Image failed to load');
                     e.target.style.display = 'none';
@@ -602,33 +645,39 @@ const MyDocuments = ({ doctorId, doctorData, onDocumentUpdate }) => {
                   }}
                 />
               ) : (
-                <div className="document-placeholder">
-                  <FiFileText size={64} />
-                  <p>Document preview not available</p>
-                  <small>This document type cannot be previewed in browser</small>
+                <div className="text-center py-12">
+                  <FiFileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium mb-2">Document preview not available</p>
+                  <p className="text-sm text-gray-500 mb-4">This document type cannot be previewed in browser</p>
                   <button 
-                    className="btn-download"
                     onClick={() => {
                       const link = document.createElement('a');
                       link.href = `data:${doctorData[selectedDocument]?.contentType};base64,${doctorData[selectedDocument]?.data}`;
                       link.download = doctorData[selectedDocument]?.originalName || `${selectedDocument}.file`;
                       link.click();
                     }}
+                    className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Download Document
+                    <FiDownload className="w-4 h-4" />
+                    <span>Download Document</span>
                   </button>
                 </div>
               )}
-              <div className="document-error" style={{ display: 'none' }}>
-                <FiFileText size={64} />
-                <p>Unable to load document</p>
-                <small>The document may be corrupted or in an unsupported format</small>
+              <div className="text-center py-12 hidden">
+                <FiFileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium mb-2">Unable to load document</p>
+                <p className="text-sm text-gray-500">The document may be corrupted or in an unsupported format</p>
               </div>
             </div>
             
-            <div className="modal-footer">
-              <button className="btn-close-modal" onClick={closeModal}>
-                <FiX /> Close
+            {/* Modal Footer */}
+            <div className="flex justify-end p-4 border-t bg-gray-50">
+              <button 
+                onClick={closeModal}
+                className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <FiX className="w-4 h-4" />
+                <span>Close</span>
               </button>
             </div>
           </div>

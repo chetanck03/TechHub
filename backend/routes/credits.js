@@ -25,6 +25,9 @@ router.post('/purchase', protect, async (req, res) => {
       return res.status(400).json({ message: 'Amount and credits required' });
     }
 
+    // Simulate payment processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     const user = await User.findById(req.user._id);
     user.credits += credits;
     await user.save();
@@ -34,13 +37,13 @@ router.post('/purchase', protect, async (req, res) => {
       type: 'credit_purchase',
       amount,
       credits,
-      paymentId: `sim_${Date.now()}`,
+      paymentId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       status: 'completed',
       description: `Purchased ${credits} credits for $${amount}`
     });
 
     res.json({
-      message: 'Credits added successfully',
+      message: 'Payment processed successfully',
       credits: user.credits
     });
   } catch (error) {

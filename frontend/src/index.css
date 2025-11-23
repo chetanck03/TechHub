@@ -58,6 +58,16 @@
     background: rgb(241 245 249);
   }
 
+  /* Hide Scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
   /* Professional Button Components */
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 border-2 rounded-lg font-semibold text-sm transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-opacity-20 disabled:opacity-60 disabled:cursor-not-allowed;

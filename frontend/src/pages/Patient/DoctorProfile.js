@@ -38,144 +38,207 @@ const DoctorProfile = () => {
     }
   };
 
-  if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
-  if (!doctor) return <Layout><div className="loading">Doctor not found</div></Layout>;
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span className="ml-3 text-secondary-600">Loading...</span>
+      </div>
+    </Layout>
+  );
+  
+  if (!doctor) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-6xl mb-4">👨‍⚕️</div>
+          <p className="text-secondary-500 text-lg">Doctor not found</p>
+        </div>
+      </div>
+    </Layout>
+  );
 
   return (
     <Layout>
-      <div className="dashboard">
-        <div className="doctor-profile">
-          <div className="profile-header">
-            {doctor.profilePhoto ? (
-              <img src={`${process.env.REACT_APP_API_URL}/${doctor.profilePhoto}`} alt={doctor.name} className="doctor-avatar large" />
-            ) : (
-              <div className="doctor-avatar large">
-                {doctor.name?.charAt(0)}
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Profile Header */}
+        <div className="card">
+          <div className="card-body">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-shrink-0">
+                {doctor.profilePhoto ? (
+                  <img 
+                    src={`${process.env.REACT_APP_API_URL}/${doctor.profilePhoto}`} 
+                    alt={doctor.name} 
+                    className="w-32 h-32 rounded-full object-cover border-4 border-primary-200" 
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-primary-100 flex items-center justify-center text-4xl font-bold text-primary-600 border-4 border-primary-200">
+                    {doctor.name?.charAt(0)}
+                  </div>
+                )}
               </div>
-            )}
-            <div>
-              <h1>Dr. {doctor.name}</h1>
-              <p className="specialization">{doctor.specialization?.name}</p>
-              <p className="qualification">{doctor.qualification}</p>
-              <div className="rating">
-                <FiStar style={{ color: '#f59e0b' }} />
-                <span>{doctor.rating?.toFixed(1) || 'New'} ({doctor.totalRatings || 0} reviews)</span>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-secondary-900 mb-2">Dr. {doctor.name}</h1>
+                <p className="text-xl text-primary-600 font-semibold mb-2">{doctor.specialization?.name}</p>
+                <p className="text-secondary-600 mb-3">{doctor.qualification}</p>
+                <div className="flex items-center gap-2">
+                  <FiStar className="w-5 h-5 text-warning-500" />
+                  <span className="font-medium text-secondary-900">
+                    {doctor.rating?.toFixed(1) || 'New'} ({doctor.totalRatings || 0} reviews)
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="profile-content">
-            <div className="info-section">
-              <h2>About Dr. {doctor.name}</h2>
-              <p>{doctor.about || 'No description available yet.'}</p>
-            </div>
+        {/* About Section */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">About Dr. {doctor.name}</h2>
+          </div>
+          <div className="card-body">
+            <p className="text-secondary-700 leading-relaxed">
+              {doctor.about || 'No description available yet.'}
+            </p>
+          </div>
+        </div>
 
-            <div className="info-section">
-              <h2>Professional Details</h2>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <span>Qualification</span>
-                  <strong>{doctor.qualification}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Specialization</span>
-                  <strong>{doctor.specialization?.name}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Experience</span>
-                  <strong>{doctor.experience} years</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Current Practice</span>
-                  <strong>{doctor.currentHospitalClinic}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>City</span>
-                  <strong>{doctor.currentWorkingCity}</strong>
-                </div>
+        {/* Professional Details */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Professional Details</h2>
+          </div>
+          <div className="card-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-secondary-500">Qualification</span>
+                <p className="text-secondary-900 font-semibold">{doctor.qualification}</p>
+              </div>
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-secondary-500">Specialization</span>
+                <p className="text-secondary-900 font-semibold">{doctor.specialization?.name}</p>
+              </div>
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-secondary-500">Experience</span>
+                <p className="text-secondary-900 font-semibold">{doctor.experience} years</p>
+              </div>
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-secondary-500">Current Practice</span>
+                <p className="text-secondary-900 font-semibold">{doctor.currentHospitalClinic}</p>
+              </div>
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-secondary-500">City</span>
+                <p className="text-secondary-900 font-semibold">{doctor.currentWorkingCity}</p>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="info-section">
-              <h2>Languages Spoken</h2>
-              <div className="language-badges">
-                {doctor.languagesSpoken?.map((lang, index) => (
-                  <span key={index} className="language-badge">{lang}</span>
+        {/* Languages */}
+        {doctor.languagesSpoken && doctor.languagesSpoken.length > 0 && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-xl font-semibold text-secondary-900">Languages Spoken</h2>
+            </div>
+            <div className="card-body">
+              <div className="flex flex-wrap gap-2">
+                {doctor.languagesSpoken.map((lang, index) => (
+                  <span key={index} className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 text-secondary-700">
+                    {lang}
+                  </span>
                 ))}
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="info-section">
-              <h2>Consultation Options</h2>
-              <div className="consultation-options">
-                {doctor.consultationModes?.video && (
-                  <div className="consultation-option">
-                    <div className="option-icon">📹</div>
-                    <div className="option-details">
-                      <h3>Video Consultation</h3>
-                      <p className="option-fee">{doctor.consultationFee?.video} credits</p>
-                      <p className="option-desc">Consult from anywhere via video call</p>
+        {/* Consultation Options */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Consultation Options</h2>
+          </div>
+          <div className="card-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {doctor.consultationModes?.video && (
+                <div className="p-4 border border-primary-200 rounded-lg bg-primary-50">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">📹</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-secondary-900 mb-1">Video Consultation</h3>
+                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.video} credits</p>
+                      <p className="text-sm text-secondary-600">Consult from anywhere via video call</p>
                     </div>
                   </div>
-                )}
-                {doctor.consultationModes?.physical && (
-                  <div className="consultation-option">
-                    <div className="option-icon">🏥</div>
-                    <div className="option-details">
-                      <h3>Physical Visit</h3>
-                      <p className="option-fee">{doctor.consultationFee?.physical} credits</p>
-                      <p className="option-desc">Visit clinic at {doctor.currentHospitalClinic}</p>
+                </div>
+              )}
+              {doctor.consultationModes?.physical && (
+                <div className="p-4 border border-success-200 rounded-lg bg-success-50">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">🏥</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-secondary-900 mb-1">Physical Visit</h3>
+                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.physical} credits</p>
+                      <p className="text-sm text-secondary-600">Visit clinic at {doctor.currentHospitalClinic}</p>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Available Days */}
+        {doctor.availableDays && doctor.availableDays.length > 0 && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-xl font-semibold text-secondary-900">Available Days</h2>
+            </div>
+            <div className="card-body">
+              <div className="flex flex-wrap gap-2">
+                {doctor.availableDays.map((day, index) => (
+                  <span key={index} className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700">
+                    {day}
+                  </span>
+                ))}
               </div>
             </div>
+          </div>
+        )}
 
-            {doctor.availableDays && doctor.availableDays.length > 0 && (
-              <div className="info-section">
-                <h2>Available Days</h2>
-                <div className="available-days">
-                  {doctor.availableDays.map((day, index) => (
-                    <span key={index} className="day-badge">{day}</span>
-                  ))}
-                </div>
+        {/* Action Buttons */}
+        <div className="card">
+          <div className="card-body space-y-4">
+            {doctor.isAvailable ? (
+              <Link to={`/book/${doctor._id}`} className="block">
+                <button className="btn btn-primary w-full">
+                  <FiCalendar className="w-5 h-5" />
+                  Book Consultation
+                </button>
+              </Link>
+            ) : (
+              <button className="btn btn-secondary w-full" disabled>
+                Currently Unavailable
+              </button>
+            )}
+            
+            {canMessage && consultationId && (
+              <Link to={`/chat/${consultationId}`} className="block">
+                <button className="btn btn-secondary w-full">
+                  <FiMessageCircle className="w-5 h-5" />
+                  Message Doctor
+                </button>
+              </Link>
+            )}
+            
+            {!canMessage && (
+              <div className="p-4 bg-secondary-50 border border-secondary-200 rounded-lg text-center">
+                <p className="text-secondary-600 text-sm">
+                  💬 Complete a video consultation to unlock messaging
+                </p>
               </div>
             )}
-
-            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-              {doctor.isAvailable ? (
-                <Link to={`/book/${doctor._id}`}>
-                  <button className="btn-primary" style={{ width: '100%' }}>
-                    <FiCalendar /> Book Consultation
-                  </button>
-                </Link>
-              ) : (
-                <button className="btn-disabled" style={{ width: '100%' }} disabled>
-                  Currently Unavailable
-                </button>
-              )}
-              
-              {canMessage && consultationId && (
-                <Link to={`/chat/${consultationId}`}>
-                  <button className="btn-secondary" style={{ width: '100%' }}>
-                    <FiMessageCircle /> Message Doctor
-                  </button>
-                </Link>
-              )}
-              
-              {!canMessage && (
-                <div style={{ 
-                  padding: '0.75rem', 
-                  background: '#f0f0f0', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666',
-                  fontSize: '0.9rem'
-                }}>
-                  💬 Complete a video consultation to unlock messaging
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>

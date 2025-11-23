@@ -52,72 +52,96 @@ const FileComplaint = () => {
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>File a Complaint</h1>
-        <p className="subtitle">We take your concerns seriously</p>
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-secondary-900 mb-2">File a Complaint</h1>
+          <p className="text-secondary-600">We take your concerns seriously and will address them promptly</p>
+        </div>
 
-        <div className="complaint-form">
-          <form onSubmit={handleSubmit}>
-            {!againstId && (
+        <div className="card">
+          <div className="card-body">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {!againstId && (
+                <div className="form-group">
+                  <label className="form-label">Complaint Against (User ID) - Optional</label>
+                  <input
+                    type="text"
+                    value={formData.againstId}
+                    onChange={(e) => setFormData({ ...formData, againstId: e.target.value })}
+                    placeholder="Enter user ID (optional - leave blank for general complaint)"
+                    className="form-input"
+                  />
+                  <p className="text-sm text-secondary-500 mt-1">
+                    Leave blank for general complaints or platform issues
+                  </p>
+                </div>
+              )}
+
               <div className="form-group">
-                <label>Complaint Against (User ID) - Optional</label>
+                <label className="form-label">Subject *</label>
                 <input
                   type="text"
-                  value={formData.againstId}
-                  onChange={(e) => setFormData({ ...formData, againstId: e.target.value })}
-                  placeholder="Enter user ID (optional - leave blank for general complaint)"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  required
+                  placeholder="Brief description of the issue"
+                  className="form-input"
                 />
-                <small>Leave blank for general complaints or platform issues</small>
               </div>
-            )}
 
-            <div className="form-group">
-              <label>Subject *</label>
-              <input
-                type="text"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                required
-                placeholder="Brief description of the issue"
-              />
-            </div>
+              <div className="form-group">
+                <label className="form-label">Description *</label>
+                <textarea
+                  rows="6"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  required
+                  placeholder="Provide detailed information about your complaint..."
+                  className="form-input"
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Description *</label>
-              <textarea
-                rows="6"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                required
-                placeholder="Provide detailed information about your complaint..."
-              />
-            </div>
+              <div className="form-group">
+                <label className="form-label">Evidence (Optional)</label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => setFiles(Array.from(e.target.files))}
+                  accept="image/*,.pdf"
+                  className="form-input"
+                />
+                <p className="text-sm text-secondary-500 mt-1">
+                  Upload images or documents as evidence (max 5 files)
+                </p>
+                {files.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-secondary-700">Selected files:</p>
+                    <ul className="text-sm text-secondary-600">
+                      {files.map((file, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <span>📎</span>
+                          {file.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
-            <div className="form-group">
-              <label>Evidence (Optional)</label>
-              <input
-                type="file"
-                multiple
-                onChange={(e) => setFiles(Array.from(e.target.files))}
-                accept="image/*,.pdf"
-                className="file-input"
-              />
-              <small>Upload images or documents as evidence (max 5 files)</small>
-            </div>
-
-            <div className="form-actions">
-              <button type="submit" className="btn-primary">
-                Submit Complaint
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="btn-cancel"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <button type="submit" className="btn btn-primary flex-1 sm:flex-none">
+                  Submit Complaint
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="btn btn-secondary flex-1 sm:flex-none"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </Layout>
