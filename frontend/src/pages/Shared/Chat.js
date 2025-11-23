@@ -107,82 +107,107 @@ const Chat = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="loading">Loading chat...</div>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+          <span className="ml-3 text-secondary-600">Loading chat...</span>
+        </div>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="chat-container">
-        <div className="chat-header">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            <FiArrowLeft />
-          </button>
-          <div className="chat-user-info">
-            {otherUser?.profilePhoto || otherUser?.profileImage ? (
-              <img 
-                src={`${process.env.REACT_APP_API_URL}/${otherUser.profilePhoto || otherUser.profileImage}`} 
-                alt={otherUser.name}
-                className="chat-avatar"
-              />
-            ) : (
-              <div className="chat-avatar">
-                {otherUser?.name?.charAt(0)}
+      <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
+        <div className="card mb-4">
+          <div className="card-body py-4">
+            <div className="flex items-center gap-4">
+              <button 
+                className="btn btn-ghost btn-sm btn-icon" 
+                onClick={() => navigate(-1)}
+              >
+                <FiArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-3">
+                {otherUser?.profilePhoto || otherUser?.profileImage ? (
+                  <img 
+                    src={`${process.env.REACT_APP_API_URL}/${otherUser.profilePhoto || otherUser.profileImage}`} 
+                    alt={otherUser.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-primary-200"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-lg font-bold text-primary-600 border-2 border-primary-200">
+                    {otherUser?.name?.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold text-secondary-900">
+                    {user.role === 'patient' ? 'Dr. ' : ''}{otherUser?.name}
+                  </h3>
+                  <p className="text-sm text-secondary-600">
+                    {user.role === 'patient' ? otherUser?.specialization?.name : 'Patient'}
+                  </p>
+                </div>
               </div>
-            )}
-            <div>
-              <h3>{user.role === 'patient' ? 'Dr. ' : ''}{otherUser?.name}</h3>
-              <p className="chat-subtitle">
-                {user.role === 'patient' ? otherUser?.specialization?.name : 'Patient'}
-              </p>
             </div>
           </div>
         </div>
 
-        <div className="chat-messages">
-          {messages.length === 0 ? (
-            <div className="no-messages">
-              <p>No messages yet. Start the conversation!</p>
-            </div>
-          ) : (
-            messages.map((msg, index) => (
-              <div 
-                key={index} 
-                className={`message ${msg.senderId === user._id ? 'sent' : 'received'}`}
-              >
-                <div className="message-content">
-                  <p>{msg.message}</p>
-                  <span className="message-time">
-                    {new Date(msg.createdAt).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </span>
+        <div className="card flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">💬</div>
+                  <p className="text-secondary-500">No messages yet. Start the conversation!</p>
                 </div>
               </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div 
+                  key={index} 
+                  className={`flex ${msg.senderId === user._id ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    msg.senderId === user._id 
+                      ? 'bg-primary-500 text-white' 
+                      : 'bg-secondary-100 text-secondary-900'
+                  }`}>
+                    <p className="text-sm">{msg.message}</p>
+                    <span className={`text-xs mt-1 block ${
+                      msg.senderId === user._id ? 'text-primary-100' : 'text-secondary-500'
+                    }`}>
+                      {new Date(msg.createdAt).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-        <form className="chat-input-form" onSubmit={handleSendMessage}>
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="chat-input"
-            disabled={sending}
-          />
-          <button 
-            type="submit" 
-            className="send-btn"
-            disabled={!newMessage.trim() || sending}
-          >
-            <FiSend />
-          </button>
-        </form>
+          <div className="border-t border-secondary-200 p-4">
+            <form className="flex gap-3" onSubmit={handleSendMessage}>
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="form-input flex-1"
+                disabled={sending}
+              />
+              <button 
+                type="submit" 
+                className="btn btn-primary btn-icon"
+                disabled={!newMessage.trim() || sending}
+              >
+                <FiSend className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </Layout>
   );

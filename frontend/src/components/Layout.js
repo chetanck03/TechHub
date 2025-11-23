@@ -48,8 +48,8 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
-      <nav className="bg-white shadow-soft sticky top-0 z-40 border-b border-secondary-200">
+    <div className="h-screen bg-secondary-50 flex flex-col overflow-hidden">
+      <nav className="bg-white shadow-soft border-b border-secondary-200 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
@@ -70,8 +70,8 @@ const Layout = ({ children }) => {
         </div>
       </nav>
 
-      <div className="flex">
-        <aside className="w-64 bg-white shadow-soft sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-64 bg-white shadow-soft flex-shrink-0 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100">
           <div className="py-6">
             {getNavItems().map((item) => (
               <Link 
@@ -86,8 +86,10 @@ const Layout = ({ children }) => {
           </div>
         </aside>
 
-        <main className="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]">
-          {children}
+        <main className="flex-1 p-6 overflow-hidden">
+          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100">
+            {children}
+          </div>
         </main>
       </div>
 

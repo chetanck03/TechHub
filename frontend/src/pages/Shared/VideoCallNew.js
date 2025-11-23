@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
+import { buildSocketUrl } from '../../config/api';
 import { 
   FiVideo, FiVideoOff, FiMic, FiMicOff, FiPhone, 
   FiMessageSquare, FiFileText, FiX, FiSend 
@@ -73,7 +74,7 @@ const VideoCallNew = () => {
 
       // Initialize socket connection
       const token = localStorage.getItem('token');
-      const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+      const socket = io(buildSocketUrl(), {
         auth: { token }
       });
 

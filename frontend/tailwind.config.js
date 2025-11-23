@@ -96,6 +96,31 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'rgb(203 213 225) rgb(241 245 249)',
+        },
+        '.scrollbar-thin::-webkit-scrollbar': {
+          width: '6px',
+          height: '6px',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-track': {
+          background: 'rgb(241 245 249)',
+          'border-radius': '3px',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-thumb': {
+          background: 'rgb(203 213 225)',
+          'border-radius': '3px',
+        },
+        '.scrollbar-thin::-webkit-scrollbar-thumb:hover': {
+          background: 'rgb(148 163 184)',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }
 

@@ -157,25 +157,43 @@ const DoctorProfile = () => {
 
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span className="ml-3 text-secondary-600">Loading...</span>
+      </div>
+    </Layout>
+  );
 
-  if (!doctor) return <Layout><div className="loading">Profile not found</div></Layout>;
+  if (!doctor) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-secondary-600">Profile not found</p>
+        </div>
+      </div>
+    </Layout>
+  );
 
   if (!doctor.isApproved) {
     return (
       <Layout>
-        <div className="dashboard">
-          <div className="info-box">
-            <h2>⏳ Profile Pending Approval</h2>
-            <p>Your doctor profile is currently under review by our admin team.</p>
-            <p>You will receive an email notification once your profile is approved.</p>
-            <p><strong>Status:</strong> {doctor.status}</p>
-            {doctor.rejectionReason && (
-              <div style={{ marginTop: '1rem', padding: '1rem', background: '#fee2e2', borderRadius: '8px' }}>
-                <strong>Rejection Reason:</strong>
-                <p>{doctor.rejectionReason}</p>
-              </div>
-            )}
+        <div className="max-w-2xl mx-auto">
+          <div className="card">
+            <div className="card-body text-center">
+              <div className="text-6xl mb-4">⏳</div>
+              <h2 className="text-2xl font-bold text-secondary-900 mb-4">Profile Pending Approval</h2>
+              <p className="text-secondary-600 mb-2">Your doctor profile is currently under review by our admin team.</p>
+              <p className="text-secondary-600 mb-4">You will receive an email notification once your profile is approved.</p>
+              <p className="text-sm"><span className="font-semibold">Status:</span> {doctor.status}</p>
+              {doctor.rejectionReason && (
+                <div className="mt-6 p-4 bg-danger-50 border border-danger-200 rounded-lg text-left">
+                  <h4 className="font-semibold text-danger-800 mb-2">Rejection Reason:</h4>
+                  <p className="text-danger-700">{doctor.rejectionReason}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Layout>
@@ -183,64 +201,73 @@ const DoctorProfile = () => {
   }  
 return (
     <Layout>
-      <div className="dashboard">
-        <div className="profile-header-section">
-          <h1>My Profile</h1>
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-secondary-900 mb-2">My Profile</h1>
+            <p className="text-secondary-600">Manage your professional profile and consultation settings</p>
+          </div>
           {!editing && (
-            <button className="btn-primary" onClick={() => setEditing(true)}>
+            <button className="btn btn-primary" onClick={() => setEditing(true)}>
+              <FiEdit3 className="w-4 h-4" />
               Edit Consultation Details
             </button>
           )}
         </div>
 
         {/* Profile Photo Section */}
-        <div className="profile-section">
-          <h2>Profile Photo</h2>
-          <div className="photo-upload-section">
-            {doctor.profilePhoto && doctor.profilePhoto.data ? (
-              <img 
-                src={`data:${doctor.profilePhoto.contentType};base64,${doctor.profilePhoto.data}`}
-                alt="Profile" 
-                className="profile-photo-preview"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div 
-              className="profile-photo-placeholder" 
-              style={{ 
-                display: (doctor.profilePhoto && doctor.profilePhoto.data) ? 'none' : 'flex' 
-              }}
-            >
-              {doctor.userId?.name?.charAt(0) || 'D'}
-            </div>
-            <div className="photo-info">
-              <h4>Profile Photo Status</h4>
-              {doctor.profilePhoto && doctor.profilePhoto.data ? (
-                <div>
-                  <p style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Photo Uploaded</p>
-                  <small>File: {doctor.profilePhoto.originalName}</small><br />
-                  <small>Size: {(doctor.profilePhoto.size / 1024).toFixed(1)} KB</small>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Profile Photo</h2>
+          </div>
+          <div className="card-body">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0">
+                {doctor.profilePhoto && doctor.profilePhoto.data ? (
+                  <img 
+                    src={`data:${doctor.profilePhoto.contentType};base64,${doctor.profilePhoto.data}`}
+                    alt="Profile" 
+                    className="w-24 h-24 rounded-full object-cover border-4 border-primary-200"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className={`w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-600 border-4 border-primary-200 ${
+                    (doctor.profilePhoto && doctor.profilePhoto.data) ? 'hidden' : 'flex'
+                  }`}
+                >
+                  {doctor.userId?.name?.charAt(0) || 'D'}
                 </div>
-              ) : (
-                <p style={{ color: '#f59e0b', fontWeight: 'bold' }}>📷 No photo uploaded</p>
-              )}
-              
-              <form onSubmit={handlePhotoUpload} className="photo-upload-form">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setProfilePhoto(e.target.files[0])}
-                  className="file-input"
-                />
-                {profilePhoto && (
-                  <button type="submit" className="btn-primary btn-small">
-                    {doctor.profilePhoto && doctor.profilePhoto.data ? 'Update Photo' : 'Upload Photo'}
-                  </button>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-secondary-900 mb-2">Profile Photo Status</h4>
+                {doctor.profilePhoto && doctor.profilePhoto.data ? (
+                  <div className="space-y-1">
+                    <p className="text-success-600 font-medium">✅ Photo Uploaded</p>
+                    <p className="text-sm text-secondary-500">File: {doctor.profilePhoto.originalName}</p>
+                    <p className="text-sm text-secondary-500">Size: {(doctor.profilePhoto.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                ) : (
+                  <p className="text-warning-600 font-medium">📷 No photo uploaded</p>
                 )}
-              </form>
+                
+                <form onSubmit={handlePhotoUpload} className="mt-4 space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setProfilePhoto(e.target.files[0])}
+                    className="form-input"
+                  />
+                  {profilePhoto && (
+                    <button type="submit" className="btn btn-primary btn-sm">
+                      {doctor.profilePhoto && doctor.profilePhoto.data ? 'Update Photo' : 'Upload Photo'}
+                    </button>
+                  )}
+                </form>
+              </div>
             </div>
           </div>
         </div>       

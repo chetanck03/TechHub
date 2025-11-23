@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "dev:safe": "node scripts/check-port.js && nodemon server.js",
+    "check-port": "node scripts/check-port.js",
     "seed": "node scripts/seed.js",
     "build": "echo 'No build step required'"
   },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Users, Calendar, Shield, Search, MapPin, Zap, Heart, Stethoscope, UserCheck, Clock, Lock } from 'lucide-react';
+import { buildApiUrl, API_ENDPOINTS } from '../../config/api';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const LandingPage = () => {
     setSearchResults([]);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/stores/search?query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(buildApiUrl(`${API_ENDPOINTS.STORES.SEARCH}?query=${encodeURIComponent(searchQuery)}`));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

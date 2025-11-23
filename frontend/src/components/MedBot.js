@@ -294,7 +294,7 @@ const MedBot = () => {
 
           {/* Messages or History */}
           {currentView === 'chat' ? (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-4 space-y-4 pr-2">
               {messages.map((msg, index) => (
                 <div
                   key={index}
@@ -329,7 +329,7 @@ const MedBot = () => {
               <div ref={messagesEndRef} />
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-4">
               <div className="mb-6">
                 <h4 className="font-semibold text-secondary-900 mb-1">Chat History</h4>
                 <p className="text-sm text-secondary-600">Your previous conversations with MedBot</p>
@@ -351,7 +351,7 @@ const MedBot = () => {
                   <small className="text-secondary-500">Start a conversation to see your history here</small>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 pr-2">
                   {chatHistory.map((session) => (
                     <div key={session.sessionId} className="flex items-center gap-3 p-3 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors">
                       <div 
@@ -388,7 +388,7 @@ const MedBot = () => {
 
           {/* Suggestions - only show in chat view */}
           {currentView === 'chat' && messages.length <= 2 && suggestions.length > 0 && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-2">
               <p className="text-sm text-secondary-600 mb-3">Quick questions:</p>
               <div className="grid grid-cols-2 gap-2">
                 {suggestions.slice(0, 4).map((suggestion, index) => (
@@ -406,27 +406,27 @@ const MedBot = () => {
 
           {/* Input - only show in chat view */}
           {currentView === 'chat' && (
-            <div className="p-4 border-t border-secondary-200">
-              <div className="flex items-end gap-2">
+            <div className="p-4 border-t border-secondary-200 bg-white rounded-b-2xl">
+              <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
-                  <textarea
-                    className="w-full p-3 pr-12 border border-secondary-200 rounded-xl resize-none focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 text-sm"
+                  <input
+                    type="text"
+                    className="w-full p-3 pr-16 border border-secondary-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 text-sm"
                     placeholder="Ask me anything about health..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    rows="1"
                     disabled={isLoading}
                     maxLength={1000}
                   />
                   {inputMessage.length > 0 && (
-                    <span className={`absolute bottom-1 right-1 text-xs ${inputMessage.length > 900 ? 'text-warning-500' : 'text-secondary-400'}`}>
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-xs ${inputMessage.length > 900 ? 'text-warning-500' : 'text-secondary-400'}`}>
                       {inputMessage.length}/1000
                     </span>
                   )}
                 </div>
                 <button
-                  className="p-3 bg-primary-500 hover:bg-primary-600 disabled:bg-secondary-300 text-white rounded-xl transition-colors"
+                  className="flex-shrink-0 p-3 bg-primary-500 hover:bg-primary-600 disabled:bg-secondary-300 text-white rounded-xl transition-colors"
                   onClick={() => handleSendMessage()}
                   disabled={!inputMessage.trim() || isLoading}
                   title="Send message"
@@ -438,12 +438,14 @@ const MedBot = () => {
           )}
 
           {/* Disclaimer */}
-          <div className="px-4 pb-4">
-            <div className="text-xs text-secondary-500 bg-warning-50 border border-warning-200 rounded-lg p-3">
-              ⚠️ MedBot is an AI assistant. For medical emergencies, call emergency services.
-              Always consult a doctor for personalized advice.
+          {currentView === 'chat' && (
+            <div className="px-4 pb-4">
+              <div className="text-xs text-secondary-500 bg-warning-50 border border-warning-200 rounded-lg p-3">
+                ⚠️ MedBot is an AI assistant. For medical emergencies, call emergency services.
+                Always consult a doctor for personalized advice.
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>

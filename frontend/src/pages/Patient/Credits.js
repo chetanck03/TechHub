@@ -45,58 +45,93 @@ const Credits = () => {
     }
   };
 
-  if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span className="ml-3 text-secondary-600">Loading...</span>
+      </div>
+    </Layout>
+  );
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>Credit Wallet</h1>
-
-        <div className="credit-balance">
-          <FiCreditCard className="credit-icon" />
-          <div>
-            <h2>{credits}</h2>
-            <p>Available Credits</p>
-          </div>
+      <div className="space-y-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-secondary-900 mb-2">Credit Wallet</h1>
+          <p className="text-secondary-600">Manage your consultation credits and purchase history</p>
         </div>
 
-        <div className="section">
-          <h2>Buy Credits</h2>
-          <div className="packages-grid">
-            {packages.map((pkg, index) => (
-              <div key={index} className="package-card">
-                <h3>{pkg.credits} Credits</h3>
-                <p className="package-price">${pkg.amount}</p>
-                <button 
-                  onClick={() => handlePurchase(pkg)}
-                  className="btn-primary"
-                >
-                  Purchase
-                </button>
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center gap-6">
+              <div className="p-4 bg-success-100 rounded-full">
+                <FiCreditCard className="w-8 h-8 text-success-600" />
               </div>
-            ))}
+              <div>
+                <h2 className="text-4xl font-bold text-secondary-900">{credits}</h2>
+                <p className="text-secondary-600">Available Credits</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="section">
-          <h2>Transaction History</h2>
-          {transactions.length === 0 ? (
-            <p>No transactions yet</p>
-          ) : (
-            <div className="transactions-list">
-              {transactions.map((transaction) => (
-                <div key={transaction._id} className="transaction-item">
-                  <div>
-                    <strong>{transaction.description}</strong>
-                    <p>{new Date(transaction.createdAt).toLocaleString()}</p>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Buy Credits</h2>
+            <p className="text-secondary-600 mt-1">Purchase credit packages for consultations</p>
+          </div>
+          <div className="card-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {packages.map((pkg, index) => (
+                <div key={index} className="card card-hover border-2 border-primary-200">
+                  <div className="card-body text-center">
+                    <div className="text-4xl mb-4">💳</div>
+                    <h3 className="text-2xl font-bold text-secondary-900 mb-2">{pkg.credits} Credits</h3>
+                    <p className="text-3xl font-bold text-primary-600 mb-4">${pkg.amount}</p>
+                    <button 
+                      onClick={() => handlePurchase(pkg)}
+                      className="btn btn-primary w-full"
+                    >
+                      Purchase
+                    </button>
                   </div>
-                  <span className={transaction.credits > 0 ? 'credit-positive' : 'credit-negative'}>
-                    {transaction.credits > 0 ? '+' : ''}{transaction.credits} credits
-                  </span>
                 </div>
               ))}
             </div>
-          )}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Transaction History</h2>
+          </div>
+          <div className="card-body">
+            {transactions.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">📋</div>
+                <p className="text-secondary-500">No transactions yet</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction._id} className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border border-secondary-200">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-secondary-900">{transaction.description}</h4>
+                      <p className="text-sm text-secondary-500">{new Date(transaction.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-lg font-bold ${
+                        transaction.credits > 0 ? 'text-success-600' : 'text-danger-600'
+                      }`}>
+                        {transaction.credits > 0 ? '+' : ''}{transaction.credits} credits
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Layout>

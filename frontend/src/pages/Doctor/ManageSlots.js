@@ -74,109 +74,158 @@ const ManageSlots = () => {
     }
   };
 
-  if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span className="ml-3 text-secondary-600">Loading...</span>
+      </div>
+    </Layout>
+  );
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>Manage Availability</h1>
+      <div className="space-y-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-secondary-900 mb-2">Manage Availability</h1>
+          <p className="text-secondary-600">Set your available time slots for patient consultations</p>
+        </div>
 
-        <div className="slots-container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2>Add New Slot</h2>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Add New Slot</h2>
           </div>
-          <form onSubmit={handleAddSlot} className="add-slot-form">
-            <div className="form-group">
-              <label>Date</label>
-              <input
-                type="date"
-                value={newSlot.date}
-                onChange={(e) => setNewSlot({ ...newSlot, date: e.target.value })}
-                required
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Start Time</label>
-              <input
-                type="time"
-                value={newSlot.startTime}
-                onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>End Time</label>
-              <input
-                type="time"
-                value={newSlot.endTime}
-                onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
-                required
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? 'Adding...' : 'Add Slot'}
-            </button>
-          </form>
-
-          <h2>Your Slots</h2>
-          {slots.length === 0 ? (
-            <p>No slots created yet. Add your first slot above to start accepting appointments.</p>
-          ) : (
-            <>
-              <div className="slots-summary">
-                <p>Total Slots: <strong>{slots.length}</strong></p>
-                <p>Available: <strong>{slots.filter(s => !s.isBooked).length}</strong></p>
-                <p>Booked: <strong>{slots.filter(s => s.isBooked).length}</strong></p>
+          <div className="card-body">
+            <form onSubmit={handleAddSlot} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="form-group">
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  value={newSlot.date}
+                  onChange={(e) => setNewSlot({ ...newSlot, date: e.target.value })}
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                  className="form-input"
+                />
               </div>
-              <div className="slots-list">
-                {slots.map((slot) => {
-                  // Safety check for null slot
-                  if (!slot || !slot._id) return null;
-                  
-                  const slotDate = new Date(slot.date);
-                  const isPast = slotDate < new Date(new Date().setHours(0, 0, 0, 0));
-                  
-                  return (
-                    <div key={slot._id} className={`slot-item ${isPast ? 'past-slot' : ''}`}>
-                      <div className="slot-info">
-                        <div>
-                          <label>Date</label>
-                          <strong>{slotDate.toLocaleDateString('en-US', { 
-                            weekday: 'short', 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}</strong>
-                        </div>
-                        <div>
-                          <label>Time</label>
-                          <strong>{slot.startTime || 'N/A'} - {slot.endTime || 'N/A'}</strong>
-                        </div>
-                        <div>
-                          <label>Status</label>
-                          <strong className={slot.isBooked ? 'status-booked' : 'status-available'}>
-                            {slot.isBooked ? '🔴 Booked' : '🟢 Available'}
-                          </strong>
+
+              <div className="form-group">
+                <label className="form-label">Start Time</label>
+                <input
+                  type="time"
+                  value={newSlot.startTime}
+                  onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">End Time</label>
+                <input
+                  type="time"
+                  value={newSlot.endTime}
+                  onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  {submitting ? 'Adding...' : 'Add Slot'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-xl font-semibold text-secondary-900">Your Slots</h2>
+          </div>
+          <div className="card-body">
+            {slots.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">📅</div>
+                <p className="text-secondary-500">No slots created yet. Add your first slot above to start accepting appointments.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-secondary-50 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-secondary-900">{slots.length}</div>
+                    <div className="text-sm text-secondary-600">Total Slots</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-success-600">{slots.filter(s => !s.isBooked).length}</div>
+                    <div className="text-sm text-secondary-600">Available</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-danger-600">{slots.filter(s => s.isBooked).length}</div>
+                    <div className="text-sm text-secondary-600">Booked</div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {slots.map((slot) => {
+                    // Safety check for null slot
+                    if (!slot || !slot._id) return null;
+                    
+                    const slotDate = new Date(slot.date);
+                    const isPast = slotDate < new Date(new Date().setHours(0, 0, 0, 0));
+                    
+                    return (
+                      <div key={slot._id} className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                        isPast 
+                          ? 'bg-secondary-100 border-secondary-200 opacity-60' 
+                          : slot.isBooked 
+                            ? 'bg-danger-50 border-danger-200' 
+                            : 'bg-success-50 border-success-200 hover:shadow-md'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                            <div>
+                              <span className="text-sm font-medium text-secondary-500">Date</span>
+                              <div className="font-semibold text-secondary-900">
+                                {slotDate.toLocaleDateString('en-US', { 
+                                  weekday: 'short', 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-secondary-500">Time</span>
+                              <div className="font-semibold text-secondary-900">
+                                {slot.startTime || 'N/A'} - {slot.endTime || 'N/A'}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-secondary-500">Status</span>
+                              <div className={`font-semibold ${
+                                slot.isBooked ? 'text-danger-600' : 'text-success-600'
+                              }`}>
+                                {slot.isBooked ? '🔴 Booked' : '🟢 Available'}
+                              </div>
+                            </div>
+                          </div>
+                          {!slot.isBooked && !isPast && (
+                            <button 
+                              onClick={() => handleDeleteSlot(slot._id)}
+                              className="btn btn-danger btn-sm ml-4"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </div>
-                      {!slot.isBooked && !isPast && (
-                        <button 
-                          onClick={() => handleDeleteSlot(slot._id)}
-                          className="btn-delete"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  );
-                }).filter(Boolean)}
-              </div>
-            </>
-          )}
+                    );
+                  }).filter(Boolean)}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </Layout>
