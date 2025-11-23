@@ -128,14 +128,17 @@ const Chat = () => {
                 <FiArrowLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-3">
-                {otherUser?.profilePhoto || otherUser?.profileImage ? (
+                {(otherUser?.profilePhoto && otherUser?.profilePhoto.data) || otherUser?.profileImage ? (
                   <img 
-                    src={`${process.env.REACT_APP_API_URL}/${otherUser.profilePhoto || otherUser.profileImage}`} 
+                    src={user.role === 'patient' && otherUser?.profilePhoto?.data ? 
+                      `data:${otherUser.profilePhoto.contentType};base64,${otherUser.profilePhoto.data}` : 
+                      `${process.env.REACT_APP_API_URL}/${otherUser.profileImage}`
+                    } 
                     alt={otherUser.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-primary-200"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-lg font-bold text-primary-600 border-2 border-primary-200">
+                  <div>
                     {otherUser?.name?.charAt(0)}
                   </div>
                 )}

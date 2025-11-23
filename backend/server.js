@@ -16,7 +16,7 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
   process.env.FRONTEND_URL,
   // Add your deployed frontend URL here
-  'https://your-frontend-app.vercel.app',
+  'https://telehealthsystem.vercel.app',
   'https://your-frontend-app.netlify.app'
 ].filter(Boolean);
 

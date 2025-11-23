@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
-import { FiStar, FiCalendar, FiMessageCircle } from 'react-icons/fi';
+import { FiStar, FiCalendar, FiMessageCircle, FiArrowLeft, FiMonitor } from 'react-icons/fi';
 
 
 const DoctorProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [canMessage, setCanMessage] = useState(false);
@@ -61,14 +62,25 @@ const DoctorProfile = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Back Button */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 transition-colors"
+          >
+            <FiArrowLeft className="w-5 h-5" />
+            Back
+          </button>
+        </div>
+        
         {/* Profile Header */}
         <div className="card">
           <div className="card-body">
             <div className="flex flex-col md:flex-row gap-6 items-start">
               <div className="flex-shrink-0">
-                {doctor.profilePhoto ? (
+                {doctor.profilePhoto && doctor.profilePhoto.data ? (
                   <img 
-                    src={`${process.env.REACT_APP_API_URL}/${doctor.profilePhoto}`} 
+                    src={`data:${doctor.profilePhoto.contentType};base64,${doctor.profilePhoto.data}`} 
                     alt={doctor.name} 
                     className="w-32 h-32 rounded-full object-cover border-4 border-primary-200" 
                   />
@@ -164,10 +176,10 @@ const DoctorProfile = () => {
               {doctor.consultationModes?.video && (
                 <div className="p-4 border border-primary-200 rounded-lg bg-primary-50">
                   <div className="flex items-start gap-3">
-                    <div className="text-2xl">📹</div>
+                    <div className="text-2xl"><FiMonitor className="w-8 h-8 text-primary-600" /></div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-secondary-900 mb-1">Video Consultation</h3>
-                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.video} credits</p>
+                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.video} Credits</p>
                       <p className="text-sm text-secondary-600">Consult from anywhere via video call</p>
                     </div>
                   </div>
@@ -179,7 +191,7 @@ const DoctorProfile = () => {
                     <div className="text-2xl">🏥</div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-secondary-900 mb-1">Physical Visit</h3>
-                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.physical} credits</p>
+                      <p className="text-lg font-bold text-success-600 mb-2">{doctor.consultationFee?.physical} Credits</p>
                       <p className="text-sm text-secondary-600">Visit clinic at {doctor.currentHospitalClinic}</p>
                     </div>
                   </div>

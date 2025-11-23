@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
-import { FiStar } from 'react-icons/fi';
+import { FiStar, FiArrowLeft, FiMonitor } from 'react-icons/fi';
 
 
 const DoctorList = () => {
   const [doctors, setDoctors] = useState([]);
   const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     category: '',
     minExperience: '',
@@ -60,6 +61,15 @@ const DoctorList = () => {
     <Layout>
       <div className="space-y-6">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 transition-colors"
+            >
+              <FiArrowLeft className="w-5 h-5" />
+              Back
+            </button>
+          </div>
           <h1 className="text-3xl font-bold text-secondary-900 mb-2">Find Doctors</h1>
           <p className="text-secondary-600">Browse and connect with qualified healthcare professionals</p>
         </div>
@@ -135,9 +145,9 @@ const DoctorList = () => {
               <div key={doctor._id} className="card card-hover">
                 <div className="card-body">
                   <div className="flex items-start gap-4 mb-4">
-                    {doctor.profilePhoto ? (
+                    {doctor.profilePhoto && doctor.profilePhoto.data ? (
                       <img 
-                        src={`${process.env.REACT_APP_API_URL}/${doctor.profilePhoto}`} 
+                        src={`data:${doctor.profilePhoto.contentType};base64,${doctor.profilePhoto.data}`} 
                         alt={doctor.name} 
                         className="w-16 h-16 rounded-full object-cover border-2 border-primary-200" 
                       />
@@ -183,7 +193,7 @@ const DoctorList = () => {
                       </span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-success-600">{doctor.consultationFee?.video} cr</div>
+                      <div className="font-bold text-success-600">{doctor.consultationFee?.video} Credits</div>
                       <div className="text-xs text-secondary-500">Video Fee</div>
                     </div>
                   </div>
@@ -191,7 +201,7 @@ const DoctorList = () => {
                   <div className="flex gap-2 mb-4">
                     {doctor.consultationModes?.video && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
-                        📹 Video
+                        <FiMonitor className="w-3 h-3 mr-1" /> Video
                       </span>
                     )}
                     {doctor.consultationModes?.physical && (

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
+import { FiArrowLeft } from 'react-icons/fi';
 
 
 const BookConsultation = () => {
@@ -69,6 +70,17 @@ const BookConsultation = () => {
     <Layout>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
+          {/* Back Button */}
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 transition-colors"
+            >
+              <FiArrowLeft className="w-5 h-5" />
+              Back
+            </button>
+          </div>
+          
           <h1 className="text-3xl font-bold text-secondary-900 mb-2">Book Consultation</h1>
           <p className="text-lg text-secondary-600">
             Dr. {doctor.userId?.name} - <span className="text-primary-600">{doctor.specialization?.name}</span>
