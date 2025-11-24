@@ -48,11 +48,11 @@ const MyConsultations = () => {
   return (
     <Layout>
       <div className="h-full flex flex-col">
-        <div className="mb-6 flex-shrink-0">
-          <h1 className="text-3xl font-bold text-secondary-900 mb-2">
+        <div className="mb-4 sm:mb-6 flex-shrink-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-2">
             {user.role === 'patient' ? 'My Consultations' : 'My Patients'}
           </h1>
-          <p className="text-secondary-600">
+          <p className="text-sm sm:text-base text-secondary-600">
             {user.role === 'patient' 
               ? 'View and manage your medical consultations' 
               : 'View and manage your patient consultations'
@@ -64,42 +64,42 @@ const MyConsultations = () => {
           {consultations.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="text-6xl mb-4">
+                <div className="text-4xl sm:text-6xl mb-4">
                   {user.role === 'patient' ? '👨‍⚕️' : '👥'}
                 </div>
-                <p className="text-secondary-500 text-lg">
+                <p className="text-secondary-500 text-base sm:text-lg">
                   {user.role === 'patient' ? 'No consultations found' : 'No patient consultations found'}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="space-y-4 pr-2">
+            <div className="space-y-3 sm:space-y-4 pr-2">
               {consultations.map((consultation) => (
                 <div key={consultation._id} className="card card-hover">
-                  <div className="card-body">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-                      <div className="flex-1">
+                  <div className="card-body p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                      <div className="flex-1 min-w-0">
                         {user.role === 'patient' ? (
                           <>
-                            <h3 className="text-lg font-semibold text-secondary-900 mb-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-secondary-900 mb-1 truncate">
                               Dr. {consultation.doctorId?.userId?.name}
                             </h3>
-                            <p className="text-primary-600 font-medium mb-2">
+                            <p className="text-sm sm:text-base text-primary-600 font-medium mb-2 truncate">
                               {consultation.doctorId?.specialization?.name}
                             </p>
                           </>
                         ) : (
                           <>
-                            <h3 className="text-lg font-semibold text-secondary-900 mb-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-secondary-900 mb-1 truncate">
                               {consultation.patientId?.name}
                             </h3>
-                            <p className="text-primary-600 font-medium mb-2">
+                            <p className="text-sm sm:text-base text-primary-600 font-medium mb-2">
                               Patient
                             </p>
                           </>
                         )}
                       </div>
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium capitalize ${
+                      <span className={`inline-flex px-2 sm:px-3 py-1 rounded-full text-xs font-medium capitalize whitespace-nowrap ${
                         consultation.status === 'scheduled' 
                           ? 'bg-primary-100 text-primary-700'
                           : consultation.status === 'ongoing'
@@ -114,13 +114,13 @@ const MyConsultations = () => {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
                       <div className="space-y-1">
-                        <span className="text-sm font-medium text-secondary-500">Type</span>
-                        <p className="text-secondary-900 capitalize">{consultation.type}</p>
+                        <span className="text-xs sm:text-sm font-medium text-secondary-500">Type</span>
+                        <p className="text-sm sm:text-base text-secondary-900 capitalize">{consultation.type}</p>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-sm font-medium text-secondary-500">
+                        <span className="text-xs sm:text-sm font-medium text-secondary-500">
                           {(() => {
                             if (consultation.status === 'completed') return 'Completed At';
                             if (consultation.status === 'ongoing') return 'Started At';
@@ -128,7 +128,7 @@ const MyConsultations = () => {
                             return 'Created At';
                           })()}
                         </span>
-                        <p className="text-secondary-900 text-sm">
+                        <p className="text-xs sm:text-sm text-secondary-900">
                           {(() => {
                             // Show different dates based on consultation status
                             if (consultation.status === 'completed' && consultation.completedAt) {
@@ -144,33 +144,35 @@ const MyConsultations = () => {
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-sm font-medium text-secondary-500">Credits Charged</span>
-                        <p className="text-secondary-900 font-semibold">{consultation.creditsCharged}</p>
+                        <span className="text-xs sm:text-sm font-medium text-secondary-500">Credits Charged</span>
+                        <p className="text-sm sm:text-base text-secondary-900 font-semibold">{consultation.creditsCharged}</p>
                       </div>
                     </div>
 
                     {consultation.notes && (
-                      <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-semibold text-secondary-800 mb-2">Consultation Notes:</h4>
-                        <p className="text-secondary-700">{consultation.notes}</p>
+                      <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                        <h4 className="text-sm sm:text-base font-semibold text-secondary-800 mb-2">Consultation Notes:</h4>
+                        <p className="text-xs sm:text-sm text-secondary-700">{consultation.notes}</p>
                       </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-secondary-200">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-secondary-200">
                       {(consultation.status === 'scheduled' || consultation.status === 'ongoing') && consultation.type === 'online' && (
                         <Link to={`/video-call/${consultation._id}`} className="flex-1 sm:flex-none">
-                          <button className="btn btn-primary w-full sm:w-auto">
-                            <FiVideo className="w-4 h-4" />
-                            {consultation.status === 'ongoing' ? 'Rejoin' : 'Join'} Video Call
+                          <button className="btn btn-primary w-full sm:w-auto text-sm">
+                            <FiVideo className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">{consultation.status === 'ongoing' ? 'Rejoin' : 'Join'} Video Call</span>
+                            <span className="sm:hidden">{consultation.status === 'ongoing' ? 'Rejoin' : 'Join'}</span>
                           </button>
                         </Link>
                       )}
                       
                       {consultation.videoCallCompleted && (
                         <Link to={`/chat/${consultation._id}`} className="flex-1 sm:flex-none">
-                          <button className="btn btn-secondary w-full sm:w-auto">
-                            <FiMessageCircle className="w-4 h-4" />
-                            {user.role === 'patient' ? 'Message Doctor' : 'Message Patient'}
+                          <button className="btn btn-secondary w-full sm:w-auto text-sm">
+                            <FiMessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">{user.role === 'patient' ? 'Message Doctor' : 'Message Patient'}</span>
+                            <span className="sm:hidden">Message</span>
                           </button>
                         </Link>
                       )}

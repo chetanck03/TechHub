@@ -67,42 +67,42 @@ const Credits = () => {
 
   return (
     <Layout>
-      <div className="space-y-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-secondary-900 mb-2">Credit Wallet</h1>
-          <p className="text-secondary-600">Manage your consultation credits and purchase history</p>
+      <div className="space-y-6 sm:space-y-8">
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-2">Credit Wallet</h1>
+          <p className="text-sm sm:text-base text-secondary-600">Manage your consultation credits and purchase history</p>
         </div>
 
         <div className="card">
-          <div className="card-body">
-            <div className="flex items-center gap-6">
-              <div className="p-4 bg-success-100 rounded-full">
-                <FiCreditCard className="w-8 h-8 text-success-600" />
+          <div className="card-body p-4 sm:p-6">
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="p-3 sm:p-4 bg-success-100 rounded-full flex-shrink-0">
+                <FiCreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-success-600" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-secondary-900">{credits}</h2>
-                <p className="text-secondary-600">Available Credits</p>
+                <h2 className="text-3xl sm:text-4xl font-bold text-secondary-900">{credits}</h2>
+                <p className="text-sm sm:text-base text-secondary-600">Available Credits</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-secondary-900">Buy Credits</h2>
-            <p className="text-secondary-600 mt-1">Purchase credit packages for consultations</p>
+          <div className="card-header p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Buy Credits</h2>
+            <p className="text-xs sm:text-sm text-secondary-600 mt-1">Purchase credit packages for consultations</p>
           </div>
-          <div className="card-body">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="card-body p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {packages.map((pkg, index) => (
                 <div key={index} className="card card-hover border-2 border-primary-200">
-                  <div className="card-body text-center">
-                    <div className="text-4xl mb-4">💳</div>
-                    <h3 className="text-2xl font-bold text-secondary-900 mb-2">{pkg.credits} Credits</h3>
-                    <p className="text-3xl font-bold text-primary-600 mb-4">${pkg.amount}</p>
+                  <div className="card-body text-center p-4 sm:p-6">
+                    <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">💳</div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-secondary-900 mb-2">{pkg.credits} Credits</h3>
+                    <p className="text-2xl sm:text-3xl font-bold text-primary-600 mb-3 sm:mb-4">${pkg.amount}</p>
                     <button 
                       onClick={() => handlePurchaseClick(pkg)}
-                      className="btn btn-primary w-full"
+                      className="btn btn-primary w-full text-sm sm:text-base"
                     >
                       Purchase
                     </button>
@@ -114,25 +114,25 @@ const Credits = () => {
         </div>
 
         <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-secondary-900">Transaction History</h2>
+          <div className="card-header p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Transaction History</h2>
           </div>
-          <div className="card-body">
+          <div className="card-body p-4 sm:p-6">
             {transactions.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-6xl mb-4">📋</div>
-                <p className="text-secondary-500">No transactions yet</p>
+                <div className="text-4xl sm:text-6xl mb-4">📋</div>
+                <p className="text-sm sm:text-base text-secondary-500">No transactions yet</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {transactions.map((transaction) => (
-                  <div key={transaction._id} className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border border-secondary-200">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-secondary-900">{transaction.description}</h4>
-                      <p className="text-sm text-secondary-500">{new Date(transaction.createdAt).toLocaleString()}</p>
+                  <div key={transaction._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-secondary-50 rounded-lg border border-secondary-200 gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm sm:text-base font-semibold text-secondary-900 truncate">{transaction.description}</h4>
+                      <p className="text-xs sm:text-sm text-secondary-500">{new Date(transaction.createdAt).toLocaleString()}</p>
                     </div>
-                    <div className="text-right">
-                      <span className={`text-lg font-bold ${
+                    <div className="text-left sm:text-right">
+                      <span className={`text-base sm:text-lg font-bold ${
                         transaction.credits > 0 ? 'text-success-600' : 'text-danger-600'
                       }`}>
                         {transaction.credits > 0 ? '+' : ''}{transaction.credits} credits

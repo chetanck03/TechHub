@@ -231,27 +231,30 @@ const MedBot = () => {
     <>
       {/* Floating Button */}
       <button
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-large hover:shadow-xl transition-all duration-300 hover:-translate-y-1 z-40 ${isOpen ? 'hidden' : 'flex'} items-center justify-center`}
+        className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-full shadow-large hover:shadow-xl transition-all duration-300 hover:-translate-y-1 z-40 ${isOpen ? 'hidden' : 'flex'} items-center justify-center group`}
         onClick={() => setIsOpen(true)}
-        title="Chat with MedBot"
+        title="Chat with MedBot AI Assistant"
       >
-        <Bot className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 bg-success-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+        <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
+        <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full animate-pulse">
           AI
         </span>
       </button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-large border border-secondary-200 flex flex-col z-40 animate-slide-up">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-large border border-secondary-200 flex flex-col z-50 animate-slide-up">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-secondary-200 bg-primary-50 rounded-t-2xl">
+          <div className="flex items-center justify-between p-4 border-b border-secondary-200 bg-gradient-to-r from-success-50 to-success-100 rounded-t-2xl">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-success-500 to-success-600 rounded-full flex items-center justify-center shadow-md">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-secondary-900">MedBot</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-secondary-900">MedBot</h3>
+                  <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">AI</span>
+                </div>
                 <p className="text-xs text-secondary-600">AI Health Assistant</p>
               </div>
             </div>

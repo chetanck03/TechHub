@@ -127,274 +127,502 @@ const DoctorRegister = () => {
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>Doctor Registration</h1>
-        <p className="subtitle">Complete your profile to start practicing on our platform</p>
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        {/* Header Section */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full mb-4">
+            <span className="text-3xl sm:text-4xl">👨‍⚕️</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-2">Doctor Registration</h1>
+          <p className="text-sm sm:text-base text-secondary-600 max-w-2xl mx-auto px-4">
+            Complete your profile to start practicing on our platform. All information will be verified by our admin team.
+          </p>
+        </div>
 
-        <div className="register-form">
-          <form onSubmit={handleSubmit}>
+        {/* Progress Indicator */}
+        <div className="card bg-gradient-to-r from-primary-50 to-purple-50 border-2 border-primary-200">
+          <div className="card-body p-4 sm:p-6">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold">1</div>
+                <span className="font-medium text-secondary-900 hidden sm:inline">Personal Info</span>
+              </div>
+              <div className="flex-1 h-1 bg-primary-200 mx-2"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold">2</div>
+                <span className="font-medium text-secondary-900 hidden sm:inline">Professional</span>
+              </div>
+              <div className="flex-1 h-1 bg-primary-200 mx-2"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold">3</div>
+                <span className="font-medium text-secondary-900 hidden sm:inline">Documents</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Personal Information */}
-            <div className="form-section">
-              <h2>Personal Information</h2>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Phone Number *</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                    placeholder="+1234567890"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Gender *</label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                    required
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
+            <div className="card border-l-4 border-l-primary-500 shadow-lg">
+              <div className="card-header bg-gradient-to-r from-primary-50 to-primary-100 p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl sm:text-2xl">👤</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-secondary-900">Personal Information</h2>
+                    <p className="text-xs sm:text-sm text-secondary-600">Basic details about yourself</p>
+                  </div>
                 </div>
               </div>
+              <div className="card-body p-4 sm:p-6 space-y-4 sm:space-y-6">
+              
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📱 Phone Number <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      required
+                      placeholder="+1234567890"
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Date of Birth *</label>
-                  <input
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                    required
-                  />
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        ⚧ Gender <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <select
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      required
+                      className="form-input text-sm sm:text-base"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Profile Photo</label>
-                  <input
-                    type="file"
-                    onChange={(e) => setFiles({ ...files, profilePhoto: e.target.files[0] })}
-                    accept="image/*"
-                    className="file-input"
-                  />
-                  <small>Optional - Upload your profile photo (Max 2MB)</small>
-                  {files.profilePhoto && (
-                    <div className="file-info">
-                      ✅ Selected: {files.profilePhoto.name} ({(files.profilePhoto.size / 1024 / 1024).toFixed(2)} MB)
-                    </div>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📅 Date of Birth <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                      required
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📸 Profile Photo <span className="text-secondary-400 text-xs">(Optional)</span>
+                      </span>
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => setFiles({ ...files, profilePhoto: e.target.files[0] })}
+                      accept="image/*"
+                      className="form-input text-sm"
+                    />
+                    <p className="text-xs text-secondary-500 mt-1">Upload your profile photo (Max 2MB)</p>
+                    {files.profilePhoto && (
+                      <div className="mt-2 p-2 bg-success-50 border border-success-200 rounded-lg text-xs sm:text-sm text-success-700">
+                        ✅ {files.profilePhoto.name} ({(files.profilePhoto.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Professional Details */}
-            <div className="form-section">
-              <h2>Professional Details (Required for Verification)</h2>
+            <div className="card border-l-4 border-l-purple-500 shadow-lg">
+              <div className="card-header bg-gradient-to-r from-purple-50 to-purple-100 p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl sm:text-2xl">🎓</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-secondary-900">Professional Details</h2>
+                    <p className="text-xs sm:text-sm text-secondary-600">Required for verification</p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-body p-4 sm:p-6 space-y-4 sm:space-y-6">
               
-              <div className="form-row">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        🎓 Qualification <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.qualification}
+                      onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                      required
+                      placeholder="MBBS, MD, MS, BDS, etc."
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        🩺 Specialization <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <select
+                      value={formData.specialization}
+                      onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                      required
+                      className="form-input text-sm sm:text-base"
+                    >
+                      <option value="">Select Specialization</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        ⏱️ Years of Experience <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.experience}
+                      onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                      required
+                      min="0"
+                      placeholder="5"
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        🆔 Medical Registration Number <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.medicalRegistrationNumber}
+                      onChange={(e) => setFormData({ ...formData, medicalRegistrationNumber: e.target.value })}
+                      required
+                      placeholder="MED12345"
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label>Qualification *</label>
+                  <label className="form-label text-sm sm:text-base">
+                    <span className="flex items-center gap-2">
+                      🏛️ Issuing Medical Council Name <span className="text-danger-500">*</span>
+                    </span>
+                  </label>
                   <input
                     type="text"
-                    value={formData.qualification}
-                    onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                    value={formData.issuingMedicalCouncil}
+                    onChange={(e) => setFormData({ ...formData, issuingMedicalCouncil: e.target.value })}
                     required
-                    placeholder="MBBS, MD, MS, BDS, etc."
+                    placeholder="e.g., Medical Council of India"
+                    className="form-input text-sm sm:text-base"
                   />
                 </div>
-
-                <div className="form-group">
-                  <label>Specialization *</label>
-                  <select
-                    value={formData.specialization}
-                    onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                    required
-                  >
-                    <option value="">Select Specialization</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Years of Experience *</label>
-                  <input
-                    type="number"
-                    value={formData.experience}
-                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                    required
-                    min="0"
-                    placeholder="5"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Medical Registration Number (MCI/SMC) *</label>
-                  <input
-                    type="text"
-                    value={formData.medicalRegistrationNumber}
-                    onChange={(e) => setFormData({ ...formData, medicalRegistrationNumber: e.target.value })}
-                    required
-                    placeholder="MED12345"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Issuing Medical Council Name *</label>
-                <input
-                  type="text"
-                  value={formData.issuingMedicalCouncil}
-                  onChange={(e) => setFormData({ ...formData, issuingMedicalCouncil: e.target.value })}
-                  required
-                  placeholder="e.g., Medical Council of India"
-                />
               </div>
             </div>
 
             {/* Required Documents */}
-            <div className="form-section">
-              <h2>Required Documents (Must Upload at Registration)</h2>
-              <p className="form-note">All documents are required for verification. Accepted formats: PDF, JPG, PNG</p>
+            <div className="card border-l-4 border-l-warning-500 shadow-lg">
+              <div className="card-header bg-gradient-to-r from-warning-50 to-warning-100 p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-warning-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl sm:text-2xl">📄</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-secondary-900">Required Documents</h2>
+                    <p className="text-xs sm:text-sm text-secondary-600">Must upload at registration</p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-body p-4 sm:p-6 space-y-4 sm:space-y-6">
+                <div className="bg-warning-50 border-l-4 border-warning-500 p-3 sm:p-4 rounded-r-lg">
+                  <p className="text-xs sm:text-sm text-warning-800 font-medium">
+                    ⚠️ All documents are required for verification. Accepted formats: PDF, JPG, PNG (Max 5MB each)
+                  </p>
+                </div>
               
-              <div className="form-group">
-                <label>Government ID (Aadhar/PAN) *</label>
-                <input
-                  type="file"
-                  onChange={(e) => setFiles({ ...files, idProof: e.target.files[0] })}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  required
-                  className="file-input"
-                />
-                <small>Upload your Aadhar card, PAN card, or any government-issued ID (Max 5MB)</small>
-                {files.idProof && (
-                  <div className="file-info">
-                    ✅ Selected: {files.idProof.name} ({(files.idProof.size / 1024 / 1024).toFixed(2)} MB)
+                <div className="space-y-4 sm:space-y-5">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        🪪 Government ID (Aadhar/PAN) <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => setFiles({ ...files, idProof: e.target.files[0] })}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      required
+                      className="form-input text-sm"
+                    />
+                    <p className="text-xs text-secondary-500 mt-1">Upload your Aadhar card, PAN card, or any government-issued ID (Max 5MB)</p>
+                    {files.idProof && (
+                      <div className="mt-2 p-3 bg-success-50 border border-success-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="text-success-600 text-lg">✅</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-success-700 truncate">{files.idProof.name}</p>
+                            <p className="text-xs text-success-600">Size: {(files.idProof.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="form-group">
-                <label>Degree Certificate *</label>
-                <input
-                  type="file"
-                  onChange={(e) => setFiles({ ...files, degreeDocument: e.target.files[0] })}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  required
-                  className="file-input"
-                />
-                <small>Upload your medical degree certificate (MBBS, MD, etc.) (Max 5MB)</small>
-                {files.degreeDocument && (
-                  <div className="file-info">
-                    ✅ Selected: {files.degreeDocument.name} ({(files.degreeDocument.size / 1024 / 1024).toFixed(2)} MB)
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📜 Degree Certificate <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => setFiles({ ...files, degreeDocument: e.target.files[0] })}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      required
+                      className="form-input text-sm"
+                    />
+                    <p className="text-xs text-secondary-500 mt-1">Upload your medical degree certificate (MBBS, MD, etc.) (Max 5MB)</p>
+                    {files.degreeDocument && (
+                      <div className="mt-2 p-3 bg-success-50 border border-success-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="text-success-600 text-lg">✅</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-success-700 truncate">{files.degreeDocument.name}</p>
+                            <p className="text-xs text-success-600">Size: {(files.degreeDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="form-group">
-                <label>Medical License Certificate *</label>
-                <input
-                  type="file"
-                  onChange={(e) => setFiles({ ...files, licenseDocument: e.target.files[0] })}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  required
-                  className="file-input"
-                />
-                <small>Upload your medical council registration/license certificate (Max 5MB)</small>
-                {files.licenseDocument && (
-                  <div className="file-info">
-                    ✅ Selected: {files.licenseDocument.name} ({(files.licenseDocument.size / 1024 / 1024).toFixed(2)} MB)
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📋 Medical License Certificate <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => setFiles({ ...files, licenseDocument: e.target.files[0] })}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      required
+                      className="form-input text-sm"
+                    />
+                    <p className="text-xs text-secondary-500 mt-1">Upload your medical council registration/license certificate (Max 5MB)</p>
+                    {files.licenseDocument && (
+                      <div className="mt-2 p-3 bg-success-50 border border-success-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="text-success-600 text-lg">✅</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-success-700 truncate">{files.licenseDocument.name}</p>
+                            <p className="text-xs text-success-600">Size: {(files.licenseDocument.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
-
-
 
             {/* Current Practice */}
-            <div className="form-section">
-              <h2>Current Practice</h2>
+            <div className="card border-l-4 border-l-success-500 shadow-lg">
+              <div className="card-header bg-gradient-to-r from-success-50 to-success-100 p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-success-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl sm:text-2xl">🏥</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-secondary-900">Current Practice</h2>
+                    <p className="text-xs sm:text-sm text-secondary-600">Where you currently work</p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-body p-4 sm:p-6 space-y-4 sm:space-y-6">
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Current Hospital/Clinic Name *</label>
-                  <input
-                    type="text"
-                    value={formData.currentHospitalClinic}
-                    onChange={(e) => setFormData({ ...formData, currentHospitalClinic: e.target.value })}
-                    required
-                    placeholder="City Hospital"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        🏥 Current Hospital/Clinic Name <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.currentHospitalClinic}
+                      onChange={(e) => setFormData({ ...formData, currentHospitalClinic: e.target.value })}
+                      required
+                      placeholder="City Hospital"
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label text-sm sm:text-base">
+                      <span className="flex items-center gap-2">
+                        📍 Current Working City <span className="text-danger-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.currentWorkingCity}
+                      onChange={(e) => setFormData({ ...formData, currentWorkingCity: e.target.value })}
+                      required
+                      placeholder="New York"
+                      className="form-input text-sm sm:text-base"
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Current Working City *</label>
-                  <input
-                    type="text"
-                    value={formData.currentWorkingCity}
-                    onChange={(e) => setFormData({ ...formData, currentWorkingCity: e.target.value })}
-                    required
-                    placeholder="New York"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Languages Spoken *</label>
-                <div className="language-input">
-                  <input
-                    type="text"
-                    value={languageInput}
-                    onChange={(e) => setLanguageInput(e.target.value)}
-                    placeholder="Enter language and click Add"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLanguage())}
-                  />
-                  <button type="button" onClick={handleAddLanguage} className="btn-add">
-                    Add
-                  </button>
-                </div>
-                <div className="language-tags">
-                  {formData.languagesSpoken.map((lang, index) => (
-                    <span key={index} className="language-tag">
-                      {lang}
-                      <button type="button" onClick={() => handleRemoveLanguage(index)}>×</button>
+                  <label className="form-label text-sm sm:text-base">
+                    <span className="flex items-center gap-2">
+                      🗣️ Languages Spoken <span className="text-danger-500">*</span>
                     </span>
-                  ))}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={languageInput}
+                      onChange={(e) => setLanguageInput(e.target.value)}
+                      placeholder="Enter language and press Enter or click Add"
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLanguage())}
+                      className="form-input flex-1 text-sm sm:text-base"
+                    />
+                    <button type="button" onClick={handleAddLanguage} className="btn btn-success whitespace-nowrap text-sm">
+                      + Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.languagesSpoken.map((lang, index) => (
+                      <span key={index} className="inline-flex items-center gap-2 px-3 py-1.5 bg-success-100 text-success-700 rounded-full text-sm font-medium">
+                        {lang}
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveLanguage(index)}
+                          className="hover:bg-success-200 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  {formData.languagesSpoken.length === 0 && (
+                    <p className="text-xs text-secondary-500 mt-2">Add at least one language you can communicate in</p>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="form-section">
-              <div className="info-box">
-                <h3>📋 Important Information</h3>
-                <ul>
-                  <li>✅ All fields marked with * are mandatory</li>
-                  <li>✅ Your registration will be reviewed by our admin team</li>
-                  <li>✅ You will receive an email once your profile is approved</li>
-                  <li>✅ You cannot login until admin approves your registration</li>
-                  <li>✅ After approval, you can update consultation details, fees, and slots</li>
-                  <li>🔒 All documents are securely stored in our database</li>
-                  <li>📁 Supported formats: PDF, JPG, PNG (Max 5MB per file)</li>
-                </ul>
+            {/* Important Information */}
+            <div className="card border-2 border-primary-300 bg-gradient-to-br from-primary-50 via-purple-50 to-success-50 shadow-lg">
+              <div className="card-body p-4 sm:p-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl sm:text-2xl">📋</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold text-secondary-900 mb-2">Important Information</h3>
+                    <p className="text-xs sm:text-sm text-secondary-600">Please read carefully before submitting</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-primary-200">
+                    <span className="text-primary-600 text-lg flex-shrink-0">✅</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">All fields marked with <span className="text-danger-500 font-bold">*</span> are mandatory</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-purple-200">
+                    <span className="text-purple-600 text-lg flex-shrink-0">👨‍💼</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">Your registration will be reviewed by our admin team</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-success-200">
+                    <span className="text-success-600 text-lg flex-shrink-0">📧</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">You will receive an email once your profile is approved</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-warning-200">
+                    <span className="text-warning-600 text-lg flex-shrink-0">⏳</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">You cannot login until admin approves your registration</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-primary-200">
+                    <span className="text-primary-600 text-lg flex-shrink-0">⚙️</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">After approval, you can update consultation details, fees, and slots</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-success-200">
+                    <span className="text-success-600 text-lg flex-shrink-0">🔒</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">All documents are securely stored and encrypted in our database</p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-secondary-200">
+                    <span className="text-secondary-600 text-lg flex-shrink-0">📁</span>
+                    <p className="text-xs sm:text-sm text-secondary-700">Supported formats: PDF, JPG, PNG (Max 5MB per file)</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <button type="submit" className="btn-primary btn-large">
-              Submit Registration for Approval
-            </button>
+            {/* Submit Button */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-4 pb-24">
+              <button 
+                type="submit" 
+                className="relative w-full sm:w-auto bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-bold text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-5 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 border-2 border-primary-700"
+              >
+                <span className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">🚀</span>
+                  <span>Submit Registration for Approval</span>
+                </span>
+                <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 rounded-xl transition-opacity duration-300"></div>
+              </button>
+            </div>
+            
+            {/* Bottom spacing to avoid MedBot overlap */}
+            <div className="h-8"></div>
           </form>
         </div>
-      </div>
     </Layout>
   );
 };
