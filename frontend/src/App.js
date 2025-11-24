@@ -39,6 +39,7 @@ import VideoCallNew from './pages/Shared/VideoCallNew';
 import Chat from './pages/Shared/Chat';
 
 import LocationPrompt from './components/LocationPrompt';
+import MedBot from './components/MedBot';
 import { requestLocationPermission, updateUserLocation } from './utils/location';
 import api from './utils/api';
 
@@ -154,6 +155,9 @@ function AppRoutes() {
           onDeny={handleLocationDeny}
         />
       )}
+
+      {/* MedBot - Available on all pages for logged-in users */}
+      {user && <MedBot />}
     </>
   );
 }

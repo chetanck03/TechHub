@@ -119,7 +119,6 @@ const ForgotPassword = () => {
             <form onSubmit={handleSendOTP} className="space-y-6">
               <div className="form-group">
                 <label className="form-label flex items-center gap-2">
-                  <span className="text-lg">📧</span>
                   Email Address
                 </label>
                 <input
@@ -143,7 +142,6 @@ const ForgotPassword = () => {
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    <span>📨</span>
                     Send OTP
                   </span>
                 )}
@@ -155,13 +153,12 @@ const ForgotPassword = () => {
             <form onSubmit={handleVerifyOTP} className="space-y-6">
               <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-primary-800">
-                  <span className="font-semibold">📧 OTP sent to:</span> {email}
+                  <span className="font-semibold">OTP sent to:</span> {email}
                 </p>
               </div>
 
               <div className="form-group">
                 <label className="form-label flex items-center gap-2">
-                  <span className="text-lg">🔢</span>
                   Enter OTP
                 </label>
                 <input
@@ -200,7 +197,6 @@ const ForgotPassword = () => {
 
               <div className="form-group">
                 <label className="form-label flex items-center gap-2">
-                  <span className="text-lg">🔒</span>
                   New Password
                 </label>
                 <input
@@ -217,7 +213,6 @@ const ForgotPassword = () => {
 
               <div className="form-group">
                 <label className="form-label flex items-center gap-2">
-                  <span className="text-lg">🔐</span>
                   Confirm Password
                 </label>
                 <input
@@ -234,7 +229,6 @@ const ForgotPassword = () => {
               <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading}>
                 {loading ? 'Resetting...' : (
                   <span className="flex items-center justify-center gap-2">
-                    <span>🔑</span>
                     Reset Password
                   </span>
                 )}

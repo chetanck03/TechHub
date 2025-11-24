@@ -123,7 +123,7 @@ const DoctorApprovals = () => {
                         </div>
                       </div>
                       <span className="px-3 py-1.5 bg-warning-100 text-warning-800 rounded-full text-xs sm:text-sm font-semibold border border-warning-300 whitespace-nowrap">
-                        ⏳ Pending Review
+                        Pending Review
                       </span>
                     </div>
                   </div>
@@ -131,32 +131,31 @@ const DoctorApprovals = () => {
                   <div className="card-body p-4 sm:p-6 space-y-4 sm:space-y-6 bg-white">
                     {/* Personal Information Section */}
                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
-                      <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3 flex items-center gap-2">
-                        <span className="text-lg">👤</span>
+                      <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3">
                         Personal Information
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-white rounded-lg p-3 sm:p-4">
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-blue-700 flex items-center gap-1">
-                            📧 Email
+                          <span className="text-xs sm:text-sm font-semibold text-blue-700">
+                            Email
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 break-all">{doctor.userId?.email}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-blue-700 flex items-center gap-1">
-                            📱 Phone
+                          <span className="text-xs sm:text-sm font-semibold text-blue-700">
+                            Phone
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900">{doctor.phone}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-blue-700 flex items-center gap-1">
-                            ⚧ Gender
+                          <span className="text-xs sm:text-sm font-semibold text-blue-700">
+                            Gender
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 capitalize">{doctor.gender}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-blue-700 flex items-center gap-1">
-                            📅 Date of Birth
+                          <span className="text-xs sm:text-sm font-semibold text-blue-700">
+                            Date of Birth
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900">{new Date(doctor.dateOfBirth).toLocaleDateString()}</p>
                         </div>
@@ -165,32 +164,31 @@ const DoctorApprovals = () => {
 
                     {/* Professional Credentials Section */}
                     <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border-l-4 border-purple-500">
-                      <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3 flex items-center gap-2">
-                        <span className="text-lg">🎓</span>
+                      <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3">
                         Professional Credentials
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-white rounded-lg p-3 sm:p-4">
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-purple-700 flex items-center gap-1">
-                            🎓 Qualification
+                          <span className="text-xs sm:text-sm font-semibold text-purple-700">
+                            Qualification
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 font-medium">{doctor.qualification}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-purple-700 flex items-center gap-1">
-                            ⏱️ Experience
+                          <span className="text-xs sm:text-sm font-semibold text-purple-700">
+                            Experience
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 font-medium">{doctor.experience} years</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-purple-700 flex items-center gap-1">
-                            🆔 Registration Number
+                          <span className="text-xs sm:text-sm font-semibold text-purple-700">
+                            Registration Number
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 font-mono">{doctor.medicalRegistrationNumber}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
-                          <span className="text-xs sm:text-sm font-semibold text-purple-700 flex items-center gap-1">
-                            🏛️ Issuing Council
+                          <span className="text-xs sm:text-sm font-semibold text-purple-700">
+                            Issuing Council
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900">{doctor.issuingMedicalCouncil}</p>
                         </div>
@@ -200,25 +198,24 @@ const DoctorApprovals = () => {
                     {/* Current Practice Section */}
                     <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border-l-4 border-green-500">
                       <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3 flex items-center gap-2">
-                        <span className="text-lg">🏥</span>
                         Current Practice
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-white rounded-lg p-3 sm:p-4">
                         <div className="space-y-1 sm:space-y-2">
                           <span className="text-xs sm:text-sm font-semibold text-green-700 flex items-center gap-1">
-                            🏥 Hospital/Clinic
+                            Hospital/Clinic
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900">{doctor.currentHospitalClinic}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
                           <span className="text-xs sm:text-sm font-semibold text-green-700 flex items-center gap-1">
-                            📍 Working City
+                             Working City
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900">{doctor.currentWorkingCity}</p>
                         </div>
                         <div className="space-y-1 sm:space-y-2">
                           <span className="text-xs sm:text-sm font-semibold text-green-700 flex items-center gap-1">
-                            🗣️ Languages
+                             Languages
                           </span>
                           <div className="flex flex-wrap gap-1">
                             {doctor.languagesSpoken?.map((lang, idx) => (
@@ -228,12 +225,12 @@ const DoctorApprovals = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="space-y-1 sm:space-y-2">
+                        {/* <div className="space-y-1 sm:space-y-2">
                           <span className="text-xs sm:text-sm font-semibold text-green-700 flex items-center gap-1">
-                            📋 Registration Type
+                             Registration Type
                           </span>
                           <p className="text-sm sm:text-base text-secondary-900 capitalize">{doctor.registrationType}</p>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
 
@@ -241,7 +238,6 @@ const DoctorApprovals = () => {
                     {doctor.fileInfo && (
                       <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4 border-l-4 border-orange-500">
                         <h4 className="text-sm sm:text-base font-bold text-secondary-900 mb-3 flex items-center gap-2">
-                          <span className="text-lg">📄</span>
                           Uploaded Documents
                         </h4>
                         <div className="bg-white rounded-lg p-3 sm:p-4">

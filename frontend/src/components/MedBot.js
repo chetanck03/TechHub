@@ -231,83 +231,83 @@ const MedBot = () => {
     <>
       {/* Floating Button */}
       <button
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-full shadow-large hover:shadow-xl transition-all duration-300 hover:-translate-y-1 z-40 ${isOpen ? 'hidden' : 'flex'} items-center justify-center group`}
+        className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-large hover:shadow-xl transition-all duration-300 hover:-translate-y-1 z-40 ${isOpen ? 'hidden' : 'flex'} items-center justify-center group touch-target`}
         onClick={() => setIsOpen(true)}
         title="Chat with MedBot AI Assistant"
       >
         <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
-        <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+        <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full animate-pulse">
           AI
         </span>
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Window - Complete Full Screen */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-large border border-secondary-200 flex flex-col z-50 animate-slide-up">
+        <div className="fixed inset-0 bg-white flex flex-col z-50 animate-slide-up">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-secondary-200 bg-gradient-to-r from-success-50 to-success-100 rounded-t-2xl">
+          <div className="flex items-center justify-between p-4 border-b border-secondary-200 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-[70px]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-success-500 to-success-600 rounded-full flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-secondary-900">MedBot</h3>
-                  <span className="px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">AI</span>
+                  <h3 className="font-bold text-secondary-900 text-lg">MedBot</h3>
+                  <span className="px-2 py-0.5 bg-indigo-500 text-white text-xs font-bold rounded-full">AI</span>
                 </div>
-                <p className="text-xs text-secondary-600">AI Health Assistant</p>
+                <p className="text-sm text-secondary-600">AI Health Assistant</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               {currentView === 'chat' ? (
                 <>
                   <button
-                    className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-blue-100 rounded-lg transition-colors touch-target"
                     onClick={handleViewHistory}
                     title="View chat history"
                   >
-                    <Clock className="w-4 h-4 text-secondary-600" />
+                    <Clock className="w-5 h-5 text-secondary-600" />
                   </button>
                   <button
-                    className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-blue-100 rounded-lg transition-colors touch-target"
                     onClick={handleNewChat}
                     title="New chat"
                   >
-                    <RefreshCw className="w-4 h-4 text-secondary-600" />
+                    <RefreshCw className="w-5 h-5 text-secondary-600" />
                   </button>
                 </>
               ) : (
                 <button
-                  className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-blue-100 rounded-lg transition-colors touch-target"
                   onClick={() => setCurrentView('chat')}
                   title="Back to chat"
                 >
-                  <MessageCircle className="w-4 h-4 text-secondary-600" />
+                  <MessageCircle className="w-5 h-5 text-secondary-600" />
                 </button>
               )}
               <button
-                className="p-2 hover:bg-primary-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-red-100 rounded-lg transition-colors touch-target ml-1 bg-red-50"
                 onClick={() => setIsOpen(false)}
                 title="Close"
               >
-                <X className="w-4 h-4 text-secondary-600" />
+                <X className="w-5 h-5 text-red-600" />
               </button>
             </div>
           </div>
 
           {/* Messages or History */}
           {currentView === 'chat' ? (
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-4 space-y-4 pr-2">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-6 space-y-6 medbot-messages">
               {messages.map((msg, index) => (
                 <div
                   key={index}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] ${msg.role === 'user' ? 'bg-primary-500 text-white' : 'bg-secondary-100 text-secondary-900'} rounded-2xl px-4 py-3`}>
-                    <div className="text-sm">
+                  <div className={`max-w-[80%] ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-blue-50 text-secondary-900 border border-blue-100'} rounded-2xl px-4 py-3`}>
+                    <div className="text-sm leading-relaxed">
                       <FormattedMessage content={msg.content} />
                     </div>
-                    <div className={`text-xs mt-2 ${msg.role === 'user' ? 'text-primary-100' : 'text-secondary-500'}`}>
+                    <div className={`text-xs mt-2 ${msg.role === 'user' ? 'text-blue-100' : 'text-secondary-500'}`}>
                       {new Date(msg.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -319,11 +319,11 @@ const MedBot = () => {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-secondary-100 rounded-2xl px-4 py-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="bg-blue-50 border border-blue-100 rounded-2xl px-6 py-5">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                     </div>
                   </div>
                 </div>
@@ -332,55 +332,55 @@ const MedBot = () => {
               <div ref={messagesEndRef} />
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-4">
-              <div className="mb-6">
-                <h4 className="font-semibold text-secondary-900 mb-1">Chat History</h4>
-                <p className="text-sm text-secondary-600">Your previous conversations with MedBot</p>
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 p-6">
+              <div className="mb-8">
+                <h4 className="font-semibold text-secondary-900 mb-2 text-2xl">Chat History</h4>
+                <p className="text-lg text-secondary-600">Your previous conversations with MedBot</p>
               </div>
               
               {isLoadingHistory ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="flex space-x-1 mb-4">
-                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="flex space-x-2 mb-6">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"></div>
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                   </div>
-                  <p className="text-secondary-600">Loading chat history...</p>
+                  <p className="text-secondary-600 text-lg">Loading chat history...</p>
                 </div>
               ) : chatHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <MessageCircle className="w-12 h-12 text-secondary-300 mb-4" />
-                  <p className="text-secondary-600 mb-2">No chat history yet</p>
-                  <small className="text-secondary-500">Start a conversation to see your history here</small>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <MessageCircle className="w-16 h-16 text-secondary-300 mb-6" />
+                  <p className="text-secondary-600 mb-3 text-xl">No chat history yet</p>
+                  <p className="text-secondary-500 text-lg">Start a conversation to see your history here</p>
                 </div>
               ) : (
-                <div className="space-y-3 pr-2">
+                <div className="space-y-4 max-w-4xl mx-auto">
                   {chatHistory.map((session) => (
-                    <div key={session.sessionId} className="flex items-center gap-3 p-3 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors">
+                    <div key={session.sessionId} className="flex items-center gap-4 p-5 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100">
                       <div 
-                        className="flex-1 cursor-pointer"
+                        className="flex-1 cursor-pointer touch-target"
                         onClick={() => loadChatSession(session.sessionId)}
                       >
-                        <div className="text-sm text-secondary-900 mb-1">
+                        <div className="text-base text-secondary-900 mb-2 font-medium">
                           {session.messages.length > 0 && session.messages[1] ? 
-                            session.messages[1].content.substring(0, 60) + '...' : 
+                            session.messages[1].content.substring(0, 80) + '...' : 
                             'New conversation'
                           }
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-secondary-500">
+                        <div className="flex items-center gap-4 text-sm text-secondary-500">
                           <span>{new Date(session.lastActivity).toLocaleDateString()}</span>
                           <span>{Math.floor(session.messages.length / 2)} messages</span>
                         </div>
                       </div>
                       <button
-                        className="p-2 hover:bg-danger-100 rounded-lg transition-colors"
+                        className="p-3 hover:bg-danger-100 rounded-lg transition-colors touch-target"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteChatSession(session.sessionId);
                         }}
                         title="Delete conversation"
                       >
-                        <Trash2 className="w-4 h-4 text-danger-500" />
+                        <Trash2 className="w-5 h-5 text-danger-500" />
                       </button>
                     </div>
                   ))}
@@ -391,13 +391,13 @@ const MedBot = () => {
 
           {/* Suggestions - only show in chat view */}
           {currentView === 'chat' && messages.length <= 2 && suggestions.length > 0 && (
-            <div className="px-4 pb-2">
-              <p className="text-sm text-secondary-600 mb-3">Quick questions:</p>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="px-4 pb-3">
+              <p className="text-sm text-secondary-600 mb-3 font-medium">Quick questions:</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {suggestions.slice(0, 4).map((suggestion, index) => (
                   <button
                     key={index}
-                    className="text-xs p-2 bg-secondary-50 hover:bg-primary-50 text-secondary-700 hover:text-primary-700 rounded-lg transition-colors text-left"
+                    className="text-sm p-3 bg-blue-50 hover:bg-blue-100 text-secondary-700 hover:text-blue-700 rounded-lg transition-colors text-left border border-blue-100 touch-target min-h-[48px]"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     {suggestion}
@@ -409,32 +409,37 @@ const MedBot = () => {
 
           {/* Input - only show in chat view */}
           {currentView === 'chat' && (
-            <div className="p-4 border-t border-secondary-200 bg-white rounded-b-2xl">
-              <div className="flex items-center gap-3">
+            <div className="p-4 border-t border-secondary-200 bg-white">
+              <div className="flex items-end gap-3">
                 <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    className="w-full p-3 pr-16 border border-secondary-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 text-sm"
+                  <textarea
+                    rows="1"
+                    className="w-full p-3 pr-16 border border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 text-sm bg-blue-50/30 resize-none min-h-[48px] max-h-[120px]"
                     placeholder="Ask me anything about health..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
                     maxLength={1000}
+                    style={{ height: 'auto' }}
+                    onInput={(e) => {
+                      e.target.style.height = 'auto';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                    }}
                   />
                   {inputMessage.length > 0 && (
-                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-xs ${inputMessage.length > 900 ? 'text-warning-500' : 'text-secondary-400'}`}>
+                    <span className={`absolute right-3 bottom-2 text-xs ${inputMessage.length > 900 ? 'text-warning-500' : 'text-secondary-400'}`}>
                       {inputMessage.length}/1000
                     </span>
                   )}
                 </div>
                 <button
-                  className="flex-shrink-0 p-3 bg-primary-500 hover:bg-primary-600 disabled:bg-secondary-300 text-white rounded-xl transition-colors"
+                  className="flex-shrink-0 p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-secondary-300 text-white rounded-xl transition-colors touch-target min-w-[48px] min-h-[48px]"
                   onClick={() => handleSendMessage()}
                   disabled={!inputMessage.trim() || isLoading}
                   title="Send message"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -442,8 +447,8 @@ const MedBot = () => {
 
           {/* Disclaimer */}
           {currentView === 'chat' && (
-            <div className="px-4 pb-4">
-              <div className="text-xs text-secondary-500 bg-warning-50 border border-warning-200 rounded-lg p-3">
+            <div className="px-4 pb-3">
+              <div className="text-xs text-secondary-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 ⚠️ MedBot is an AI assistant. For medical emergencies, call emergency services.
                 Always consult a doctor for personalized advice.
               </div>
