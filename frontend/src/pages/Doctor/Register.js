@@ -127,35 +127,65 @@ const DoctorRegister = () => {
 
   return (
     <Layout>
-      <div className="dashboard">
-        <h1>Doctor Registration</h1>
-        <p className="subtitle">Complete your profile to start practicing on our platform</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Doctor Registration</h1>
+            <p className="text-lg text-gray-600">Complete your profile to start practicing on our platform</p>
+            <div className="mt-4 inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Admin approval required after submission
+            </div>
+          </div>
 
-        <div className="register-form">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Personal Information */}
-            <div className="form-section">
-              <h2>Personal Information</h2>
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
+                  <p className="text-sm text-gray-500">Basic details about yourself</p>
+                </div>
+              </div>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Phone Number *</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     required
                     placeholder="+1234567890"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Gender *</label>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Gender <span className="text-red-500">*</span>
+                  </label>
                   <select
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   >
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
@@ -163,31 +193,37 @@ const DoctorRegister = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Date of Birth *</label>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Date of Birth <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Profile Photo</label>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Profile Photo <span className="text-gray-400">(Optional)</span>
+                  </label>
                   <input
                     type="file"
                     onChange={(e) => setFiles({ ...files, profilePhoto: e.target.files[0] })}
                     accept="image/*"
-                    className="file-input"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
-                  <small>Optional - Upload your profile photo (Max 2MB)</small>
+                  <p className="text-xs text-gray-500 mt-1">Max 2MB - JPG, PNG</p>
                   {files.profilePhoto && (
-                    <div className="file-info">
-                      ✅ Selected: {files.profilePhoto.name} ({(files.profilePhoto.size / 1024 / 1024).toFixed(2)} MB)
+                    <div className="mt-2 flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      {files.profilePhoto.name} ({(files.profilePhoto.size / 1024 / 1024).toFixed(2)} MB)
                     </div>
                   )}
                 </div>
@@ -195,8 +231,18 @@ const DoctorRegister = () => {
             </div>
 
             {/* Professional Details */}
-            <div className="form-section">
-              <h2>Professional Details (Required for Verification)</h2>
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Professional Details</h2>
+                  <p className="text-sm text-gray-500">Required for verification</p>
+                </div>
+              </div>
               
               <div className="form-row">
                 <div className="form-group">
@@ -389,9 +435,20 @@ const DoctorRegister = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-primary btn-large">
-              Submit Registration for Approval
-            </button>
+            {/* Submit Button */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-center">
+              <h3 className="text-2xl font-bold text-white mb-2">Ready to Submit?</h3>
+              <p className="text-blue-100 mb-6">Your registration will be reviewed by our admin team within 24-48 hours</p>
+              <button 
+                type="submit" 
+                className="bg-white text-blue-600 px-12 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-lg inline-flex items-center gap-3"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Submit Registration for Approval
+              </button>
+            </div>
           </form>
         </div>
       </div>
