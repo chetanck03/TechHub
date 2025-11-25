@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
+import RequestConsultationForm from '../../components/RequestConsultationForm';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiX } from 'react-icons/fi';
 
 
 const BookConsultation = () => {
@@ -14,6 +15,7 @@ const BookConsultation = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [consultationType, setConsultationType] = useState('online');
   const [loading, setLoading] = useState(true);
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -56,6 +58,8 @@ const BookConsultation = () => {
       toast.error(error.response?.data?.message || 'Booking failed');
     }
   };
+
+
 
   if (loading) return (
     <Layout>
@@ -121,34 +125,66 @@ const BookConsultation = () => {
                 {slots.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="text-4xl mb-2">📅</div>
-                    <p className="text-secondary-500">No available slots</p>
+                    <p className="text-secondary-500 mb-4">No available slots</p>
+                    <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-4">
+                      <h3 className="font-semibold text-primary-800 mb-2">💡 Request Future Consultation</h3>
+                      <p className="text-primary-700 text-sm mb-3">
+                        Can't find a suitable time? Send a consultation request to the doctor with your preferred date and time.
+                      </p>
+                      <button 
+                        onClick={() => setShowRequestForm(true)}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Request Consultation
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    {slots.map((slot) => (
-                      <div
-                        key={slot._id}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          selectedSlot === slot._id 
-                            ? 'border-primary-500 bg-primary-50 shadow-md' 
-                            : 'border-secondary-200 hover:border-primary-300'
-                        }`}
-                        onClick={() => setSelectedSlot(slot._id)}
-                      >
-                        <div className="text-center">
-                          <div className="font-semibold text-secondary-900 mb-1">
-                            {new Date(slot.date).toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </div>
-                          <div className="text-sm text-secondary-600">
-                            {slot.startTime} - {slot.endTime}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {slots.map((slot) => (
+                        <div
+                          key={slot._id}
+                          className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                            selectedSlot === slot._id 
+                              ? 'border-primary-500 bg-primary-50 shadow-md' 
+                              : 'border-secondary-200 hover:border-primary-300'
+                          }`}
+                          onClick={() => setSelectedSlot(slot._id)}
+                        >
+                          <div className="text-center">
+                            <div className="font-semibold text-secondary-900 mb-1">
+                              {new Date(slot.date).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </div>
+                            <div className="text-sm text-secondary-600">
+                              {slot.startTime} - {slot.endTime}
+                            </div>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                    
+                    {/* Request Different Time Option */}
+                    <div className="border-t border-secondary-200 pt-4">
+                      <div className="bg-warning-50 border border-warning-200 rounded-lg p-4">
+                        <h4 className="font-semibold text-warning-800 mb-2 flex items-center">
+                          📅 Can't find a suitable time?
+                        </h4>
+                        <p className="text-warning-700 text-sm mb-3">
+                          Request a different time slot that works better for your schedule.
+                        </p>
+                        <button 
+                          onClick={() => setShowRequestForm(true)}
+                          className="btn btn-warning btn-sm"
+                        >
+                          Request Different Time
+                        </button>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -202,6 +238,43 @@ const BookConsultation = () => {
             </div>
           </div>
         </div>
+
+        {/* Consultation Request Modal */}
+        {showRequestForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-secondary-900">Request Different Time</h3>
+                  <button 
+                    onClick={() => setShowRequestForm(false)}
+                    className="text-secondary-400 hover:text-secondary-600"
+                  >
+                    <FiX className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 text-sm">
+                    💡 <strong>Alternative Time Request:</strong> The available slots don't work for you? 
+                    Request a different time that fits your schedule better.
+                  </p>
+                </div>
+
+                <RequestConsultationForm 
+                  doctorId={doctorId} 
+                  doctorName={doctor?.userId?.name}
+                  onSuccess={() => {
+                    setShowRequestForm(false);
+                    toast.success('Time request sent! You can track it in "My Requests".');
+                  }}
+                  onCancel={() => setShowRequestForm(false)}
+                  isModal={true}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

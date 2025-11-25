@@ -38,6 +38,9 @@ import VideoCall from './pages/Shared/VideoCall';
 import VideoCallNew from './pages/Shared/VideoCallNew';
 import Chat from './pages/Shared/Chat';
 
+import ConsultationRequests from './pages/Patient/ConsultationRequests';
+import DoctorConsultationRequests from './pages/Doctor/ConsultationRequests';
+
 import LocationPrompt from './components/LocationPrompt';
 import MedBot from './components/MedBot';
 import { requestLocationPermission, updateUserLocation } from './utils/location';
@@ -109,9 +112,12 @@ function AppRoutes() {
         } />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
+        <Route path="/consultation-requests" element={<PrivateRoute allowedRoles={['patient']}><ConsultationRequests /></PrivateRoute>} />
+
         <Route path="/doctor/register" element={<PrivateRoute><DoctorRegister /></PrivateRoute>} />
         <Route path="/doctor/profile" element={<PrivateRoute allowedRoles={['doctor']}><DoctorProfileEdit /></PrivateRoute>} />
         <Route path="/doctor/slots" element={<PrivateRoute allowedRoles={['doctor']}><ManageSlots /></PrivateRoute>} />
+        <Route path="/doctor/consultation-requests" element={<PrivateRoute allowedRoles={['doctor']}><DoctorConsultationRequests /></PrivateRoute>} />
 
         <Route path="/admin/doctors" element={<PrivateRoute allowedRoles={['admin']}><DoctorManagement /></PrivateRoute>} />
         <Route path="/admin/patients" element={<PrivateRoute allowedRoles={['admin']}><PatientManagement /></PrivateRoute>} />

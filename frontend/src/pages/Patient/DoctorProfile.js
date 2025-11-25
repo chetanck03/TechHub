@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
+import RequestConsultationForm from '../../components/RequestConsultationForm';
 import api from '../../utils/api';
 import { FiStar, FiCalendar, FiMessageCircle, FiArrowLeft, FiMonitor } from 'react-icons/fi';
 
@@ -12,10 +13,12 @@ const DoctorProfile = () => {
   const [loading, setLoading] = useState(true);
   const [canMessage, setCanMessage] = useState(false);
   const [consultationId, setConsultationId] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
     fetchDoctor();
     checkMessageAccess();
+    fetchAvailableSlots();
   }, [id]);
 
   const fetchDoctor = async () => {
@@ -36,6 +39,18 @@ const DoctorProfile = () => {
       setConsultationId(response.data.consultationId);
     } catch (error) {
       console.error('Error checking message access:', error);
+    }
+  };
+
+  const fetchAvailableSlots = async () => {
+    try {
+      const response = await api.get(`/slots/doctor/${id}`);
+      // Get next 3 available slots
+      const nextSlots = response.data.slice(0, 3);
+      setAvailableSlots(nextSlots);
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+      setAvailableSlots([]);
     }
   };
 
@@ -230,9 +245,46 @@ const DoctorProfile = () => {
                 </button>
               </Link>
             ) : (
-              <button className="btn btn-secondary w-full" disabled>
-                Currently Unavailable
-              </button>
+              <div className="space-y-4">
+                <button className="btn btn-secondary w-full" disabled>
+                  Currently Unavailable
+                </button>
+                
+                {/* Show future consultation options */}
+                {availableSlots.length > 0 ? (
+                  <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                    <h4 className="font-semibold text-primary-800 mb-3 flex items-center">
+                      <FiCalendar className="w-4 h-4 mr-2" />
+                      Upcoming Available Slots
+                    </h4>
+                    <div className="space-y-2">
+                      {availableSlots.map((slot, index) => (
+                        <div key={slot._id} className="flex items-center justify-between p-2 bg-white rounded border">
+                          <div className="text-sm">
+                            <span className="font-medium text-secondary-900">
+                              {new Date(slot.date).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-secondary-600 ml-2">
+                              {slot.startTime} - {slot.endTime}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Link to={`/book/${doctor._id}`} className="block mt-3">
+                      <button className="btn btn-primary w-full text-sm">
+                        View All Available Times
+                      </button>
+                    </Link>
+                  </div>
+                ) : (
+                  <RequestConsultationForm doctorId={doctor._id} doctorName={doctor.name} />
+                )}
+              </div>
             )}
             
             {canMessage && consultationId && (

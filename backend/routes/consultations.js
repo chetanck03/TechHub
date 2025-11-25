@@ -57,6 +57,22 @@ router.post('/book', protect, async (req, res) => {
     slot.consultationId = null; // Will be set after consultation is created
     await slot.save();
 
+    // Check if doctor has any remaining available slots
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const remainingSlots = await Slot.countDocuments({
+      doctorId: doctorId,
+      date: { $gte: today },
+      isBooked: false
+    });
+
+    // If no available slots remain, set doctor as unavailable
+    if (remainingSlots === 0) {
+      await Doctor.findByIdAndUpdate(doctorId, { isAvailable: false });
+      console.log('Doctor automatically set as unavailable - all slots are now booked');
+    }
+
     const consultation = await Consultation.create({
       patientId: req.user._id,
       doctorId,

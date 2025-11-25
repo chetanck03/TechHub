@@ -62,6 +62,7 @@ app.use('/api/doctors', require('./routes/doctors'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/credits', require('./routes/credits'));
 app.use('/api/consultations', require('./routes/consultations'));
+app.use('/api/consultation-requests', require('./routes/consultationRequests'));
 app.use('/api/slots', require('./routes/slots'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/complaints', require('./routes/complaints'));

@@ -28,6 +28,12 @@ router.post('/', protect, authorize('doctor'), async (req, res) => {
       endTime
     });
 
+    // Auto-set doctor as available when they create their first slot
+    if (!doctor.isAvailable) {
+      await Doctor.findByIdAndUpdate(doctor._id, { isAvailable: true });
+      console.log('Doctor automatically set as available after creating first slot');
+    }
+
     console.log('Slot created:', slot);
     res.status(201).json(slot);
   } catch (error) {
@@ -90,16 +96,81 @@ router.get('/my-slots', protect, authorize('doctor'), async (req, res) => {
   }
 });
 
+// Get availability status (Doctor)
+router.get('/my-availability', protect, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor profile not found' });
+    }
+
+    // Get today's date at midnight for proper comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const totalSlots = await Slot.countDocuments({
+      doctorId: doctor._id,
+      date: { $gte: today }
+    });
+
+    const availableSlots = await Slot.countDocuments({
+      doctorId: doctor._id,
+      date: { $gte: today },
+      isBooked: false
+    });
+
+    const bookedSlots = totalSlots - availableSlots;
+
+    res.json({
+      isAvailable: doctor.isAvailable,
+      totalSlots,
+      availableSlots,
+      bookedSlots,
+      hasSlots: totalSlots > 0,
+      recommendation: totalSlots === 0 
+        ? 'Create some time slots to become available for consultations'
+        : availableSlots === 0 
+        ? 'All your slots are booked. Create more slots or wait for existing consultations to complete'
+        : `You have ${availableSlots} available slots`
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Delete slot
 router.delete('/:id', protect, authorize('doctor'), async (req, res) => {
   try {
     const slot = await Slot.findById(req.params.id);
     
+    if (!slot) {
+      return res.status(404).json({ message: 'Slot not found' });
+    }
+    
     if (slot.isBooked) {
       return res.status(400).json({ message: 'Cannot delete booked slot' });
     }
 
+    const doctorId = slot.doctorId;
     await slot.deleteOne();
+
+    // Check if doctor has any remaining available slots
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const remainingSlots = await Slot.countDocuments({
+      doctorId: doctorId,
+      date: { $gte: today },
+      isBooked: false
+    });
+
+    // If no available slots remain, set doctor as unavailable
+    if (remainingSlots === 0) {
+      await Doctor.findByIdAndUpdate(doctorId, { isAvailable: false });
+      console.log('Doctor automatically set as unavailable - no available slots remaining');
+    }
+
     res.json({ message: 'Slot deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

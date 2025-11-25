@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 
 const ManageSlots = () => {
   const [slots, setSlots] = useState([]);
+  const [availabilityStatus, setAvailabilityStatus] = useState(null);
   const [newSlot, setNewSlot] = useState({
     date: '',
     startTime: '',
@@ -16,6 +17,7 @@ const ManageSlots = () => {
 
   useEffect(() => {
     fetchSlots();
+    fetchAvailabilityStatus();
   }, []);
 
   const fetchSlots = async () => {
@@ -38,6 +40,15 @@ const ManageSlots = () => {
     }
   };
 
+  const fetchAvailabilityStatus = async () => {
+    try {
+      const response = await api.get('/slots/my-availability');
+      setAvailabilityStatus(response.data);
+    } catch (error) {
+      console.error('Error fetching availability status:', error);
+    }
+  };
+
   const handleAddSlot = async (e) => {
     e.preventDefault();
     
@@ -54,6 +65,7 @@ const ManageSlots = () => {
       toast.success('Slot added successfully!');
       setNewSlot({ date: '', startTime: '', endTime: '' });
       fetchSlots();
+      fetchAvailabilityStatus();
     } catch (error) {
       console.error('Error adding slot:', error);
       toast.error(error.response?.data?.message || 'Failed to add slot');
@@ -69,6 +81,7 @@ const ManageSlots = () => {
       await api.delete(`/slots/${slotId}`);
       toast.success('Slot deleted successfully!');
       fetchSlots();
+      fetchAvailabilityStatus();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete slot');
     }
@@ -90,6 +103,39 @@ const ManageSlots = () => {
           <h1 className="text-3xl font-bold text-secondary-900 mb-2">Manage Availability</h1>
           <p className="text-secondary-600">Set your available time slots for patient consultations</p>
         </div>
+
+        {/* Availability Status */}
+        {availabilityStatus && (
+          <div className={`card border-2 ${
+            availabilityStatus.isAvailable 
+              ? 'border-success-200 bg-success-50' 
+              : 'border-warning-200 bg-warning-50'
+          }`}>
+            <div className="card-body">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full ${
+                    availabilityStatus.isAvailable ? 'bg-success-500' : 'bg-warning-500'
+                  }`}></div>
+                  <h3 className="text-lg font-semibold text-secondary-900">
+                    {availabilityStatus.isAvailable ? 'You are Available' : 'You are Currently Unavailable'}
+                  </h3>
+                </div>
+                <div className="text-sm text-secondary-600">
+                  {availabilityStatus.availableSlots} of {availabilityStatus.totalSlots} slots available
+                </div>
+              </div>
+              <p className="text-secondary-700 mb-2">
+                {availabilityStatus.recommendation}
+              </p>
+              {!availabilityStatus.isAvailable && availabilityStatus.hasSlots && (
+                <p className="text-sm text-warning-700">
+                  💡 Patients will see you as "Currently Unavailable" until you have open time slots.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <div className="card-header">
