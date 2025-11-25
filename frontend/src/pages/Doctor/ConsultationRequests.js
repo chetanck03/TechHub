@@ -173,7 +173,7 @@ const DoctorConsultationRequests = () => {
                         <div>
                           <span className="text-sm font-medium text-secondary-500">Type</span>
                           <div className="text-secondary-900 capitalize">
-                            {request.consultationType === 'video' ? '📹 Video' : '🏥 Physical'}
+                            {request.consultationType === 'video' ? 'Video' : 'Physical'}
                           </div>
                         </div>
                         <div>

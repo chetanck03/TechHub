@@ -108,10 +108,10 @@ const BookConsultation = () => {
                   className="form-input"
                 >
                   <option value="online">
-                    📹 Online Consultation ({doctor.consultationFee?.video} credits)
+                    Online Consultation ({doctor.consultationFee?.video} credits)
                   </option>
                   <option value="physical">
-                    🏥 Physical Visit ({doctor.consultationFee?.physical} credits)
+                    Physical Visit ({doctor.consultationFee?.physical} credits)
                   </option>
                 </select>
               </div>
@@ -172,7 +172,7 @@ const BookConsultation = () => {
                     <div className="border-t border-secondary-200 pt-4">
                       <div className="bg-warning-50 border border-warning-200 rounded-lg p-4">
                         <h4 className="font-semibold text-warning-800 mb-2 flex items-center">
-                          📅 Can't find a suitable time?
+                           Can't find a suitable time?
                         </h4>
                         <p className="text-warning-700 text-sm mb-3">
                           Request a different time slot that works better for your schedule.

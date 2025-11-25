@@ -147,8 +147,8 @@ const RequestConsultationForm = ({
               onChange={handleChange}
               className="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-warning-500 focus:border-transparent text-sm"
             >
-              <option value="video">📹 Video Consultation</option>
-              <option value="physical">🏥 Physical Visit</option>
+              <option value="video">Video Consultation</option>
+              <option value="physical">Physical Visit</option>
             </select>
           </div>
 

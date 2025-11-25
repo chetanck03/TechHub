@@ -43,24 +43,54 @@ const searchDoctors = async (specialization = null, city = null, limit = 5) => {
       .limit(limit)
       .sort({ rating: -1, totalRatings: -1 });
 
-    return doctors.map(doctor => ({
-      id: doctor._id,
-      name: doctor.userId?.name || 'Dr. Unknown',
-      email: doctor.userId?.email,
-      phone: doctor.userId?.phone || doctor.phone,
-      specialization: doctor.specialization?.name || 'General',
-      qualification: doctor.qualification,
-      experience: doctor.experience,
-      hospital: doctor.currentHospitalClinic,
-      city: doctor.currentWorkingCity,
-      rating: doctor.rating,
-      totalRatings: doctor.totalRatings,
-      consultationFee: doctor.consultationFee,
-      consultationModes: doctor.consultationModes,
-      languages: doctor.languagesSpoken,
-      about: doctor.about,
-      isAvailable: doctor.isAvailable
-    }));
+    // If no approved doctors found, check for pending doctors to provide better info
+    if (doctors.length === 0) {
+      const pendingCount = await Doctor.countDocuments({
+        status: 'pending',
+        ...(specialization && { specialization: await Category.findOne({ name: { $regex: specialization, $options: 'i' } }).select('_id') }),
+        ...(city && { currentWorkingCity: { $regex: city, $options: 'i' } })
+      });
+
+      const totalDoctorsCount = await Doctor.countDocuments({
+        ...(specialization && { specialization: await Category.findOne({ name: { $regex: specialization, $options: 'i' } }).select('_id') }),
+        ...(city && { currentWorkingCity: { $regex: city, $options: 'i' } })
+      });
+
+      console.log(`📊 Doctor search stats - Approved: 0, Pending: ${pendingCount}, Total: ${totalDoctorsCount}`);
+      
+      return {
+        doctors: [],
+        pendingCount,
+        totalDoctorsCount,
+        message: pendingCount > 0 
+          ? `We have ${pendingCount} doctor(s) currently under review for approval. Please check back soon!`
+          : 'No doctors found matching your criteria. Our platform is growing - please check back later!'
+      };
+    }
+
+    return {
+      doctors: doctors.map(doctor => ({
+        id: doctor._id,
+        name: doctor.userId?.name || 'Dr. Unknown',
+        email: doctor.userId?.email,
+        phone: doctor.userId?.phone || doctor.phone,
+        specialization: doctor.specialization?.name || 'General',
+        qualification: doctor.qualification,
+        experience: doctor.experience,
+        hospital: doctor.currentHospitalClinic,
+        city: doctor.currentWorkingCity,
+        rating: doctor.rating,
+        totalRatings: doctor.totalRatings,
+        consultationFee: doctor.consultationFee,
+        consultationModes: doctor.consultationModes,
+        languages: doctor.languagesSpoken,
+        about: doctor.about,
+        isAvailable: doctor.isAvailable
+      })),
+      pendingCount: 0,
+      totalDoctorsCount: doctors.length,
+      message: null
+    };
   } catch (error) {
     console.error('Error searching doctors:', error);
     return [];
@@ -116,8 +146,10 @@ const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a co
 **Doctor Recommendations:**
 - When users ask for doctor recommendations, search our database for available doctors
 - Provide specific doctor names, contact details, specializations, and consultation fees
-- If no doctors are found for a specific specialty or location, inform the user
+- If no approved doctors are found, explain that doctors need admin approval before they can practice
+- If there are pending doctors, let users know they're being reviewed and to check back soon
 - Always encourage booking consultations through the platform for the best experience
+- Explain that our platform is growing and new doctors join regularly
 
 **For Doctors:**
 - Managing consultation availability and slots
@@ -278,11 +310,11 @@ router.post('/chat', protect, async (req, res) => {
       const cityMatch = message.match(/in\s+([a-zA-Z\s]+)/i);
       const city = cityMatch ? cityMatch[1].trim() : null;
 
-      const doctors = await searchDoctors(foundSpecialization, city, 3);
+      const searchResult = await searchDoctors(foundSpecialization, city, 3);
       
-      if (doctors.length > 0) {
+      if (searchResult.doctors && searchResult.doctors.length > 0) {
         doctorInfo = '\n\n=== AVAILABLE DOCTORS ===\n';
-        doctors.forEach((doctor, index) => {
+        searchResult.doctors.forEach((doctor, index) => {
           doctorInfo += `\n${index + 1}. Dr. ${doctor.name}\n`;
           doctorInfo += `   Specialization: ${doctor.specialization}\n`;
           doctorInfo += `   Experience: ${doctor.experience} years\n`;
@@ -301,14 +333,28 @@ router.post('/chat', protect, async (req, res) => {
         });
       } else {
         doctorInfo = '\n\n=== DOCTOR SEARCH RESULT ===\n';
-        doctorInfo += 'No doctors available';
+        doctorInfo += 'No approved doctors currently available';
         if (foundSpecialization) {
           doctorInfo += ` for ${foundSpecialization}`;
         }
         if (city) {
           doctorInfo += ` in ${city}`;
         }
-        doctorInfo += ' at the moment.\n';
+        doctorInfo += '.\n';
+        
+        if (searchResult.message) {
+          doctorInfo += `\nStatus: ${searchResult.message}\n`;
+        }
+        
+        if (searchResult.pendingCount > 0) {
+          doctorInfo += `\nGood news: ${searchResult.pendingCount} doctor(s) are currently being reviewed for approval.\n`;
+          doctorInfo += 'Please check back in a few days as new doctors join our platform regularly.\n';
+        }
+        
+        doctorInfo += '\nIn the meantime, you can:\n';
+        doctorInfo += '- Browse our "Find Doctors" section for any newly approved doctors\n';
+        doctorInfo += '- Set up notifications for when doctors in your area become available\n';
+        doctorInfo += '- Contact our support team for assistance\n';
       }
     }
 
@@ -459,13 +505,16 @@ router.get('/doctors', protect, async (req, res) => {
   try {
     const { specialization, city, limit = 10 } = req.query;
     
-    const doctors = await searchDoctors(specialization, city, parseInt(limit));
+    const searchResult = await searchDoctors(specialization, city, parseInt(limit));
     
     res.json({
-      doctors,
-      total: doctors.length,
+      doctors: searchResult.doctors || searchResult,
+      total: searchResult.doctors ? searchResult.doctors.length : (Array.isArray(searchResult) ? searchResult.length : 0),
       specialization: specialization || 'All',
-      city: city || 'All locations'
+      city: city || 'All locations',
+      pendingCount: searchResult.pendingCount || 0,
+      totalDoctorsCount: searchResult.totalDoctorsCount || 0,
+      message: searchResult.message || null
     });
   } catch (error) {
     console.error('Error in doctor search endpoint:', error);
