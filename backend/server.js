@@ -73,7 +73,7 @@ app.use('/api/medbot', require('./routes/medbot'));
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'Telehealth API is running' });
+  res.json({ message: 'MegaHealth API is running' });
 });
 
 // Error handling middleware

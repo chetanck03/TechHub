@@ -1,4 +1,4 @@
-# Telehealth Platform - Backend API
+# MegaHealth Platform - Backend API
 
 ## Features Implemented
 

@@ -85,7 +85,7 @@ const LandingPage = () => {
             {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => window.location.href = '/'}>
               <Stethoscope className="w-8 h-8 text-primary-500" />
-              <h1 className="text-xl font-bold text-secondary-900">Telehealth</h1>
+              <h1 className="text-xl font-bold text-secondary-900">MegaHealth</h1>
             </div>
 
             {/* Medical Store Search - Hidden on mobile, shown in mobile menu */}
@@ -319,7 +319,7 @@ const LandingPage = () => {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 text-center mb-16">Why Choose Telehealth?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 text-center mb-16">Why Choose MegaHealth?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-secondary-50">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-xl mb-6">
@@ -439,7 +439,7 @@ const LandingPage = () => {
       <section className="py-20 bg-gradient-to-r from-primary-500 to-primary-600 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
-          <p className="text-xl text-primary-100 mb-8">Join thousands of patients who trust Telehealth for their healthcare needs</p>
+          <p className="text-xl text-primary-100 mb-8">Join thousands of patients who trust MegaHealth for their healthcare needs</p>
           <button onClick={() => navigate('/register')} className="btn btn-lg bg-white text-primary-600 border-white hover:bg-primary-50 hover:border-primary-50">
             Create Free Account
           </button>
@@ -453,7 +453,7 @@ const LandingPage = () => {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Stethoscope className="w-7 h-7 text-primary-400" />
-                <h3 className="text-xl font-bold">Telehealth</h3>
+                <h3 className="text-xl font-bold">MegaHealth</h3>
               </div>
               <p className="text-secondary-300 leading-relaxed">Quality healthcare, accessible to everyone</p>
             </div>
@@ -482,7 +482,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="pt-8 border-t border-secondary-700 text-center">
-            <p className="text-secondary-300">© 2025 Telehealth Platform. All rights reserved.</p>
+            <p className="text-secondary-300">© 2025 MegaHealth Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -120,7 +120,7 @@ const DoctorGuard = ({ children }) => {
               </div>
 
               <p className="help-text">
-                Need help? Contact support at <a href={`mailto:${process.env.REACT_APP_SUPPORT_EMAIL || 'support@telehealth.com'}`}>support@telehealth.com</a>
+                Need help? Contact support at <a href={`mailto:${process.env.REACT_APP_SUPPORT_EMAIL || 'support@MegaHealth.com'}`}>support@MegaHealth.com</a>
               </p>
             </>
           )}
@@ -153,7 +153,7 @@ const DoctorGuard = ({ children }) => {
 
               <div className="action-buttons">
                 <a 
-                  href={`mailto:${process.env.REACT_APP_SUPPORT_EMAIL || 'support@telehealth.com'}`}
+                  href={`mailto:${process.env.REACT_APP_SUPPORT_EMAIL || 'support@MegaHealth.com'}`}
                   className="btn-contact"
                 >
                   Contact Support

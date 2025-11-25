@@ -68,7 +68,7 @@ const searchDoctors = async (specialization = null, city = null, limit = 5) => {
 };
 
 // Enhanced System prompt for MedBot
-const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a comprehensive telehealth platform. You are knowledgeable, empathetic, and dedicated to helping users with their health concerns and platform navigation.
+const SYSTEM_PROMPT = `You are MedBot, an advanced AI medical assistant for a comprehensive MegaHealth platform. You are knowledgeable, empathetic, and dedicated to helping users with their health concerns and platform navigation.
 
 ## YOUR CORE CAPABILITIES:
 

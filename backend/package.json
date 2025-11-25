@@ -1,7 +1,7 @@
 {
-  "name": "telehealth-backend",
+  "name": "MegaHealth-backend",
   "version": "1.0.0",
-  "description": "Telehealth platform backend API",
+  "description": "MegaHealth platform backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,7 +16,7 @@
     "npm": ">=8.0.0"
   },
   "keywords": [
-    "telehealth",
+    "MegaHealth",
     "medical",
     "consultation"
   ],

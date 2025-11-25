@@ -99,7 +99,7 @@ const AdminDashboard = () => {
       <div className="h-full flex flex-col">
         <div className="mb-4 sm:mb-6 flex-shrink-0">
           <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-2">Admin Dashboard</h1>
-          <p className="text-sm sm:text-base text-secondary-600">Monitor and manage your telehealth platform</p>
+          <p className="text-sm sm:text-base text-secondary-600">Monitor and manage your MegaHealth platform</p>
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary-300 scrollbar-track-secondary-100 space-y-4 sm:space-y-6">

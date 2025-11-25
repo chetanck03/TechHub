@@ -122,7 +122,7 @@ const Layout = ({ children, hideMedBot = false }) => {
               </button>
               
               <Stethoscope className="w-6 h-6 sm:w-8 sm:h-8 text-primary-500" />
-              <h2 className="text-lg sm:text-xl font-bold text-primary-600">Telehealth</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-primary-600">MegaHealth</h2>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">

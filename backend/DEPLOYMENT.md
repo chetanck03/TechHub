@@ -16,7 +16,7 @@
 - Select the backend folder (if monorepo)
 
 ### 4. Configure Service
-- **Name**: telehealth-backend
+- **Name**: MegaHealth-backend
 - **Environment**: Node
 - **Build Command**: `npm install`
 - **Start Command**: `npm start`
@@ -51,4 +51,4 @@ GEOAPIFY_API_KEY=your_geoapify_api_key
 
 ## Testing Deployment:
 Visit: `https://your-app-name.onrender.com/`
-Should return: `{"message": "Telehealth API is running"}`
+Should return: `{"message": "MegaHealth API is running"}`

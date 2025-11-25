@@ -11,7 +11,7 @@ const createAdmin = async () => {
     console.log('✅ MongoDB connected');
 
     // Check if admin exists
-    const existingAdmin = await User.findOne({ email: 'admin@telehealth.com' });
+    const existingAdmin = await User.findOne({ email: 'admin@MegaHealth.com' });
     
     if (existingAdmin) {
       console.log('ℹ️  Admin already exists');
@@ -27,7 +27,7 @@ const createAdmin = async () => {
     } else {
       // Create new admin
       const admin = await User.create({
-        email: 'admin@telehealth.com',
+        email: 'admin@MegaHealth.com',
         password: 'admin123',
         name: 'Admin User',
         role: 'admin',
@@ -35,7 +35,7 @@ const createAdmin = async () => {
         credits: 1000
       });
       console.log('✅ Admin created successfully');
-      console.log('Email: admin@telehealth.com');
+      console.log('Email: admin@MegaHealth.com');
       console.log('Password: admin123');
     }
 
@@ -56,7 +56,7 @@ const createAdmin = async () => {
     }
 
     console.log('\n🎉 Setup complete! You can now login with:');
-    console.log('Admin: admin@telehealth.com / admin123');
+    console.log('Admin: admin@MegaHealth.com / admin123');
     console.log('Patient: patient@test.com / patient123');
 
     process.exit(0);

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: telehealth-backend
+    name: MegaHealth-backend
     env: node
     plan: free
     buildCommand: npm install

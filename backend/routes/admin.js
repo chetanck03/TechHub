@@ -586,7 +586,7 @@ router.get('/settings', protect, authorize('admin'), async (req, res) => {
       platformFeePercentage: 10,
       refundPolicy: 'Refunds are processed within 7 business days for cancelled consultations.',
       termsAndConditions: 'By using this platform, you agree to our terms and conditions.',
-      notificationMessage: 'Welcome to our telehealth platform!'
+      notificationMessage: 'Welcome to our MegaHealth platform!'
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

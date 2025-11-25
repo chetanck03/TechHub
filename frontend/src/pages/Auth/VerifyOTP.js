@@ -45,7 +45,7 @@ const VerifyOTP = () => {
         <div className="card-body">
           <div className="flex items-center justify-center gap-3 mb-8">
             <Stethoscope className="w-8 h-8 text-primary-500" />
-            <h2 className="text-xl font-bold text-secondary-900">Telehealth</h2>
+            <h2 className="text-xl font-bold text-secondary-900">MegaHealth</h2>
           </div>
 
           <div className="text-center mb-8">

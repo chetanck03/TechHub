@@ -64,16 +64,16 @@ const seedDatabase = async () => {
     console.log('Medical stores seeded');
 
     // Create admin user
-    const adminExists = await User.findOne({ email: 'admin@telehealth.com' });
+    const adminExists = await User.findOne({ email: 'admin@MegaHealth.com' });
     if (!adminExists) {
       await User.create({
-        email: 'admin@telehealth.com',
+        email: 'admin@MegaHealth.com',
         password: 'admin123',
         name: 'Admin User',
         role: 'admin',
         isVerified: true
       });
-      console.log('Admin user created: admin@telehealth.com / admin123');
+      console.log('Admin user created: admin@MegaHealth.com / admin123');
     }
 
     console.log('Database seeded successfully!');

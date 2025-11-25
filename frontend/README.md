@@ -1,4 +1,4 @@
-# Telehealth Platform - Frontend
+# MegaHealth Platform - Frontend
 
 ## ✅ Features Implemented
 
@@ -80,7 +80,7 @@ Frontend will run on: http://localhost:3000
 ## 🔐 Test Credentials
 
 **Admin:**
-- Email: admin@telehealth.com
+- Email: admin@MegaHealth.com
 - Password: admin123
 
 **Test Patient:**

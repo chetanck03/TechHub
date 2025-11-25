@@ -34,20 +34,20 @@ exports.sendOTP = async (email, otp) => {
     try {
       const mailOptions = {
         from: {
-          name: 'Telehealth Platform',
+          name: 'MegaHealth Platform',
           address: process.env.EMAIL_USER
         },
         to: email,
-        subject: 'Your OTP Code - Telehealth Platform',
+        subject: 'Your OTP Code - MegaHealth Platform',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
             <div style="background: linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0;">🏥 Telehealth Platform</h1>
+              <h1 style="color: white; margin: 0;">🏥 MegaHealth Platform</h1>
             </div>
             <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <h2 style="color: #1e293b; margin-top: 0;">Your Verification Code</h2>
               <p style="color: #64748b; font-size: 16px; line-height: 1.6;">
-                Thank you for registering with Telehealth Platform. Please use the following OTP code to verify your email address:
+                Thank you for registering with MegaHealth Platform. Please use the following OTP code to verify your email address:
               </p>
               <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0;">
                 <h1 style="color: #14b8a6; font-size: 48px; letter-spacing: 8px; margin: 0;">${otp}</h1>
@@ -57,7 +57,7 @@ exports.sendOTP = async (email, otp) => {
               </p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
               <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
-                © 2025 Telehealth Platform. All rights reserved.
+                © 2025 MegaHealth Platform. All rights reserved.
               </p>
             </div>
           </div>
@@ -92,13 +92,13 @@ exports.sendDoctorApproval = async (email, name, status, reason = '') => {
     try {
       const mailOptions = {
         from: {
-          name: 'Telehealth Platform',
+          name: 'MegaHealth Platform',
           address: process.env.EMAIL_USER
         },
         to: email,
         subject: status === 'approved' 
-          ? '🎉 Doctor Registration Approved - Telehealth Platform'
-          : '📋 Doctor Registration Status Update - Telehealth Platform',
+          ? '🎉 Doctor Registration Approved - MegaHealth Platform'
+          : '📋 Doctor Registration Status Update - MegaHealth Platform',
         html: status === 'approved' 
           ? `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
@@ -112,7 +112,7 @@ exports.sendDoctorApproval = async (email, name, status, reason = '') => {
                 </p>
                 <p style="color: #64748b; font-size: 16px; line-height: 1.6;">
                   We are pleased to inform you that your doctor registration has been <strong style="color: #10b981;">approved</strong>! 
-                  You can now access all doctor features on the Telehealth Platform.
+                  You can now access all doctor features on the MegaHealth Platform.
                 </p>
                 <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 4px;">
                   <h3 style="color: #166534; margin-top: 0;">What's Next?</h3>
@@ -136,7 +136,7 @@ exports.sendDoctorApproval = async (email, name, status, reason = '') => {
                 </p>
                 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
                 <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
-                  © 2025 Telehealth Platform. All rights reserved.
+                  © 2025 MegaHealth Platform. All rights reserved.
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@ exports.sendDoctorApproval = async (email, name, status, reason = '') => {
                   Dear Dr. ${name},
                 </p>
                 <p style="color: #64748b; font-size: 16px; line-height: 1.6;">
-                  Thank you for your interest in joining the Telehealth Platform. After careful review, 
+                  Thank you for your interest in joining the MegaHealth Platform. After careful review, 
                   we regret to inform you that your registration was not approved at this time.
                 </p>
                 <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin: 30px 0; border-radius: 4px;">
@@ -175,7 +175,7 @@ exports.sendDoctorApproval = async (email, name, status, reason = '') => {
                 </div>
                 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
                 <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
-                  © 2025 Telehealth Platform. All rights reserved.
+                  © 2025 MegaHealth Platform. All rights reserved.
                 </p>
               </div>
             </div>

@@ -42,7 +42,7 @@ const PatientDashboard = () => {
     <Layout>
       <div className="space-y-6 sm:space-y-8">
         <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-900 mb-2 sm:mb-4">Welcome to Telehealth</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-900 mb-2 sm:mb-4">Welcome to MegaHealth</h1>
           <p className="text-sm sm:text-base md:text-lg text-secondary-600 px-4">Find and consult with the best doctors from the comfort of your home</p>
         </div>
 

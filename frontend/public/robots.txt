@@ -1,4 +1,4 @@
-# Telehealth Platform - Robots.txt
+# MegaHealth Platform - Robots.txt
 # Professional Online Healthcare Platform
 
 User-agent: *
@@ -33,7 +33,7 @@ Allow: /*.css
 Allow: /*.js
 
 # Sitemap location
-Sitemap: https://telehealth-platform.com/sitemap.xml
+Sitemap: https://MegaHealth-platform.com/sitemap.xml
 
 # Crawl delay (be respectful)
 Crawl-delay: 1
