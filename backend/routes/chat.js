@@ -82,4 +82,204 @@ router.get('/check-access/:doctorId', protect, async (req, res) => {
   }
 });
 
+// Get unread message count
+router.get('/notifications/unread-count', protect, async (req, res) => {
+  try {
+    const unreadCount = await ChatMessage.countDocuments({
+      to: req.user._id,
+      read: false
+    });
+
+    res.json({ count: unreadCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get unread messages by consultation
+router.get('/notifications/unread-by-consultation', protect, async (req, res) => {
+  try {
+    const unreadMessages = await ChatMessage.aggregate([
+      {
+        $match: {
+          to: req.user._id,
+          read: false
+        }
+      },
+      {
+        $group: {
+          _id: '$consultation',
+          count: { $sum: 1 },
+          lastMessage: { $last: '$text' },
+          lastMessageTime: { $last: '$createdAt' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'consultations',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'consultation'
+        }
+      },
+      {
+        $unwind: '$consultation'
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'consultation.patientId',
+          foreignField: '_id',
+          as: 'patient'
+        }
+      },
+      {
+        $lookup: {
+          from: 'doctors',
+          localField: 'consultation.doctorId',
+          foreignField: '_id',
+          as: 'doctor'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'doctor.userId',
+          foreignField: '_id',
+          as: 'doctorUser'
+        }
+      },
+      {
+        $project: {
+          consultationId: '$_id',
+          count: 1,
+          lastMessage: 1,
+          lastMessageTime: 1,
+          patientName: { $arrayElemAt: ['$patient.name', 0] },
+          doctorName: { $arrayElemAt: ['$doctorUser.name', 0] }
+        }
+      },
+      {
+        $sort: { lastMessageTime: -1 }
+      }
+    ]);
+
+    res.json(unreadMessages);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Mark all messages in a consultation as read
+router.put('/consultation/:consultationId/mark-read', protect, async (req, res) => {
+  try {
+    const { consultationId } = req.params;
+    
+    // Mark all messages in this consultation as read for the current user
+    await ChatMessage.updateMany(
+      {
+        consultation: consultationId,
+        to: req.user._id,
+        read: false
+      },
+      {
+        read: true
+      }
+    );
+
+    res.json({ message: 'Messages marked as read' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all conversations (both read and unread)
+router.get('/conversations/all', protect, async (req, res) => {
+  try {
+    const allConversations = await ChatMessage.aggregate([
+      {
+        $match: {
+          $or: [
+            { from: req.user._id },
+            { to: req.user._id }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: '$consultation',
+          lastMessage: { $last: '$text' },
+          lastMessageTime: { $last: '$createdAt' },
+          unreadCount: {
+            $sum: {
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$to', req.user._id] },
+                    { $eq: ['$read', false] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'consultations',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'consultation'
+        }
+      },
+      {
+        $unwind: '$consultation'
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'consultation.patientId',
+          foreignField: '_id',
+          as: 'patient'
+        }
+      },
+      {
+        $lookup: {
+          from: 'doctors',
+          localField: 'consultation.doctorId',
+          foreignField: '_id',
+          as: 'doctor'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'doctor.userId',
+          foreignField: '_id',
+          as: 'doctorUser'
+        }
+      },
+      {
+        $project: {
+          consultationId: '$_id',
+          count: '$unreadCount',
+          lastMessage: 1,
+          lastMessageTime: 1,
+          patientName: { $arrayElemAt: ['$patient.name', 0] },
+          doctorName: { $arrayElemAt: ['$doctorUser.name', 0] }
+        }
+      },
+      {
+        $sort: { lastMessageTime: -1 }
+      }
+    ]);
+
+    res.json(allConversations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

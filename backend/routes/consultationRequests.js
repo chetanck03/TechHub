@@ -188,4 +188,34 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// Get notification counts
+router.get('/notifications/count', protect, async (req, res) => {
+  try {
+    let count = 0;
+
+    if (req.user.role === 'patient') {
+      // Count requests with new responses
+      const lastSeen = req.query.lastSeen || new Date(0);
+      count = await ConsultationRequest.countDocuments({
+        patientId: req.user._id,
+        status: { $ne: 'pending' },
+        respondedAt: { $gt: new Date(lastSeen) }
+      });
+    } else if (req.user.role === 'doctor') {
+      // Count pending requests for doctor
+      const doctor = await Doctor.findOne({ userId: req.user._id });
+      if (doctor) {
+        count = await ConsultationRequest.countDocuments({
+          doctorId: doctor._id,
+          status: 'pending'
+        });
+      }
+    }
+
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

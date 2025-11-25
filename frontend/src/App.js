@@ -40,9 +40,9 @@ import Chat from './pages/Shared/Chat';
 
 import ConsultationRequests from './pages/Patient/ConsultationRequests';
 import DoctorConsultationRequests from './pages/Doctor/ConsultationRequests';
+import Messages from './pages/Shared/Messages';
 
 import LocationPrompt from './components/LocationPrompt';
-import MedBot from './components/MedBot';
 import { requestLocationPermission, updateUserLocation } from './utils/location';
 import api from './utils/api';
 
@@ -113,6 +113,7 @@ function AppRoutes() {
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
         <Route path="/consultation-requests" element={<PrivateRoute allowedRoles={['patient']}><ConsultationRequests /></PrivateRoute>} />
+        <Route path="/messages" element={<PrivateRoute allowedRoles={['patient', 'doctor']}><Messages /></PrivateRoute>} />
 
         <Route path="/doctor/register" element={<PrivateRoute><DoctorRegister /></PrivateRoute>} />
         <Route path="/doctor/profile" element={<PrivateRoute allowedRoles={['doctor']}><DoctorProfileEdit /></PrivateRoute>} />
@@ -162,8 +163,7 @@ function AppRoutes() {
         />
       )}
 
-      {/* MedBot - Available on all pages for logged-in users */}
-      {user && <MedBot />}
+
     </>
   );
 }
