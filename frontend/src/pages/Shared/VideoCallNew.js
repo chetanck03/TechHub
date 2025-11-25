@@ -14,6 +14,8 @@ const ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
     {
       urls: 'turn:openrelay.metered.ca:80',
       username: 'openrelayproject',
@@ -23,8 +25,14 @@ const ICE_SERVERS = {
       urls: 'turn:openrelay.metered.ca:443',
       username: 'openrelayproject',
       credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
     }
-  ]
+  ],
+  iceCandidatePoolSize: 10
 };
 
 const VideoCall = () => {
@@ -121,7 +129,10 @@ const VideoCall = () => {
       socket.on('user-joined', (data) => {
         console.log('👤 User joined:', data);
         toast.info(`${data.name} joined the call`);
-        setRemoteConnected(true);
+        
+        // Store remote user ID for retry logic
+        window.lastRemoteUserId = data.userId;
+        
         // Create offer only if we have a peer connection and we're the initiator
         // Use user ID comparison to determine who should initiate
         if (peerConnectionRef.current && currentUserId && data.userId) {
@@ -129,7 +140,7 @@ const VideoCall = () => {
           console.log('🚀 Checking if should initiate:', { currentUserId, remoteUserId: data.userId, shouldInitiate });
           if (shouldInitiate) {
             console.log('🚀 Initiating call as primary user');
-            setTimeout(() => createOffer(), 1000); // Small delay to ensure both peers are ready
+            setTimeout(() => createOffer(), 2000); // Increased delay to ensure both peers are ready
           } else {
             console.log('⏳ Waiting for remote user to initiate call');
           }
@@ -200,14 +211,16 @@ const VideoCall = () => {
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
+          width: { min: 320, ideal: 640, max: 1280 },
+          height: { min: 240, ideal: 480, max: 720 },
+          frameRate: { min: 15, ideal: 30, max: 30 },
+          facingMode: 'user'
         },
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
+          autoGainControl: true,
+          sampleRate: 44100
         }
       });
 
@@ -263,11 +276,14 @@ const VideoCall = () => {
 
     // Handle ICE candidates
     peerConnection.onicecandidate = (event) => {
-      if (event.candidate && socketRef.current) {
+      if (event.candidate && socketRef.current && socketRef.current.connected) {
+        console.log('🧊 Sending ICE candidate:', event.candidate.type);
         socketRef.current.emit('signal-ice', {
           roomId,
           candidate: event.candidate
         });
+      } else if (!event.candidate) {
+        console.log('🧊 ICE gathering complete');
       }
     };
 
@@ -292,25 +308,70 @@ const VideoCall = () => {
     // Handle ICE connection state changes
     peerConnection.oniceconnectionstatechange = () => {
       console.log('🧊 ICE connection state:', peerConnection.iceConnectionState);
+      
+      if (peerConnection.iceConnectionState === 'connected' || peerConnection.iceConnectionState === 'completed') {
+        console.log('✅ ICE connection established');
+        setRemoteConnected(true);
+      } else if (peerConnection.iceConnectionState === 'disconnected') {
+        console.log('⚠️ ICE connection disconnected');
+        setRemoteConnected(false);
+      } else if (peerConnection.iceConnectionState === 'failed') {
+        console.log('❌ ICE connection failed, attempting restart');
+        setRemoteConnected(false);
+        toast.warning('Connection failed, retrying...');
+        
+        // Attempt ICE restart
+        try {
+          peerConnection.restartIce();
+          
+          // If restart doesn't work, try recreating the connection
+          setTimeout(() => {
+            if (peerConnection.iceConnectionState === 'failed') {
+              console.log('🔄 ICE restart failed, recreating peer connection');
+              if (localStreamRef.current) {
+                createPeerConnection(localStreamRef.current);
+                // Re-initiate offer if we were the initiator
+                if (currentUserId && window.lastRemoteUserId && currentUserId.toString() > window.lastRemoteUserId.toString()) {
+                  setTimeout(() => createOffer(), 1000);
+                }
+              }
+            }
+          }, 5000);
+        } catch (error) {
+          console.error('❌ Error during ICE restart:', error);
+        }
+      }
+    };
+
+    // Handle ICE gathering state changes
+    peerConnection.onicegatheringstatechange = () => {
+      console.log('🧊 ICE gathering state:', peerConnection.iceGatheringState);
     };
   };
 
   const createOffer = async () => {
     try {
+      if (!peerConnectionRef.current) {
+        console.error('❌ No peer connection available');
+        return;
+      }
+
       console.log('🚀 Creating WebRTC offer...');
       const offer = await peerConnectionRef.current.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
       });
+      
+      console.log('📝 Setting local description...');
       await peerConnectionRef.current.setLocalDescription(offer);
       
       console.log('📤 Sending offer to room:', roomId);
       socketRef.current.emit('signal-offer', {
         roomId,
-        offer
+        offer: offer
       });
     } catch (error) {
-      console.error('Error creating offer:', error);
+      console.error('❌ Error creating offer:', error);
       toast.error('Failed to create call offer');
     }
   };
@@ -319,23 +380,47 @@ const VideoCall = () => {
     try {
       console.log('📥 Received offer from:', fromName);
       
-      if (peerConnectionRef.current.signalingState !== 'stable') {
-        console.log('⚠️ Peer connection not in stable state, ignoring offer');
+      if (!peerConnectionRef.current) {
+        console.error('❌ No peer connection available');
         return;
       }
       
+      if (peerConnectionRef.current.signalingState !== 'stable') {
+        console.log('⚠️ Peer connection not in stable state:', peerConnectionRef.current.signalingState);
+        // Reset connection if needed
+        if (peerConnectionRef.current.signalingState === 'have-local-offer') {
+          console.log('🔄 Resetting peer connection due to signaling collision');
+          return;
+        }
+      }
+      
+      console.log('📝 Setting remote description...');
       await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
       
+      // Process any queued ICE candidates
+      if (window.pendingIceCandidates && window.pendingIceCandidates.length > 0) {
+        console.log('🧊 Processing queued ICE candidates:', window.pendingIceCandidates.length);
+        for (const candidate of window.pendingIceCandidates) {
+          try {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (error) {
+            console.error('❌ Error adding queued ICE candidate:', error);
+          }
+        }
+        window.pendingIceCandidates = [];
+      }
+      
+      console.log('🚀 Creating answer...');
       const answer = await peerConnectionRef.current.createAnswer();
       await peerConnectionRef.current.setLocalDescription(answer);
       
       console.log('📤 Sending answer to room:', roomId);
       socketRef.current.emit('signal-answer', {
         roomId,
-        answer
+        answer: answer
       });
     } catch (error) {
-      console.error('Error handling offer:', error);
+      console.error('❌ Error handling offer:', error);
       toast.error('Failed to handle call offer');
     }
   };
@@ -344,29 +429,59 @@ const VideoCall = () => {
     try {
       console.log('📥 Received answer from:', fromName);
       
+      if (!peerConnectionRef.current) {
+        console.error('❌ No peer connection available');
+        return;
+      }
+      
       if (peerConnectionRef.current.signalingState !== 'have-local-offer') {
         console.log('⚠️ Peer connection not expecting answer, current state:', peerConnectionRef.current.signalingState);
         return;
       }
       
+      console.log('📝 Setting remote description with answer...');
       await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
       console.log('✅ Answer processed successfully');
+      
+      // Process any queued ICE candidates
+      if (window.pendingIceCandidates && window.pendingIceCandidates.length > 0) {
+        console.log('🧊 Processing queued ICE candidates:', window.pendingIceCandidates.length);
+        for (const candidate of window.pendingIceCandidates) {
+          try {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (error) {
+            console.error('❌ Error adding queued ICE candidate:', error);
+          }
+        }
+        window.pendingIceCandidates = [];
+      }
     } catch (error) {
-      console.error('Error handling answer:', error);
+      console.error('❌ Error handling answer:', error);
       toast.error('Failed to handle call answer');
     }
   };
 
   const handleReceiveIceCandidate = async ({ candidate, from }) => {
     try {
-      if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
+      if (!peerConnectionRef.current) {
+        console.error('❌ No peer connection available for ICE candidate');
+        return;
+      }
+
+      if (peerConnectionRef.current.remoteDescription) {
+        console.log('🧊 Adding ICE candidate:', candidate.type);
         await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log('✅ ICE candidate added');
+        console.log('✅ ICE candidate added successfully');
       } else {
-        console.log('⚠️ Ignoring ICE candidate - no remote description set');
+        console.log('⚠️ Queuing ICE candidate - no remote description set yet');
+        // Store candidate for later if needed
+        if (!window.pendingIceCandidates) {
+          window.pendingIceCandidates = [];
+        }
+        window.pendingIceCandidates.push(candidate);
       }
     } catch (error) {
-      console.error('Error adding ICE candidate:', error);
+      console.error('❌ Error adding ICE candidate:', error);
     }
   };
 
@@ -437,8 +552,36 @@ const VideoCall = () => {
     console.log('Remote connected:', remoteConnected);
   };
 
-  // Add debug button (temporary)
+  // Add debug functions (temporary)
   window.debugVideoCall = debugConnection;
+  
+  // Test WebRTC connectivity
+  const testWebRTCConnectivity = async () => {
+    try {
+      const pc = new RTCPeerConnection(ICE_SERVERS);
+      const dc = pc.createDataChannel('test');
+      
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log('🧊 Test ICE candidate:', event.candidate.type, event.candidate.candidate);
+        }
+      };
+      
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      
+      console.log('✅ WebRTC test successful - can create offers and gather ICE candidates');
+      
+      setTimeout(() => {
+        pc.close();
+      }, 5000);
+      
+    } catch (error) {
+      console.error('❌ WebRTC test failed:', error);
+    }
+  };
+  
+  window.testWebRTC = testWebRTCConnectivity;
 
   const handleCallEnded = () => {
     toast.info('Call has ended');
@@ -539,6 +682,12 @@ const VideoCall = () => {
                 <p className="text-sm text-gray-300 mt-2">
                   {connected ? 'Connected to server' : 'Connecting to server...'}
                 </p>
+                {peerConnectionRef.current && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Connection: {peerConnectionRef.current.connectionState} | 
+                    ICE: {peerConnectionRef.current.iceConnectionState}
+                  </p>
+                )}
               </div>
             </div>
           )}

@@ -159,9 +159,12 @@ module.exports = (io) => {
 
     // Send ICE candidate
     socket.on('signal-ice', ({ roomId, candidate }) => {
+      console.log(`🧊 Relaying ICE candidate from ${socket.user.name} to room ${roomId}`);
+      console.log(`🧊 Candidate type: ${candidate.type}, protocol: ${candidate.protocol}`);
       socket.to(roomId).emit('signal-ice', {
         candidate,
-        from: socket.user._id
+        from: socket.user._id,
+        fromName: socket.user.name
       });
     });
 
