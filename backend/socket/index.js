@@ -14,15 +14,20 @@ module.exports = (io) => {
       console.log('🔑 Socket auth attempt:', {
         hasToken: !!token,
         tokenStart: token ? token.substring(0, 20) + '...' : 'none',
-        hasJwtSecret: !!process.env.JWT_SECRET
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        socketId: socket.id,
+        authHeaders: socket.handshake.headers.authorization ? 'present' : 'missing',
+        authToken: socket.handshake.auth.token ? 'present' : 'missing'
       });
       
       if (!token) {
-        console.log('❌ No token provided');
+        console.log('❌ No token provided for socket:', socket.id);
         return next(new Error('Authentication error: No token provided'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('🔓 Token decoded successfully for user ID:', decoded.id);
+      
       const user = await User.findById(decoded.id).select('-password');
       
       if (!user) {
@@ -30,11 +35,12 @@ module.exports = (io) => {
         return next(new Error('Authentication error: User not found'));
       }
 
-      console.log('✅ Socket authenticated for user:', user.name);
+      console.log('✅ Socket authenticated for user:', user.name, 'Role:', user.role);
       socket.user = user;
       next();
     } catch (error) {
       console.error('❌ Socket authentication error:', error.message);
+      console.error('❌ Full error:', error);
       next(new Error('Authentication error: ' + error.message));
     }
   });
@@ -85,6 +91,9 @@ module.exports = (io) => {
         console.log(`✅ ${socket.user.name} joined room ${roomId}`);
 
         // Notify others in the room
+        const roomSize = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+        console.log(`📊 Room ${roomId} now has ${roomSize} participants`);
+        
         socket.to(roomId).emit('user-joined', {
           userId: socket.user._id,
           name: socket.user.name,
@@ -129,6 +138,7 @@ module.exports = (io) => {
     // Send offer
     socket.on('signal-offer', ({ roomId, offer, to }) => {
       console.log(`📤 Sending offer from ${socket.user.name} to room ${roomId}`);
+      console.log(`📊 Room ${roomId} has ${io.sockets.adapter.rooms.get(roomId)?.size || 0} participants`);
       socket.to(roomId).emit('signal-offer', {
         offer,
         from: socket.user._id,
@@ -139,6 +149,7 @@ module.exports = (io) => {
     // Send answer
     socket.on('signal-answer', ({ roomId, answer, to }) => {
       console.log(`📤 Sending answer from ${socket.user.name} to room ${roomId}`);
+      console.log(`📊 Room ${roomId} has ${io.sockets.adapter.rooms.get(roomId)?.size || 0} participants`);
       socket.to(roomId).emit('signal-answer', {
         answer,
         from: socket.user._id,
@@ -308,6 +319,19 @@ module.exports = (io) => {
       } catch (error) {
         console.error('Error ending call:', error);
       }
+    });
+
+    // ==================== DEBUG/TEST EVENTS ====================
+
+    // Test connection
+    socket.on('test-connection', (data) => {
+      console.log(`🧪 Test connection from ${socket.user.name}:`, data);
+      socket.emit('test-response', { 
+        message: 'Connection test successful',
+        timestamp: Date.now(),
+        userId: socket.user._id,
+        userName: socket.user.name
+      });
     });
 
     // ==================== DISCONNECT ====================

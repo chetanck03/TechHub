@@ -17,7 +17,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   // Add your deployed frontend URL here
   'https://telehealthsystem.vercel.app',
-  'https://your-frontend-app.netlify.app'
+  'https://megahealth.vercel.app'
 ].filter(Boolean);
 
 const io = socketIO(server, {
