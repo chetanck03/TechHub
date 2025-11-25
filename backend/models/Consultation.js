@@ -51,6 +51,10 @@ const consultationSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  meetingLink: {
+    type: String,
+    default: null
+  },
   videoCallCompleted: {
     type: Boolean,
     default: false

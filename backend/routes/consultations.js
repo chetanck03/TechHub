@@ -410,6 +410,57 @@ router.get('/:id/chat', protect, async (req, res) => {
   }
 });
 
+// Enable chat for consultation (debug endpoint)
+router.post('/:id/enable-chat', protect, async (req, res) => {
+  try {
+    const consultation = await Consultation.findById(req.params.id);
+    
+    if (!consultation) {
+      return res.status(404).json({ message: 'Consultation not found' });
+    }
+
+    consultation.allowedChat = true;
+    await consultation.save();
+
+    res.json({ message: 'Chat enabled successfully' });
+  } catch (error) {
+    console.error('Enable chat error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update meeting link
+router.put('/:id/meeting-link', protect, async (req, res) => {
+  try {
+    const { meetingLink } = req.body;
+    
+    const consultation = await Consultation.findById(req.params.id)
+      .populate('patientId', 'name email')
+      .populate('doctorId');
+
+    if (!consultation) {
+      return res.status(404).json({ message: 'Consultation not found' });
+    }
+
+    // Verify user is the doctor for this consultation
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor || consultation.doctorId._id.toString() !== doctor._id.toString()) {
+      return res.status(403).json({ message: 'Only the assigned doctor can set meeting link' });
+    }
+
+    consultation.meetingLink = meetingLink;
+    await consultation.save();
+
+    res.json({
+      message: 'Meeting link updated successfully',
+      meetingLink: consultation.meetingLink
+    });
+  } catch (error) {
+    console.error('Update meeting link error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get consultation by ID (for video call page)
 router.get('/:id', protect, async (req, res) => {
   try {

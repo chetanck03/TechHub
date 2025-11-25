@@ -36,6 +36,7 @@ import MyComplaints from './pages/Shared/MyComplaints';
 import FileComplaint from './pages/Shared/FileComplaint';
 import VideoCall from './pages/Shared/VideoCall';
 import VideoCallNew from './pages/Shared/VideoCallNew';
+import ExternalMeeting from './pages/Shared/ExternalMeeting';
 import Chat from './pages/Shared/Chat';
 
 import ConsultationRequests from './pages/Patient/ConsultationRequests';
@@ -140,6 +141,11 @@ function AppRoutes() {
         } />
         
         <Route path="/video-call/:consultationId" element={
+          <PrivateRoute allowedRoles={['patient', 'doctor']}>
+            <ExternalMeeting />
+          </PrivateRoute>
+        } />
+        <Route path="/video-call-webrtc/:consultationId" element={
           <PrivateRoute allowedRoles={['patient', 'doctor']}>
             <VideoCallNew />
           </PrivateRoute>
