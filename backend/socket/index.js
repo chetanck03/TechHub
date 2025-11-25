@@ -94,10 +94,15 @@ module.exports = (io) => {
         const roomSize = io.sockets.adapter.rooms.get(roomId)?.size || 0;
         console.log(`📊 Room ${roomId} now has ${roomSize} participants`);
         
+        // Get list of all users in room for debugging
+        const socketsInRoom = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
+        console.log(`👥 Sockets in room ${roomId}:`, socketsInRoom.length);
+        
         socket.to(roomId).emit('user-joined', {
           userId: socket.user._id,
           name: socket.user.name,
-          role: socket.user.role
+          role: socket.user.role,
+          roomSize: roomSize
         });
 
         // Send confirmation to the user

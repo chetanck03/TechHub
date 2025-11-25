@@ -53,6 +53,7 @@ const VideoCall = () => {
   const [connected, setConnected] = useState(false);
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [offerInProgress, setOfferInProgress] = useState(false);
   
   // Media controls
   const [videoEnabled, setVideoEnabled] = useState(true);
@@ -79,7 +80,9 @@ const VideoCall = () => {
     try {
       // Get current user
       const userRes = await api.get('/users/profile');
-      setCurrentUserId(userRes.data._id);
+      const userId = userRes.data._id;
+      setCurrentUserId(userId);
+      console.log('👤 Current user ID set:', userId);
 
       // Get consultation details
       const consultationRes = await api.get(`/consultations/${consultationId}`);
@@ -133,17 +136,16 @@ const VideoCall = () => {
         // Store remote user ID for retry logic
         window.lastRemoteUserId = data.userId;
         
-        // Create offer only if we have a peer connection and we're the initiator
-        // Use user ID comparison to determine who should initiate
-        if (peerConnectionRef.current && currentUserId && data.userId) {
-          const shouldInitiate = currentUserId.toString() > data.userId.toString();
-          console.log('🚀 Checking if should initiate:', { currentUserId, remoteUserId: data.userId, shouldInitiate });
-          if (shouldInitiate) {
-            console.log('🚀 Initiating call as primary user');
-            setTimeout(() => createOffer(), 2000); // Increased delay to ensure both peers are ready
-          } else {
-            console.log('⏳ Waiting for remote user to initiate call');
-          }
+        // Always create offer when someone joins (the second person to join will create the offer)
+        if (peerConnectionRef.current && !offerInProgress) {
+          console.log('🚀 Creating offer for new participant');
+          setOfferInProgress(true);
+          setTimeout(() => createOffer(), 2000);
+        } else {
+          console.log('❌ Cannot create offer:', {
+            hasPeerConnection: !!peerConnectionRef.current,
+            offerInProgress
+          });
         }
       });
 
@@ -330,10 +332,13 @@ const VideoCall = () => {
               console.log('🔄 ICE restart failed, recreating peer connection');
               if (localStreamRef.current) {
                 createPeerConnection(localStreamRef.current);
-                // Re-initiate offer if we were the initiator
-                if (currentUserId && window.lastRemoteUserId && currentUserId.toString() > window.lastRemoteUserId.toString()) {
-                  setTimeout(() => createOffer(), 1000);
-                }
+                // Re-initiate offer after connection recreation
+                setTimeout(() => {
+                  if (!offerInProgress) {
+                    setOfferInProgress(true);
+                    createOffer();
+                  }
+                }, 1000);
               }
             }
           }, 5000);
@@ -370,9 +375,13 @@ const VideoCall = () => {
         roomId,
         offer: offer
       });
+      
+      // Reset offer flag after sending
+      setTimeout(() => setOfferInProgress(false), 5000);
     } catch (error) {
       console.error('❌ Error creating offer:', error);
       toast.error('Failed to create call offer');
+      setOfferInProgress(false);
     }
   };
 
@@ -683,10 +692,22 @@ const VideoCall = () => {
                   {connected ? 'Connected to server' : 'Connecting to server...'}
                 </p>
                 {peerConnectionRef.current && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    Connection: {peerConnectionRef.current.connectionState} | 
-                    ICE: {peerConnectionRef.current.iceConnectionState}
-                  </p>
+                  <div className="text-xs text-gray-400 mt-1">
+                    <p>Connection: {peerConnectionRef.current.connectionState} | 
+                    ICE: {peerConnectionRef.current.iceConnectionState}</p>
+                    {connected && !offerInProgress && (
+                      <button 
+                        onClick={() => {
+                          console.log('🔄 Manual connection attempt');
+                          setOfferInProgress(true);
+                          createOffer();
+                        }}
+                        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                      >
+                        Connect Manually
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
