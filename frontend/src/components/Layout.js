@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../hooks/useNotifications';
 import { Home, User, LogOut, CreditCard, Calendar, Users, Settings, Stethoscope, Menu, X, MessageCircle } from 'lucide-react';
 import NotificationBadge from './NotificationBadge';
+import ProfileCompletionWidget from './ProfileCompletionWidget';
 import MedBot from './MedBot';
 
 const Layout = ({ children, hideMedBot = false }) => {
@@ -126,6 +127,13 @@ const Layout = ({ children, hideMedBot = false }) => {
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
+              {/* Profile Completion Widget for Patients */}
+              {user?.role === 'patient' && (
+                <div className="hidden sm:block">
+                  <ProfileCompletionWidget />
+                </div>
+              )}
+              
               {/* Notification indicator */}
               {(notifications.consultationRequests > 0 || notifications.consultations > 0 || notifications.chats > 0) && (
                 <div className="relative">

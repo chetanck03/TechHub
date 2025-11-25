@@ -288,9 +288,14 @@ router.get('/patients', protect, authorize('admin'), async (req, res) => {
     const patientsWithStats = await Promise.all(
       patients.map(async (patient) => {
         const consultationCount = await Consultation.countDocuments({ patientId: patient._id });
+        
+        // Add profile completion status
+        const profileCompleted = patient.isProfileComplete ? patient.isProfileComplete() : false;
+        
         return {
           ...patient.toObject(),
-          consultationCount
+          consultationCount,
+          profileCompleted
         };
       })
     );
@@ -305,14 +310,29 @@ router.get('/patients/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const patient = await User.findById(req.params.id).select('-password');
     const consultations = await Consultation.find({ patientId: req.params.id })
-      .populate('doctorId')
+      .populate('doctorId', 'userId')
+      .populate({
+        path: 'doctorId',
+        populate: {
+          path: 'userId',
+          select: 'name'
+        }
+      })
       .sort({ createdAt: -1 });
-    const complaints = await Complaint.find({ complainantId: req.params.id });
+    const complaints = await Complaint.find({ complainantId: req.params.id })
+      .sort({ createdAt: -1 });
+
+    // Add profile completion info
+    const profileCompletion = {
+      isComplete: patient.isProfileComplete ? patient.isProfileComplete() : false,
+      percentage: patient.getProfileCompletionPercentage ? patient.getProfileCompletionPercentage() : 0
+    };
 
     res.json({
       ...patient.toObject(),
       consultations,
-      complaints
+      complaints,
+      profileCompletion
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -334,6 +354,31 @@ router.patch('/patients/:id/block', protect, authorize('admin'), async (req, res
   }
 });
 
+// Delete patient completely from platform
+router.delete('/patients/:id', protect, authorize('admin'), async (req, res) => {
+  try {
+    const patientId = req.params.id;
+    
+    // Check if patient exists
+    const patient = await User.findById(patientId);
+    if (!patient || patient.role !== 'patient') {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    // Delete related data
+    await Consultation.deleteMany({ patientId });
+    await Transaction.deleteMany({ userId: patientId });
+    await Complaint.deleteMany({ complainantId: patientId });
+    
+    // Delete the patient user
+    await User.findByIdAndDelete(patientId);
+
+    res.json({ message: 'Patient and all related data deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Doctor Management
 router.get('/doctors', protect, authorize('admin'), async (req, res) => {
   try {
@@ -344,9 +389,14 @@ router.get('/doctors', protect, authorize('admin'), async (req, res) => {
     const doctorsWithStats = await Promise.all(
       doctors.map(async (doctor) => {
         const consultationCount = await Consultation.countDocuments({ doctorId: doctor._id });
+        
+        // Add profile completion status (based on user profile)
+        const profileCompleted = doctor.userId?.isProfileComplete ? doctor.userId.isProfileComplete() : false;
+        
         return {
           ...doctor.toObject(),
-          consultationCount
+          consultationCount,
+          profileCompleted
         };
       })
     );
@@ -368,7 +418,8 @@ router.get('/doctors/:id/details', protect, authorize('admin'), async (req, res)
       .sort({ createdAt: -1 })
       .limit(10);
     
-    const complaints = await Complaint.find({ againstId: doctor.userId });
+    const complaints = await Complaint.find({ againstId: doctor.userId })
+      .sort({ createdAt: -1 });
 
     const totalEarnings = await Transaction.aggregate([
       { 
@@ -380,6 +431,13 @@ router.get('/doctors/:id/details', protect, authorize('admin'), async (req, res)
       },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
+
+    // Add doctor profile completion info (based on user profile)
+    const user = doctor.userId;
+    const profileCompletion = {
+      isComplete: user.isProfileComplete ? user.isProfileComplete() : false,
+      percentage: user.getProfileCompletionPercentage ? user.getProfileCompletionPercentage() : 0
+    };
 
     // Include file information for admin
     const { getFileInfo } = require('../utils/fileStorage');
@@ -395,6 +453,7 @@ router.get('/doctors/:id/details', protect, authorize('admin'), async (req, res)
       consultations,
       complaints,
       totalEarnings: totalEarnings[0]?.total || 0,
+      profileCompletion,
       fileInfo
     });
   } catch (error) {
@@ -412,6 +471,41 @@ router.patch('/doctors/:id/suspend', protect, authorize('admin'), async (req, re
     ).populate('userId', 'name email');
 
     res.json({ message: `Doctor ${suspended ? 'suspended' : 'activated'} successfully`, doctor });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete doctor completely from platform
+router.delete('/doctors/:id', protect, authorize('admin'), async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    
+    // Find the doctor and get the user ID
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const userId = doctor.userId;
+
+    // Delete related data
+    await Consultation.deleteMany({ doctorId });
+    await Transaction.deleteMany({ userId });
+    await Complaint.deleteMany({ 
+      $or: [
+        { complainantId: userId },
+        { againstId: userId }
+      ]
+    });
+    
+    // Delete the doctor profile
+    await Doctor.findByIdAndDelete(doctorId);
+    
+    // Delete the user account
+    await User.findByIdAndDelete(userId);
+
+    res.json({ message: 'Doctor and all related data deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

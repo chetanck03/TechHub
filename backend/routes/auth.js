@@ -94,6 +94,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Please verify your email first' });
     }
 
+    // Check if patient is blocked
+    if (user.blocked) {
+      return res.status(403).json({ message: 'Your account has been blocked. Please contact admin for assistance.' });
+    }
+
     // Check if user is a doctor and if approved
     if (user.role === 'doctor') {
       const Doctor = require('../models/Doctor');
@@ -187,6 +192,11 @@ router.post('/google', async (req, res) => {
         isVerified: true,
         profileImage: googleUser.picture
       });
+    }
+
+    // Check if user is blocked
+    if (user.blocked) {
+      return res.status(403).json({ message: 'Your account has been blocked. Please contact admin for assistance.' });
     }
 
     const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });

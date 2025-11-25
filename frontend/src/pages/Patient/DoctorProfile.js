@@ -109,12 +109,12 @@ const DoctorProfile = () => {
                 <h1 className="text-3xl font-bold text-secondary-900 mb-2">Dr. {doctor.name}</h1>
                 <p className="text-xl text-primary-600 font-semibold mb-2">{doctor.specialization?.name}</p>
                 <p className="text-secondary-600 mb-3">{doctor.qualification}</p>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <FiStar className="w-5 h-5 text-warning-500" />
                   <span className="font-medium text-secondary-900">
                     {doctor.rating?.toFixed(1) || 'New'} ({doctor.totalRatings || 0} reviews)
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

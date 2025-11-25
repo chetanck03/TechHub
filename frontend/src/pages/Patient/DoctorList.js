@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
-import { FiStar, FiArrowLeft, FiMonitor } from 'react-icons/fi';
+import { FiArrowLeft, FiMonitor, FiSearch, FiFilter } from 'react-icons/fi';
 
 
 const DoctorList = () => {
@@ -13,10 +13,13 @@ const DoctorList = () => {
     category: '',
     minExperience: '',
     maxFee: '',
-    minRating: ''
+    city: '',
+    consultationMode: ''
   });
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
+  const [allDoctors, setAllDoctors] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -29,6 +32,26 @@ const DoctorList = () => {
   useEffect(() => {
     fetchDoctors();
   }, [filters]);
+
+  // Filter doctors based on search term with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!searchTerm.trim()) {
+        setDoctors(allDoctors);
+      } else {
+        const filtered = allDoctors.filter(doctor => 
+          doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.specialization?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.currentHospitalClinic?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.qualification?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.currentWorkingCity?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setDoctors(filtered);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, allDoctors]);
 
   const fetchCategories = async () => {
     try {
@@ -46,9 +69,11 @@ const DoctorList = () => {
       if (filters.category) params.append('category', filters.category);
       if (filters.minExperience) params.append('minExperience', filters.minExperience);
       if (filters.maxFee) params.append('maxFee', filters.maxFee);
-      if (filters.minRating) params.append('minRating', filters.minRating);
+      if (filters.city) params.append('city', filters.city);
+      if (filters.consultationMode) params.append('consultationMode', filters.consultationMode);
 
       const response = await api.get(`/doctors?${params.toString()}`);
+      setAllDoctors(response.data);
       setDoctors(response.data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -74,60 +99,23 @@ const DoctorList = () => {
           <p className="text-sm sm:text-base text-secondary-600">Browse and connect with qualified healthcare professionals</p>
         </div>
 
+        {/* Search Bar */}
         <div className="card">
           <div className="card-body p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="form-group">
-                <label className="form-label">Specialization</label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                  className="form-input"
-                >
-                  <option value="">All Specializations</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Min Experience (years)</label>
-                <input
-                  type="number"
-                  placeholder="e.g., 5"
-                  value={filters.minExperience}
-                  onChange={(e) => setFilters({ ...filters, minExperience: e.target.value })}
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Max Fee (credits)</label>
-                <input
-                  type="number"
-                  placeholder="e.g., 15"
-                  value={filters.maxFee}
-                  onChange={(e) => setFilters({ ...filters, maxFee: e.target.value })}
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Min Rating</label>
-                <select
-                  value={filters.minRating}
-                  onChange={(e) => setFilters({ ...filters, minRating: e.target.value })}
-                  className="form-input"
-                >
-                  <option value="">Any Rating</option>
-                  <option value="4">4+ Stars</option>
-                  <option value="4.5">4.5+ Stars</option>
-                </select>
-              </div>
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search doctors by name, specialization, or hospital..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="form-input pl-10 w-full"
+              />
             </div>
           </div>
         </div>
+
+       
 
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -157,7 +145,7 @@ const DoctorList = () => {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-semibold text-secondary-900 truncate">Dr. {doctor.name}</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-secondary-900 truncate">{doctor.name}</h3>
                       <p className="text-sm sm:text-base text-primary-600 font-medium truncate">{doctor.specialization?.name}</p>
                       <p className="text-xs sm:text-sm text-secondary-500 truncate">{doctor.qualification}</p>
                     </div>
@@ -182,7 +170,7 @@ const DoctorList = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-2">
+                  {/* <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-2">
                     <div className="flex items-center gap-1">
                       <FiStar className="w-3 h-3 sm:w-4 sm:h-4 text-warning-500" />
                       <span className="text-sm sm:text-base font-medium text-secondary-900">
@@ -196,7 +184,7 @@ const DoctorList = () => {
                       <div className="text-sm sm:text-base font-bold text-success-600">{doctor.consultationFee?.video} Credits</div>
                       <div className="text-xs text-secondary-500">Video Fee</div>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap">
                     {doctor.consultationModes?.video && (
@@ -206,7 +194,7 @@ const DoctorList = () => {
                     )}
                     {doctor.consultationModes?.physical && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-700">
-                        🏥 Physical
+                         Physical
                       </span>
                     )}
                   </div>

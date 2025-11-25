@@ -19,6 +19,21 @@ exports.protect = async (req, res, next) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
+    // Check if user is blocked
+    if (req.user.blocked) {
+      return res.status(403).json({ message: 'Your account has been blocked. Please contact admin for assistance.' });
+    }
+
+    // Check if doctor is suspended
+    if (req.user.role === 'doctor') {
+      const Doctor = require('../models/Doctor');
+      const doctor = await Doctor.findOne({ userId: req.user._id });
+      
+      if (doctor && doctor.suspended) {
+        return res.status(403).json({ message: 'Your doctor account has been suspended. Please contact admin.' });
+      }
+    }
+
     next();
   } catch (error) {
     res.status(401).json({ message: 'Not authorized' });

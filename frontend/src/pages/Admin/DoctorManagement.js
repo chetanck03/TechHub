@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
-import { FiSearch, FiEye, FiLock, FiUnlock } from 'react-icons/fi';
+import { FiSearch, FiEye, FiLock, FiUnlock, FiTrash2 } from 'react-icons/fi';
 
 
 const DoctorManagement = () => {
@@ -10,6 +10,8 @@ const DoctorManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ show: false, doctor: null });
+  const [actionLoading, setActionLoading] = useState({});
 
   useEffect(() => {
     fetchDoctors();
@@ -27,13 +29,32 @@ const DoctorManagement = () => {
   };
 
   const handleSuspend = async (doctorId, isSuspended) => {
+    setActionLoading(prev => ({ ...prev, [doctorId]: true }));
     try {
       await api.patch(`/admin/doctors/${doctorId}/suspend`, { suspended: !isSuspended });
       toast.success(`Doctor ${!isSuspended ? 'suspended' : 'activated'} successfully`);
       fetchDoctors();
     } catch (error) {
+      console.error('Suspend/Activate error:', error);
       toast.error('Failed to update doctor status');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [doctorId]: false }));
     }
+  };
+
+  const handleDeleteDoctor = async () => {
+    try {
+      await api.delete(`/admin/doctors/${deleteModal.doctor._id}`);
+      toast.success('Doctor deleted successfully');
+      setDeleteModal({ show: false, doctor: null });
+      fetchDoctors();
+    } catch (error) {
+      toast.error('Failed to delete doctor');
+    }
+  };
+
+  const openDeleteModal = (doctor) => {
+    setDeleteModal({ show: true, doctor });
   };
 
   const viewDoctorDetails = async (doctorId) => {
@@ -95,7 +116,8 @@ const DoctorManagement = () => {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Experience</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Fee</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Consultations</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Rating</th>
+                  {/* <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Rating</th> */}
+                  {/* <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Profile</th> */}
                   <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Status</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-secondary-700">Actions</th>
                 </tr>
@@ -112,7 +134,18 @@ const DoctorManagement = () => {
                         : 'Not set'}
                     </td>
                     <td className="px-6 py-4 text-sm text-secondary-600">{doctor.consultationCount || 0}</td>
-                    <td className="px-6 py-4 text-sm text-secondary-600">{doctor.rating?.toFixed(1) || 'N/A'}</td>
+                    {/* <td className="px-6 py-4 text-sm text-secondary-600">{doctor.rating?.toFixed(1) || 'N/A'}</td> */}
+                    {/* <td className="px-6 py-4">
+                      {doctor.profileCompleted ? (
+                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-700">
+                          Complete
+                        </span>
+                      ) : (
+                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-700">
+                          Incomplete
+                        </span>
+                      )}
+                    </td> */}
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                         doctor.suspended 
@@ -137,8 +170,20 @@ const DoctorManagement = () => {
                           className={`btn btn-sm btn-icon ${doctor.suspended ? 'btn-success' : 'btn-danger'}`}
                           onClick={() => handleSuspend(doctor._id, doctor.suspended)}
                           title={doctor.suspended ? 'Activate' : 'Suspend'}
+                          disabled={actionLoading[doctor._id]}
                         >
-                          {doctor.suspended ? <FiUnlock className="w-4 h-4" /> : <FiLock className="w-4 h-4" />}
+                          {actionLoading[doctor._id] ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            doctor.suspended ? <FiUnlock className="w-4 h-4" /> : <FiLock className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm btn-icon"
+                          onClick={() => openDeleteModal(doctor)}
+                          title="Delete Completely"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -149,6 +194,7 @@ const DoctorManagement = () => {
           </div>
         </div>
 
+        {/* Doctor Details Modal */}
         {selectedDoctor && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedDoctor(null)}>
             <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -156,6 +202,30 @@ const DoctorManagement = () => {
                 <h2 className="text-2xl font-bold text-secondary-900">Doctor Details</h2>
               </div>
               <div className="card-body space-y-6">
+                {/* Profile Completion Status */}
+                {/* {selectedDoctor.profileCompletion && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-blue-900">Profile Completion</h4>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        selectedDoctor.profileCompletion.isComplete 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {selectedDoctor.profileCompletion.percentage}% Complete
+                      </span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          selectedDoctor.profileCompletion.isComplete ? 'bg-green-500' : 'bg-yellow-500'
+                        }`}
+                        style={{ width: `${selectedDoctor.profileCompletion.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )} */}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <span className="text-sm font-medium text-secondary-500">Name</span>
@@ -235,9 +305,32 @@ const DoctorManagement = () => {
                     <div className="space-y-2">
                       {selectedDoctor.consultations.slice(0, 5).map((c) => (
                         <div key={c._id} className="p-3 bg-secondary-50 rounded-lg">
-                          <span className="font-medium">{c.patientId?.name}</span> - 
-                          <span className="text-secondary-600 ml-1">{new Date(c.date).toLocaleDateString()}</span> - 
-                          <span className="ml-1 px-2 py-1 bg-primary-100 text-primary-700 rounded text-xs">{c.status}</span>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="font-medium">{c.patientId?.name || 'Unknown Patient'}</span>
+                              <p className="text-sm text-secondary-600">
+                                {c.date 
+                                  ? new Date(c.date).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })
+                                  : c.createdAt 
+                                    ? new Date(c.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                      })
+                                    : 'Date not available'
+                                }
+                              </p>
+                            </div>
+                            <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded text-xs">
+                              {c.status || 'Unknown'}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -252,8 +345,26 @@ const DoctorManagement = () => {
                     <div className="space-y-2">
                       {selectedDoctor.complaints.map((c) => (
                         <div key={c._id} className="p-3 bg-danger-50 rounded-lg">
-                          <span className="font-medium">{c.subject}</span> - 
-                          <span className="ml-1 px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs">{c.status}</span>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="font-medium">{c.subject || 'No subject'}</span>
+                              <p className="text-sm text-secondary-600">
+                                {c.createdAt 
+                                  ? new Date(c.createdAt).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })
+                                  : 'Date not available'
+                                }
+                              </p>
+                            </div>
+                            <span className="px-2 py-1 bg-danger-100 text-danger-700 rounded text-xs">
+                              {c.status || 'Unknown'}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -264,6 +375,40 @@ const DoctorManagement = () => {
               </div>
               <div className="card-footer">
                 <button className="btn btn-primary" onClick={() => setSelectedDoctor(null)}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteModal.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-danger-100 rounded-full">
+                  <FiTrash2 className="w-6 h-6 text-danger-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-center text-secondary-900 mb-2">
+                  Delete Doctor
+                </h3>
+                <p className="text-sm text-secondary-600 text-center mb-6">
+                  Are you sure you want to completely delete <strong>Dr. {deleteModal.doctor?.userId?.name}</strong> from the platform? 
+                  This action cannot be undone and will remove all their data including consultations, transactions, and complaints.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    className="btn btn-ghost flex-1"
+                    onClick={() => setDeleteModal({ show: false, doctor: null })}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-danger flex-1"
+                    onClick={handleDeleteDoctor}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
