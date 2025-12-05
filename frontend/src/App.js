@@ -8,6 +8,7 @@ import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import VerifyOTP from './pages/Auth/VerifyOTP';
 import ForgotPassword from './pages/Auth/ForgotPassword';
+import RoleSelection from './pages/Auth/RoleSelection';
 import LandingPage from './pages/Landing/LandingPage';
 
 import PatientDashboard from './pages/Patient/Dashboard';
@@ -86,6 +87,7 @@ function AppRoutes() {
         <Route path="/" element={!user ? <LandingPage /> : <Navigate to="/dashboard" />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
+        <Route path="/role-selection" element={!user ? <RoleSelection /> : <Navigate to="/dashboard" />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/forgot-password" element={!user ? <ForgotPassword /> : <Navigate to="/dashboard" />} />
 

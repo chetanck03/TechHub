@@ -183,20 +183,46 @@ router.post('/google', async (req, res) => {
     let user = await User.findOne({ email: googleUser.email });
 
     if (!user) {
-      // Create new user
-      user = await User.create({
-        email: googleUser.email,
-        name: googleUser.name,
-        password: Math.random().toString(36).slice(-8),
-        role: 'patient',
-        isVerified: true,
-        profileImage: googleUser.picture
+      // Return user data for role selection instead of creating account
+      return res.json({
+        needsRoleSelection: true,
+        googleUserData: {
+          email: googleUser.email,
+          name: googleUser.name,
+          picture: googleUser.picture
+        }
       });
     }
 
     // Check if user is blocked
     if (user.blocked) {
       return res.status(403).json({ message: 'Your account has been blocked. Please contact admin for assistance.' });
+    }
+
+    // Check if user is a doctor and if approved
+    if (user.role === 'doctor') {
+      const Doctor = require('../models/Doctor');
+      const doctor = await Doctor.findOne({ userId: user._id });
+      
+      if (!doctor) {
+        return res.status(403).json({ message: 'Doctor profile not found. Please complete your registration.' });
+      }
+
+      if (doctor.status === 'pending') {
+        return res.status(403).json({ message: 'Your doctor profile is pending admin approval. You will receive an email once approved.' });
+      }
+
+      if (doctor.status === 'rejected') {
+        return res.status(403).json({ message: `Your doctor profile was rejected. Reason: ${doctor.rejectionReason || 'Not specified'}` });
+      }
+
+      if (!doctor.isApproved) {
+        return res.status(403).json({ message: 'Your doctor profile is not approved yet. Please wait for admin approval.' });
+      }
+
+      if (doctor.suspended) {
+        return res.status(403).json({ message: 'Your doctor account has been suspended. Please contact admin.' });
+      }
     }
 
     const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -279,6 +305,54 @@ router.post('/reset-password', async (req, res) => {
     await user.save();
 
     res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Complete Google OAuth Registration with Role Selection
+router.post('/google/complete', async (req, res) => {
+  try {
+    const { googleUserData, role } = req.body;
+
+    // Validate input data
+    if (!googleUserData || !googleUserData.email || !googleUserData.name) {
+      return res.status(400).json({ message: 'Invalid Google user data' });
+    }
+
+    // Validate role
+    if (!['patient', 'doctor'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role selected' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: googleUserData.email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Create new user with selected role
+    const user = await User.create({
+      email: googleUserData.email,
+      name: googleUserData.name,
+      password: Math.random().toString(36).slice(-8),
+      role: role,
+      isVerified: true,
+      profileImage: googleUserData.picture
+    });
+
+    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({
+      token: jwtToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        credits: user.credits
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

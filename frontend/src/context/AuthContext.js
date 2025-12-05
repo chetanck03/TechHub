@@ -37,12 +37,37 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async (googleToken) => {
     const response = await api.post('/auth/google', { token: googleToken });
+    
+    // Check if this is a new user that needs role selection
+    if (response.data.needsRoleSelection) {
+      return { needsRoleSelection: true, googleUserData: response.data.googleUserData };
+    }
+    
     const { token, user } = response.data;
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     
     // Show location prompt after successful Google login
+    const locationAsked = localStorage.getItem('locationAsked');
+    if (!locationAsked && user.role === 'patient') {
+      setShowLocationPrompt(true);
+    }
+    
+    return user;
+  };
+
+  const completeGoogleRegistration = async (googleUserData, role) => {
+    const response = await api.post('/auth/google/complete', { 
+      googleUserData, 
+      role 
+    });
+    const { token, user } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
+    
+    // Show location prompt after successful registration
     const locationAsked = localStorage.getItem('locationAsked');
     if (!locationAsked && user.role === 'patient') {
       setShowLocationPrompt(true);
@@ -94,6 +119,7 @@ export const AuthProvider = ({ children }) => {
       loading, 
       login, 
       loginWithGoogle,
+      completeGoogleRegistration,
       register, 
       verifyOTP, 
       logout, 

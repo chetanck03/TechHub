@@ -243,7 +243,7 @@ const DoctorRegisterForm = ({ basicInfo, onComplete }) => {
             value={formData.issuingMedicalCouncil}
             onChange={(e) => setFormData({ ...formData, issuingMedicalCouncil: e.target.value })}
             required
-            placeholder="e.g., Medical Council of India"
+            placeholder="e.g., Medical Council"
           />
         </div>
       </div>
@@ -254,7 +254,7 @@ const DoctorRegisterForm = ({ basicInfo, onComplete }) => {
         <p className="form-note">All documents are required for verification. Accepted formats: PDF, JPG, PNG</p>
         
         <div className="form-group">
-          <label>Government ID (Aadhar/PAN) *</label>
+          <label>Government ID *</label>
           <input
             type="file"
             onChange={(e) => setFiles({ ...files, idProof: e.target.files[0] })}
@@ -262,7 +262,7 @@ const DoctorRegisterForm = ({ basicInfo, onComplete }) => {
             required
             className="file-input"
           />
-          <small>Upload your Aadhar card, PAN card, or any government-issued ID</small>
+          <small>Upload your any government-issued ID</small>
         </div>
 
         <div className="form-group">

@@ -38,8 +38,51 @@ const Profile = () => {
     }
   };
 
+  // Phone number validation function
+  const validatePhoneNumber = (phone) => {
+    if (!phone) return true; // Phone is optional in some cases
+    const cleanPhone = phone.replace(/[^\d]/g, ''); // Remove all non-digits
+    return cleanPhone.length >= 7 && cleanPhone.length <= 15; // International standard
+  };
+
+  // Age validation function
+  const validateAge = (age) => {
+    const numAge = parseInt(age);
+    return !isNaN(numAge) && numAge >= 1 && numAge <= 120;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate age
+    if (profile.age && !validateAge(profile.age)) {
+      toast.error('Please enter a valid age between 1 and 120 years');
+      return;
+    }
+    
+    // Validate main phone number
+    if (profile.phone && !validatePhoneNumber(profile.phone)) {
+      toast.error('Please enter a valid phone number (7-15 digits)');
+      return;
+    }
+    
+    // Validate emergency contact phone number
+    if (profile.emergencyContact?.phone && !validatePhoneNumber(profile.emergencyContact.phone)) {
+      toast.error('Please enter a valid emergency contact phone number (7-15 digits)');
+      return;
+    }
+    
+    // Validate date of birth
+    if (profile.dateOfBirth) {
+      const selectedDate = new Date(profile.dateOfBirth);
+      const today = new Date();
+      
+      if (selectedDate > today) {
+        toast.error('Date of birth cannot be in the future');
+        return;
+      }
+    }
+    
     try {
       await api.put('/users/profile', profile);
       toast.success('Profile updated successfully!');
@@ -89,13 +132,28 @@ const Profile = () => {
                   <input
                     type="number"
                     value={profile.age || ''}
-                    onChange={(e) => setProfile({ ...profile, age: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers and limit to reasonable age range
+                      if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 120)) {
+                        setProfile({ ...profile, age: value });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const age = e.target.value;
+                      if (age && !validateAge(age)) {
+                        toast.error('Please enter a valid age between 1 and 120 years');
+                      }
+                    }}
                     className="form-input text-sm sm:text-base"
                     placeholder="Enter your age"
                     min="1"
                     max="120"
                     required
                   />
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    Age must be between 1 and 120 years
+                  </p> */}
                 </div>
 
                 <div className="form-group">
@@ -103,9 +161,23 @@ const Profile = () => {
                   <input
                     type="date"
                     value={profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : ''}
-                    onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value })}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      const today = new Date();
+                      
+                      if (selectedDate > today) {
+                        toast.error('Date of birth cannot be in the future');
+                        return;
+                      }
+                      setProfile({ ...profile, dateOfBirth: e.target.value });
+                    }}
+                    max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                    min={new Date(new Date().getFullYear() - 120, 0, 1).toISOString().split('T')[0]} // Max 120 years old
                     className="form-input text-sm sm:text-base"
                   />
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    Cannot select future dates
+                  </p> */}
                 </div>
               </div>
 
@@ -151,11 +223,26 @@ const Profile = () => {
                   <input
                     type="tel"
                     value={profile.phone || ''}
-                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    onChange={(e) => {
+                      // Only allow numbers, +, -, (, ), and spaces
+                      const value = e.target.value.replace(/[^0-9+\-\s()]/g, '');
+                      setProfile({ ...profile, phone: value });
+                    }}
+                    onBlur={(e) => {
+                      // Basic phone number validation (at least 7 digits)
+                      const phone = e.target.value.replace(/[^\d]/g, ''); // Remove all non-digits
+                      if (phone && phone.length < 7) {
+                        toast.error('Please enter a valid phone number with at least 7 digits');
+                      }
+                    }}
                     className="form-input text-sm sm:text-base"
-                    placeholder="Enter your phone number"
+                    placeholder="+92 300 1234567"
+                    maxLength="20"
                     required
                   />
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    Enter your phone number
+                  </p> */}
                 </div>
 
                 <div className="form-group">
@@ -227,13 +314,28 @@ const Profile = () => {
                     <input
                       type="tel"
                       value={profile.emergencyContact?.phone || ''}
-                      onChange={(e) => setProfile({ 
-                        ...profile, 
-                        emergencyContact: { ...profile.emergencyContact, phone: e.target.value }
-                      })}
+                      onChange={(e) => {
+                        // Only allow numbers, +, -, (, ), and spaces
+                        const value = e.target.value.replace(/[^0-9+\-\s()]/g, '');
+                        setProfile({ 
+                          ...profile, 
+                          emergencyContact: { ...profile.emergencyContact, phone: value }
+                        });
+                      }}
+                      onBlur={(e) => {
+                        // Basic phone number validation (at least 7 digits)
+                        const phone = e.target.value.replace(/[^\d]/g, ''); // Remove all non-digits
+                        if (phone && phone.length < 7) {
+                          toast.error('Please enter a valid emergency contact phone number with at least 7 digits');
+                        }
+                      }}
                       className="form-input text-sm sm:text-base"
-                      placeholder="Emergency contact phone"
+                      placeholder="+92 300 1234567 "
+                      maxLength="20"
                     />
+                    {/* <p className="text-xs text-gray-500 mt-1">
+                      Enter emergency contact phone number (any country format accepted)
+                    </p> */}
                   </div>
                 </div>
 

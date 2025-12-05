@@ -107,7 +107,7 @@ const ConsultationRequests = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {requests.map((request) => (
+            {requests.filter(request => request && request._id).map((request) => (
               <div key={request._id} className="card">
                 <div className="card-body">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -117,10 +117,10 @@ const ConsultationRequests = () => {
                           <FiUser className="w-5 h-5 text-primary-600" />
                           <div>
                             <h3 className="text-lg font-semibold text-secondary-900">
-                              Dr. {request.doctorId?.userId?.name}
+                              {request.doctorId?.userId?.name ? `Dr. ${request.doctorId.userId.name}` : 'Doctor (Unavailable)'}
                             </h3>
                             <p className="text-sm text-primary-600">
-                              {request.doctorId?.specialization?.name}
+                              {request.doctorId?.specialization?.name || 'Specialization not available'}
                             </p>
                           </div>
                         </div>
@@ -195,9 +195,15 @@ const ConsultationRequests = () => {
                               </div>
                             </div>
                             <div>
-                              <Link to={`/book/${request.doctorId._id}`} className="btn btn-success btn-sm">
-                                Book This Slot
-                              </Link>
+                              {request.doctorId?._id ? (
+                                <Link to={`/book/${request.doctorId._id}`} className="btn btn-success btn-sm">
+                                  Book This Slot
+                                </Link>
+                              ) : (
+                                <span className="text-sm text-gray-500 italic">
+                                  Doctor no longer available
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -233,9 +239,15 @@ const ConsultationRequests = () => {
                           Cancel Request
                         </button>
                       )}
-                      <Link to={`/doctors/${request.doctorId._id}`} className="btn btn-secondary btn-sm">
-                        View Doctor Profile
-                      </Link>
+                      {request.doctorId?._id ? (
+                        <Link to={`/doctors/${request.doctorId._id}`} className="btn btn-secondary btn-sm">
+                          View Doctor Profile
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-gray-500 italic">
+                          Doctor profile unavailable
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

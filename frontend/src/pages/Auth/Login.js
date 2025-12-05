@@ -36,7 +36,16 @@ const Login = () => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      await loginWithGoogle(credentialResponse.credential);
+      const result = await loginWithGoogle(credentialResponse.credential);
+      
+      // Check if user needs to select role
+      if (result.needsRoleSelection) {
+        navigate('/role-selection', { 
+          state: { googleUserData: result.googleUserData } 
+        });
+        return;
+      }
+      
       toast.success('Login successful!');
       navigate('/dashboard');
     } catch (error) {

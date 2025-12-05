@@ -118,8 +118,41 @@ const DoctorRegister = () => {
     setFilePreviews({ ...filePreviews, [fileType]: null });
   };
 
+  // Phone number validation function
+  const validatePhoneNumber = (phone) => {
+    const cleanPhone = phone.replace(/[^\d]/g, ''); // Remove all non-digits
+    return cleanPhone.length >= 7 && cleanPhone.length <= 15; // International standard
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate phone number before submission
+    if (!validatePhoneNumber(formData.phone)) {
+      toast.error('Please enter a valid phone number (7-15 digits)');
+      return;
+    }
+
+    // Validate date of birth
+    const selectedDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    const minAge = new Date();
+    minAge.setFullYear(today.getFullYear() - 18);
+    
+    if (selectedDate > today) {
+      toast.error('Date of birth cannot be in the future');
+      return;
+    }
+    if (selectedDate > minAge) {
+      toast.error('You must be at least 18 years old to register as a doctor');
+      return;
+    }
+
+    // Validate languages
+    if (formData.languagesSpoken.length === 0) {
+      toast.error('Please add at least one language you can communicate in');
+      return;
+    }
 
     const data = new FormData();
     
@@ -227,11 +260,24 @@ const DoctorRegister = () => {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => {
+                        // Only allow numbers, +, -, (, ), and spaces
+                        const value = e.target.value.replace(/[^0-9+\-\s()]/g, '');
+                        setFormData({ ...formData, phone: value });
+                      }}
+                      onBlur={(e) => {
+                        // Basic phone number validation (at least 7 digits)
+                        const phone = e.target.value.replace(/[^\d]/g, ''); // Remove all non-digits
+                        if (phone && phone.length < 7) {
+                          toast.error('Please enter a valid phone number with at least 7 digits');
+                        }
+                      }}
                       required
-                      placeholder="+1234567890"
+                      placeholder="+92 300 1234567"
                       className="form-input text-sm sm:text-base"
+                      maxLength="20"
                     />
+                  
                   </div>
 
                   <div className="form-group">
@@ -271,10 +317,30 @@ const DoctorRegister = () => {
                     <input
                       type="date"
                       value={formData.dateOfBirth}
-                      onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                      onChange={(e) => {
+                        const selectedDate = new Date(e.target.value);
+                        const today = new Date();
+                        const minAge = new Date();
+                        minAge.setFullYear(today.getFullYear() - 18); // Minimum 18 years old
+                        
+                        if (selectedDate > today) {
+                          toast.error('Date of birth cannot be in the future');
+                          return;
+                        }
+                        if (selectedDate > minAge) {
+                          toast.error('You must be at least 18 years old to register as a doctor');
+                          return;
+                        }
+                        setFormData({ ...formData, dateOfBirth: e.target.value });
+                      }}
                       required
+                      max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                      min={new Date(new Date().getFullYear() - 80, 0, 1).toISOString().split('T')[0]} // Max 80 years old
                       className="form-input text-sm sm:text-base"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      You must be at least 18 years old to register as a doctor
+                    </p>
                   </div>
 
                   <div className="form-group">
@@ -438,7 +504,7 @@ const DoctorRegister = () => {
                     value={formData.issuingMedicalCouncil}
                     onChange={(e) => setFormData({ ...formData, issuingMedicalCouncil: e.target.value })}
                     required
-                    placeholder="e.g., Medical Council of India"
+                    placeholder="e.g., Medical Council"
                     className="form-input text-sm sm:text-base"
                   />
                 </div>
@@ -469,7 +535,7 @@ const DoctorRegister = () => {
                   <div className="form-group">
                     <label className="form-label text-sm sm:text-base">
                       <span className="flex items-center gap-2">
-                        Government ID (Aadhar/PAN) <span className="text-red-500">*</span>
+                        Government ID <span className="text-red-500">*</span>
                       </span>
                     </label>
                     <div className="relative">
@@ -491,7 +557,7 @@ const DoctorRegister = () => {
                         {files.idProof ? files.idProof.name : 'Choose Government ID Document'}
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Upload your Aadhar card, PAN card, or any government-issued ID (Max 5MB)</p>
+                    <p className="text-xs text-gray-500 mt-1">Upload any government-issued ID (Max 5MB)</p>
                     {files.idProof && (
                       <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-start gap-3">
