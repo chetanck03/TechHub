@@ -302,7 +302,7 @@ const DoctorRegisterForm = ({ basicInfo, onComplete }) => {
               value={formData.currentHospitalClinic}
               onChange={(e) => setFormData({ ...formData, currentHospitalClinic: e.target.value })}
               required
-              placeholder="City Hospital"
+              placeholder="Hospital/Clinic Name"
             />
           </div>
 

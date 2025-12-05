@@ -742,7 +742,7 @@ const DoctorRegister = () => {
                       value={formData.currentHospitalClinic}
                       onChange={(e) => setFormData({ ...formData, currentHospitalClinic: e.target.value })}
                       required
-                      placeholder="City Hospital"
+                      placeholder="Hospital/Clinic Name"
                       className="form-input text-sm sm:text-base"
                     />
                   </div>
@@ -758,7 +758,7 @@ const DoctorRegister = () => {
                       value={formData.currentWorkingCity}
                       onChange={(e) => setFormData({ ...formData, currentWorkingCity: e.target.value })}
                       required
-                      placeholder="New York"
+                      placeholder="City Name"
                       className="form-input text-sm sm:text-base"
                     />
                   </div>
