@@ -243,10 +243,16 @@ router.put('/complaints/:id', protect, authorize('admin'), async (req, res) => {
 // Get all transactions
 router.get('/transactions', protect, authorize('admin'), async (req, res) => {
   try {
-    const { type, startDate, endDate } = req.query;
+    const { type, userType, startDate, endDate } = req.query;
 
     let query = {};
-    if (type) query.type = type;
+    
+    // Filter by transaction type
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+    
+    // Filter by date range
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
@@ -254,12 +260,20 @@ router.get('/transactions', protect, authorize('admin'), async (req, res) => {
       };
     }
 
-    const transactions = await Transaction.find(query)
+    let transactions = await Transaction.find(query)
       .populate('userId', 'name email role')
       .sort({ createdAt: -1 });
 
+    // Filter by user type after population
+    if (userType && userType !== 'all') {
+      transactions = transactions.filter(transaction => 
+        transaction.userId?.role === userType
+      );
+    }
+
     res.json(transactions);
   } catch (error) {
+    console.error('Transactions fetch error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -522,17 +536,41 @@ router.get('/appointments', protect, authorize('admin'), async (req, res) => {
       const startDate = new Date(date);
       const endDate = new Date(date);
       endDate.setDate(endDate.getDate() + 1);
-      query.date = { $gte: startDate, $lt: endDate };
+      query.scheduledAt = { $gte: startDate, $lt: endDate };
     }
 
     const appointments = await Consultation.find(query)
-      .populate('patientId', 'name email')
-      .populate('doctorId')
-      .populate('slotId')
-      .sort({ date: -1 });
+      .populate('patientId', 'name email phone')
+      .populate({
+        path: 'doctorId',
+        populate: {
+          path: 'userId',
+          select: 'name email'
+        }
+      })
+      .populate('slotId', 'date startTime endTime')
+      .sort({ scheduledAt: -1, createdAt: -1 });
 
-    res.json(appointments);
+    // Transform the data to match frontend expectations
+    const transformedAppointments = appointments.map(appointment => ({
+      _id: appointment._id,
+      patientId: appointment.patientId,
+      doctorId: appointment.doctorId,
+      slotId: appointment.slotId,
+      date: appointment.slotId?.date || appointment.scheduledAt || appointment.createdAt,
+      consultationFee: appointment.creditsCharged,
+      status: appointment.status,
+      refunded: appointment.refunded || false,
+      type: appointment.type,
+      consultationType: appointment.consultationType,
+      notes: appointment.notes,
+      createdAt: appointment.createdAt,
+      updatedAt: appointment.updatedAt
+    }));
+
+    res.json(transformedAppointments);
   } catch (error) {
+    console.error('Appointments fetch error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -556,7 +594,7 @@ router.post('/appointments/:id/refund', protect, authorize('admin'), async (req,
     }
 
     const patient = await User.findById(consultation.patientId);
-    patient.credits += consultation.consultationFee;
+    patient.credits += consultation.creditsCharged;
     await patient.save();
 
     consultation.refunded = true;
@@ -565,12 +603,36 @@ router.post('/appointments/:id/refund', protect, authorize('admin'), async (req,
     await Transaction.create({
       userId: patient._id,
       type: 'refund',
-      amount: consultation.consultationFee,
+      amount: consultation.creditsCharged,
       description: `Refund for cancelled consultation`,
       status: 'completed'
     });
 
     res.json({ message: 'Refund processed successfully', consultation });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add status update endpoint for appointments
+router.put('/appointments/:id/status', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { status } = req.body;
+    const consultation = await Consultation.findById(req.params.id);
+
+    if (!consultation) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    consultation.status = status;
+    
+    if (status === 'completed') {
+      consultation.completedAt = new Date();
+    }
+    
+    await consultation.save();
+
+    res.json({ message: `Appointment ${status} successfully`, consultation });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

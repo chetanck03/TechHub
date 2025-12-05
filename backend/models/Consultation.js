@@ -67,6 +67,10 @@ const consultationSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  refunded: {
+    type: Boolean,
+    default: false
+  },
   scheduledAt: Date,
   startedAt: Date,
   completedAt: Date
