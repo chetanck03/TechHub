@@ -6,9 +6,9 @@ const { protect } = require('../middleware/auth');
 
 // Credit packages
 const CREDIT_PACKAGES = [
-  { amount: 100, credits: 1000 },
-  { amount: 500, credits: 5500 },
-  { amount: 1000, credits: 12000 }
+  { amount: 100, credits: 10 },
+  { amount: 500, credits: 60 },
+  { amount: 1000, credits: 150 }
 ];
 
 // Get credit packages

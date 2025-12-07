@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
+import { GoogleLogin } from '@react-oauth/google';
 import { Stethoscope, ArrowLeft, User, UserCheck } from 'lucide-react';
 
 const Register = () => {
@@ -12,7 +13,7 @@ const Register = () => {
     role: 'patient'
   });
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,6 +29,30 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const result = await loginWithGoogle(credentialResponse.credential);
+      
+      // Check if user needs to select role (new user)
+      if (result.needsRoleSelection) {
+        navigate('/role-selection', { 
+          state: { googleUserData: result.googleUserData } 
+        });
+        return;
+      }
+      
+      // Existing user - redirect to dashboard
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Google authentication failed');
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google authentication failed');
   };
 
   return (
@@ -129,7 +154,31 @@ const Register = () => {
             </button>
           </form>
 
-          <div className="text-center mt-6 text-secondary-600">
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-secondary-200"></div>
+            <span className="px-4 text-sm font-semibold text-secondary-400">OR</span>
+            <div className="flex-1 border-t border-secondary-200"></div>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              theme="outline"
+              size="large"
+              text="signup_with"
+              shape="rectangular"
+              logo_alignment="left"
+              auto_select={false}
+              cancel_on_tap_outside={true}
+              context="signup"
+              ux_mode="popup"
+              itp_support={true}
+            />
+          </div>
+
+          <div className="text-center text-secondary-600">
             Already have an account?{' '}
             <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold">
               Login
